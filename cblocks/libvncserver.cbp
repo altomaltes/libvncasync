@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="libvncasync" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="DLL">
+				<Option output="$(PROJECT_DIR)../../DLL/$(PROJECT_NAME).dll" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="$(PROJECT_DIR)../../DLL" />
+				<Option object_output="obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="../../libvncserver" />
+					<Add directory="../common" />
+				</Compiler>
+				<Linker>
+					<Add library="z" />
+					<Add library="jpeg" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="libvncserver" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="turbojpeg" />
+					<Add library="z" />
+				</Linker>
+			</Target>
+			<Target title="static">
+				<Option output="vncasync" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="../../libvncserver" />
+					<Add directory="../common" />
+				</Compiler>
+				<Linker>
+					<Add library="turbojpeg" />
+					<Add library="z" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="install  $(TARGET_OUTPUT_FILE)  $(TARGET_COMPILER_DIR)bin/" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+			<Target title="shared">
+				<Option platforms="Windows;" />
+				<Option output="$(TARGET_COMPILER_DIR)/lib/vncasync" prefix_auto="0" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-fPIC" />
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add library="jpeg" />
+					<Add library="z" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="install  $(TARGET_OUTPUT_FILE)  $(TARGET_COMPILER_DIR)bin/" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+			<Target title="client">
+				<Option output="vncserver" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="../../libvncserver" />
+					<Add directory="../common" />
+				</Compiler>
+				<Linker>
+					<Add library="z" />
+					<Add library="jpeg" />
+					<Add library="vncasync" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="../../libvncserver" />
+			<Add directory="../common" />
+			<Add directory="../rfb" />
+			<Add directory=".." />
+		</Compiler>
+		<ExtraCommands>
+			<Add before='install -d &quot;$(TARGET_COMPILER_DIR)include/rfb&quot;' />
+			<Add before='install  $(PROJECT_DIR)../rfb/rfb.h               &quot;$(TARGET_COMPILER_DIR)include/rfb/&quot;' />
+			<Add before='install  $(PROJECT_DIR)../rfb/rfbproto.h     &quot;$(TARGET_COMPILER_DIR)include/rfb/&quot;' />
+			<Add before='install  $(PROJECT_DIR)../rfb/win-config.h &quot;$(TARGET_COMPILER_DIR)include/rfb/&quot;' />
+			<Add before='install  $(PROJECT_DIR)../rfb/rfb.h               &quot;$(TARGET_COMPILER_DIR)include/rfb/&quot;' />
+			<Mode after="always" />
+		</ExtraCommands>
+		<Unit filename="../client_examples/ppmtest.c">
+			<Option compilerVar="CC" />
+			<Option target="client" />
+		</Unit>
+		<Unit filename="../common/base64.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../common/base64.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/d3des.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/d3des.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/lzoconf.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/lzodefs.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/md5.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/md5.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/minilzo.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/minilzo.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/rfbcrypto.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/rfbcrypto_included.c">
+			<Option compilerVar="CC" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/rfbcrypto_libgcrypt.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../common/rfbcrypto_openssl.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../common/sha-private.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/sha.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/sha1.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/turbojpeg.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/turbojpeg.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/vncauth.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../common/zywrletemplate.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../examples/example.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../examples/simple.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/corre.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/cursor.c">
+			<Option compilerVar="CC" />
+			<Option target="client" />
+		</Unit>
+		<Unit filename="../libvncclient/hextile.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/rfbproto.c">
+			<Option compilerVar="CC" />
+			<Option target="client" />
+		</Unit>
+		<Unit filename="../libvncclient/rre.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/sasl.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/tight.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/tls_gnutls.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/tls_none.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/tls_openssl.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/trle.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/ultra.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/vncviewer.c">
+			<Option compilerVar="CC" />
+			<Option target="client" />
+		</Unit>
+		<Unit filename="../libvncclient/zlib.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncclient/zrle.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/auth.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/cargs.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/corre.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/cursor.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/cutpaste.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/draw.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/font.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/hextile.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/main.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/rfbregion.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/rfbserver.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/rfbssl_gnutls.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/rfbssl_none.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/rfbssl_openssl.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/rre.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/scale.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/selbox.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/stats.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/tableinit24.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/tableinitcmtemplate.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/tableinittctemplate.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/tabletrans24template.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/tabletranstemplate.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/tight.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/translate.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/ultra.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/ws_decode.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/zlib.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/zrle.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/zrleencodetemplate.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncserver/zrleoutstream.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../libvncserver/zrlepalettehelper.c">
+			<Option compilerVar="CC" />
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../rfb/default8x16.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../rfb/keysym.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../rfb/rfb.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../rfb/rfbclient.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../rfb/rfbproto.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../rfb/rfbregion.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Unit filename="../rfb/win-config.h">
+			<Option target="DLL" />
+			<Option target="Release" />
+			<Option target="static" />
+			<Option target="shared" />
+		</Unit>
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

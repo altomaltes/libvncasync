@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<FileVersion major="1" minor="0" />
+	<ActiveTarget name="DLL" />
+	<File name="..\libvncserver\rfbserver.c" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="24772" topLine="890" />
+		</Cursor>
+	</File>
+	<File name="..\libvncserver\scale.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="10380" topLine="285" />
+		</Cursor>
+	</File>
+	<File name="..\libvncserver\main.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="21525" topLine="781" />
+		</Cursor>
+	</File>
+	<File name="..\common\turbojpeg.c" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1130" topLine="23" />
+		</Cursor>
+	</File>
+	<File name="..\libvncserver\cargs.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4682" topLine="31" />
+		</Cursor>
+	</File>
+	<File name="..\rfb\rfbproto.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="44821" topLine="1184" />
+		</Cursor>
+	</File>
+	<File name="..\libvncclient\rfbproto.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7529" topLine="219" />
+		</Cursor>
+	</File>
+	<File name="..\libvncserver\stats.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="10270" topLine="199" />
+		</Cursor>
+	</File>
+	<File name="..\rfb\rfb.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="13242" topLine="375" />
+		</Cursor>
+	</File>
+</CodeBlocks_layout_file>
