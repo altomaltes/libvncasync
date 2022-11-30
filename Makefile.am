@@ -34,8 +34,7 @@ slack:
 	make install DESTDIR=$(abs_builddir)/pkg.${build_cpu}
 	$(MKDIR_P) $(abs_builddir)/pkg.${build_cpu}/install
 	cp ${top_srcdir}/slack-desc $(abs_builddir)/pkg.${build_cpu}/install
-	cd $(abs_builddir)/pkg.${build_cpu}; ${SLACKBUILD} -l y -c n $(abs_builddir)/../../${build_cpu}/${PACKAGE}-${VERSION}-${build_cpu}-${SVN_BUILD}.txz
-#	cd $(abs_builddir)/pkg.${build_cpu}; ${SLACKBUILD} -l y -c n /var/cache/packages/${build_cpu}/extra/${PACKAGE}-${VERSION}-${build_cpu}-${SVN_BUILD}.txz
+	cd $(abs_builddir)/pkg.${build_cpu}; ${SLACKBUILD} -l y -c n $(abs_builddir)/${PACKAGE}-${VERSION}-${build_cpu}-${SVN_BUILD}.txz
 
 else
 

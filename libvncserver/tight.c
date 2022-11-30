@@ -73,19 +73,21 @@ static TLS rfbBool usePixelFormat24 = FALSE;
    encoder parameters for each of 10 compression levels (0..9).
    Last three parameters correspond to JPEG quality levels (0..9). */
 
-typedef struct TIGHT_CONF_s {
-    int maxRectSize, maxRectWidth;
-    int monoMinRectSize;
-    int idxZlibLevel, monoZlibLevel, rawZlibLevel;
-    int idxMaxColorsDivisor;
-    int palMaxColorsWithJPEG;
+typedef struct TIGHT_CONF_s 
+{  
+  int maxRectSize, maxRectWidth;
+  int monoMinRectSize;
+  int idxZlibLevel, monoZlibLevel, rawZlibLevel;
+  int idxMaxColorsDivisor;
+  int palMaxColorsWithJPEG;
+
 } TIGHT_CONF;
 
-static TIGHT_CONF tightConf[4] = {
-    { 65536, 2048,   6, 0, 0, 0,   4, 24 }, /* 0  (used only without JPEG) */
-    { 65536, 2048,  32, 1, 1, 1,  96, 24 }, /* 1 */
-    { 65536, 2048,  32, 3, 3, 2,  96, 96 }, /* 2  (used only with JPEG) */
-    { 65536, 2048,  32, 7, 7, 5,  96, 256 } /* 9 */
+static TIGHT_CONF tightConf[4] = 
+{{ 65536, 2048,   6, 0, 0, 0,   4,  24 } /* 0  (used only without JPEG) */
+,{ 65536, 2048,  32, 1, 1, 1,  96,  24 } /* 1 */
+,{ 65536, 2048,  32, 3, 3, 2,  96,  96 } /* 2  (used only with JPEG) */
+,{ 65536, 2048,  32, 7, 7, 5,  96, 256 } /* 9 */
 };
 
 #ifdef LIBVNCSERVER_HAVE_LIBPNG
@@ -124,15 +126,15 @@ typedef struct COLOR_LIST_s {
     uint32_t rgb;
 } COLOR_LIST;
 
-typedef struct PALETTE_ENTRY_s {
-    COLOR_LIST *listNode;
-    int numPixels;
+typedef struct PALETTE_ENTRY_s 
+{ COLOR_LIST *listNode;
+  int numPixels;
 } PALETTE_ENTRY;
 
-typedef struct PALETTE_s {
-    PALETTE_ENTRY entry[256];
-    COLOR_LIST *hash[256];
-    COLOR_LIST list[256];
+typedef struct PALETTE_s 
+{ PALETTE_ENTRY entry[256];
+  COLOR_LIST *hash[256];
+  COLOR_LIST list[256];
 } PALETTE;
 
 /* TODO: move into rfbScreen struct */
@@ -608,27 +610,27 @@ CheckSolidTile##bpp(rfbClientPtr cl, int x, int y, int w, int h,              \
     return TRUE;                                                              \
 }
 
-DEFINE_CHECK_SOLID_FUNCTION(8)
-DEFINE_CHECK_SOLID_FUNCTION(16)
-DEFINE_CHECK_SOLID_FUNCTION(32)
+DEFINE_CHECK_SOLID_FUNCTION( 8  )
+DEFINE_CHECK_SOLID_FUNCTION( 16 )
+DEFINE_CHECK_SOLID_FUNCTION( 32 )
 
 static rfbBool
 SendRectSimple(rfbClientPtr cl, int x, int y, int w, int h)
-{
-    int maxBeforeSize, maxAfterSize;
-    int maxRectSize, maxRectWidth;
-    int subrectMaxWidth, subrectMaxHeight;
-    int dx, dy;
-    int rw, rh;
+{ 
+  int maxBeforeSize, maxAfterSize;
+  int maxRectSize, maxRectWidth;
+  int subrectMaxWidth, subrectMaxHeight;
+  int dx, dy;
+  int rw, rh;
 
-    maxRectSize = tightConf[compressLevel].maxRectSize;
-    maxRectWidth = tightConf[compressLevel].maxRectWidth;
+  maxRectSize = tightConf[compressLevel].maxRectSize;
+  maxRectWidth = tightConf[compressLevel].maxRectWidth;
 
-    maxBeforeSize = maxRectSize * (cl->format.bitsPerPixel / 8);
-    maxAfterSize = maxBeforeSize + (maxBeforeSize + 99) / 100 + 12;
+  maxBeforeSize = maxRectSize * (cl->format.bitsPerPixel / 8);
+  maxAfterSize = maxBeforeSize + (maxBeforeSize + 99) / 100 + 12;
 
-    if (tightBeforeBufSize < maxBeforeSize) {
-        tightBeforeBufSize = maxBeforeSize;
+  if (tightBeforeBufSize < maxBeforeSize) 
+  { tightBeforeBufSize = maxBeforeSize;
         if (tightBeforeBuf == NULL)
             tightBeforeBuf = (char *)malloc(tightBeforeBufSize);
         else

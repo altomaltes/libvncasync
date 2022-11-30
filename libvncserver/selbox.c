@@ -2,8 +2,8 @@
 #include <rfb/rfb.h>
 #include <rfb/keysym.h>
 
-typedef struct {
-  rfbScreenInfoPtr screen;
+typedef struct 
+{ rfbScreenInfoPtr screen;
   rfbFontDataPtr font;
   char** list;
   int listSize;
@@ -16,7 +16,9 @@ typedef struct {
   int lastButtons;
   rfbPixel colour,backColour;
   SelectionChangedHookPtr selChangedHook;
-  enum { SELECTING, OK, CANCEL } state;
+  enum 
+  { SELECTING, OK, CANCEL 
+  } state;
 } rfbSelectData;
 
 static const char* okStr="OK";

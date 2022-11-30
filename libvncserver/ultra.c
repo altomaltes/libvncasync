@@ -40,27 +40,25 @@ void rfbFreeUltraData( rfbClientPtr cl )
 
 
 static rfbBool
-rfbSendOneRectEncodingUltra(rfbClientPtr cl,
-                           int x,
-                           int y,
-                           int w,
-                           int h)
-{
-    rfbFramebufferUpdateRectHeader rect;
-    rfbZlibHeader hdr;
-    int deflateResult;
-    int i;
-    char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
+rfbSendOneRectEncodingUltra( rfbClientPtr cl
+                           , int x, int y
+                           , int w, int h )
+{ rfbFramebufferUpdateRectHeader rect;
+  rfbZlibHeader hdr;
+  int deflateResult;
+  int i;
+  char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
     	   + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
-    int maxRawSize;
-    lzo_uint maxCompSize;
+  int maxRawSize;
+  lzo_uint maxCompSize;
 
-    maxRawSize = (w * h * (cl->format.bitsPerPixel / 8));
+  maxRawSize = (w * h * (cl->format.bitsPerPixel / 8));
 
-    if (cl->beforeEncBufSize < maxRawSize) {
-	cl->beforeEncBufSize = maxRawSize;
-	if (cl->beforeEncBuf == NULL)
+  if (cl->beforeEncBufSize < maxRawSize) 
+  { 
+    cl->beforeEncBufSize = maxRawSize;
+   	if (cl->beforeEncBuf == NULL)
 	    cl->beforeEncBuf = (char *)malloc(cl->beforeEncBufSize);
 	else
 	    cl->beforeEncBuf = (char *)realloc(cl->beforeEncBuf, cl->beforeEncBufSize);
@@ -200,36 +198,34 @@ rfbSendRectEncodingUltra(rfbClientPtr cl,
                                            partialRect.x,
                                            partialRect.y,
                                            partialRect.w,
-                                           partialRect.h )) {
+                                           partialRect.h )) 
+        {
 
             return FALSE;
         }
 
-        /* Technically, flushing the buffer here is not extremely
-         * efficient.  However, this improves the overall throughput
-         * of the system over very slow networks.  By flushing
-         * the buffer with every maximum size lzo rectangle, we
-         * improve the pipelining usage of the server CPU, network,
-         * and viewer CPU components.  Insuring that these components
-         * are working in parallel actually improves the performance
-         * seen by the user.
-         * Since, lzo is most useful for slow networks, this flush
-         * is appropriate for the desired behavior of the lzo encoding.
-         */
-        if (( cl->ublen > 0 ) &&
-            ( linesToComp == maxLines )) {
-            if (!rfbSendUpdateBuf(cl)) {
+/* Technically, flushing the buffer here is not extremely
+ * efficient.  However, this improves the overall throughput
+ * of the system over very slow networks.  By flushing
+ * the buffer with every maximum size lzo rectangle, we
+ * improve the pipelining usage of the server CPU, network,
+ * and viewer CPU components.  Insuring that these components
+ * are working in parallel actually improves the performance
+ * seen by the user.
+ * Since, lzo is most useful for slow networks, this flush
+ * is appropriate for the desired behavior of the lzo encoding.
+ */
+        if (( cl->ublen > 0 ) 
+        &&   ( linesToComp == maxLines )) 
+        { if (!rfbSendUpdateBuf(cl)) 
+          {  return FALSE;
+        } }
 
-                return FALSE;
-            }
-        }
+/* Update remaining and incremental rectangle location. 
+ */
+    linesRemaining -= linesToComp;
+    partialRect.y += linesToComp;
+  }
 
-        /* Update remaining and incremental rectangle location. */
-        linesRemaining -= linesToComp;
-        partialRect.y += linesToComp;
-
-    }
-
-    return TRUE;
-
+  return TRUE;
 }

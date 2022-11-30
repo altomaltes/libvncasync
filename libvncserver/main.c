@@ -265,12 +265,13 @@ void rfbScheduleCopyRegion( rfbScreenInfoPtr rfbScreen,sraRegionPtr copyRegion
        sraRgnOr(cl->modifiedRegion,modifiedRegionBackup);
        sraRgnDestroy(modifiedRegionBackup);
 
-       if(!cl->enableCursorShapeUpdates) {
-          /*
-           * n.b. (dx, dy) is the vector pointing in the direction the
-           * copyrect displacement will take place.  copyRegion is the
-           * destination rectangle (say), not the source rectangle.
-           */
+ /*
+  * n.b. (dx, dy) is the vector pointing in the direction the
+  * copyrect displacement will take place.  copyRegion is the
+  * destination rectangle (say), not the source rectangle.
+  */
+       if(!cl->enableCursorShapeUpdates) 
+       {
           sraRegionPtr cursorRegion;
           int x = cl->cursorX - cl->screen->cursor->xhot;
           int y = cl->cursorY - cl->screen->cursor->yhot;

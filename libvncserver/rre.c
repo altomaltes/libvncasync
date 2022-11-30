@@ -35,9 +35,9 @@
  * raw encoding is used instead.
  */
 
-static int subrectEncode8(rfbClientPtr cl, uint8_t *data, int w, int h);
-static int subrectEncode16(rfbClientPtr cl, uint16_t *data, int w, int h);
-static int subrectEncode32(rfbClientPtr cl, uint32_t *data, int w, int h);
+static int subrectEncode8(  rfbClientPtr, uint8_t *data, int w, int h);
+static int subrectEncode16( rfbClientPtr, uint16_t *data, int w, int h);
+static int subrectEncode32( rfbClientPtr, uint32_t *data, int w, int h);
 static uint32_t getBgColour(char *data, int size, int bpp);
 
 
@@ -45,18 +45,15 @@ static uint32_t getBgColour(char *data, int size, int bpp);
  * rfbSendRectEncodingRRE - send a given rectangle using RRE encoding.
  */
 
-rfbBool
-rfbSendRectEncodingRRE(rfbClientPtr cl,
-                       int x,
-                       int y,
-                       int w,
-                       int h)
-{
-    rfbFramebufferUpdateRectHeader rect;
-    rfbRREHeader hdr;
-    int nSubrects;
-    int i;
-    char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
+rfbBool rfbSendRectEncodingRRE( rfbClientPtr cl
+                              , int x, int y
+                              , int w, int h )
+{ rfbFramebufferUpdateRectHeader rect;
+  rfbRREHeader hdr;
+  int nSubrects;
+  int i;
+
+  char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
                    + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
     int maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
@@ -70,30 +67,34 @@ rfbSendRectEncodingRRE(rfbClientPtr cl,
             cl->beforeEncBuf = (char *)realloc(cl->beforeEncBuf, cl->beforeEncBufSize);
     }
 
-    if (cl->afterEncBufSize < maxRawSize) {
-        cl->afterEncBufSize = maxRawSize;
-        if (cl->afterEncBuf == NULL)
+  if (cl->afterEncBufSize < maxRawSize) 
+  {
+     cl->afterEncBufSize = maxRawSize;
+     if (cl->afterEncBuf == NULL)
             cl->afterEncBuf = (char *)malloc(cl->afterEncBufSize);
-        else
+     else
             cl->afterEncBuf = (char *)realloc(cl->afterEncBuf, cl->afterEncBufSize);
-    }
+  }
 
     (*cl->translateFn)(cl->translateLookupTable,
 		       &(cl->screen->serverFormat),
                        &cl->format, fbptr, cl->beforeEncBuf,
                        cl->scaledScreen->paddedWidthInBytes, w, h);
 
-    switch (cl->format.bitsPerPixel) {
-    case 8:
+    switch (cl->format.bitsPerPixel) 
+    { case 8:
         nSubrects = subrectEncode8(cl, (uint8_t *)cl->beforeEncBuf, w, h);
-        break;
-    case 16:
+      break;
+
+      case 16:
         nSubrects = subrectEncode16(cl, (uint16_t *)cl->beforeEncBuf, w, h);
-        break;
-    case 32:
+      break;
+
+      case 32:
         nSubrects = subrectEncode32(cl, (uint32_t *)cl->beforeEncBuf, w, h);
-        break;
-    default:
+      break;
+
+      default:
         rfbLog("getBgColour: bpp %d?\n",cl->format.bitsPerPixel);
         return FALSE;
     }
@@ -116,10 +117,10 @@ rfbSendRectEncodingRRE(rfbClientPtr cl,
             return FALSE;
     }
 
-    rect.r.x = Swap16IfLE(x);
-    rect.r.y = Swap16IfLE(y);
-    rect.r.w = Swap16IfLE(w);
-    rect.r.h = Swap16IfLE(h);
+    rect.r.x = Swap16IfLE( x );
+    rect.r.y = Swap16IfLE( y );
+    rect.r.w = Swap16IfLE( w );
+    rect.r.h = Swap16IfLE( h );
     rect.encoding = Swap32IfLE(rfbEncodingRRE);
 
     memcpy(&cl->updateBuf[cl->ublen], (char *)&rect,
@@ -257,9 +258,9 @@ static int                                                                    \
     return numsubs;                                                           \
 }
 
-DEFINE_SUBRECT_ENCODE(8)
-DEFINE_SUBRECT_ENCODE(16)
-DEFINE_SUBRECT_ENCODE(32)
+DEFINE_SUBRECT_ENCODE(  8 )
+DEFINE_SUBRECT_ENCODE( 16 )
+DEFINE_SUBRECT_ENCODE( 32 )
 
 
 /*
