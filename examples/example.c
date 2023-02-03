@@ -295,8 +295,10 @@ static void MakeRichCursor(rfbScreenInfoPtr rfbScreen)
 
   c->richSource = (unsigned char*)malloc(w*h*bpp);
   c->cleanupRichSource = TRUE;
-  for(j=0;j<h;j++) {
-    for(i=0;i<w;i++) {
+
+  for(j=0;j<h;j++) 
+  { for(i=0;i<w;i++) 
+    {
       c->richSource[j*w*bpp+i*bpp+0]=i*0xff/w;
       c->richSource[j*w*bpp+i*bpp+1]=(i+j)*0xff/(w+h);
       c->richSource[j*w*bpp+i*bpp+2]=j*0xff/h;

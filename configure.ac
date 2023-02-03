@@ -8,7 +8,7 @@ DATE="`date '+%d %B %Y'`"
 
 SVN_BUILD=m4_esyscmd_s([sh -c "svnversion | cut -f1 -d: "])
 AC_REVISION($Revision: $SVN_BUILD $)
-SVN_BUILD=m4_esyscmd_s([sh -c "../bld"])
+SVN_BUILD=m4_esyscmd_s([sh -c "./bld"])
 
 AC_CONFIG_MACRO_DIR([m4])
 

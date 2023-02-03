@@ -293,21 +293,23 @@ void rfbScheduleCopyRegion( rfbScreenInfoPtr rfbScreen,sraRegionPtr copyRegion
           /* displace it to check for overlap with copy region source: */
           sraRgnOffset(cursorRegion, dx, dy);
           sraRgnAnd(cursorRegion, cl->copyRegion);
-          if(!sraRgnEmpty(cursorRegion)) {
+
              /*
               * current cursor rect overlaps with the copy region *source*,
               * mark the *displaced* cursorRegion as modified since we
               * won't copyrect stuff to it.
               */
+
+          if(!sraRgnEmpty(cursorRegion)) 
+          {
              sraRgnOr(cl->modifiedRegion, cursorRegion);
           }
           sraRgnDestroy(cursorRegion);
-       }
-
-     } else {
+     }  } 
+     else 
+     {
        sraRgnOr(cl->modifiedRegion,copyRegion);
-     }
-   }
+   } }
 
    rfbReleaseClientIterator(iterator);
 }
@@ -376,7 +378,7 @@ void rfbMarkRectAsModified(rfbScreenInfoPtr screen,int x1,int y1,int x2,int y2)
   int i;
 
   if ( x1>x2) { i=x1; x1=x2; x2=i; }
-  if ( x1<0) x1=0;
+  if ( x1<0 ) { x1=0; }
   if ( x2>screen->width) x2=screen->width;
   if ( x1==x2) return;
 

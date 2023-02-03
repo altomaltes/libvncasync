@@ -103,16 +103,19 @@ rfbBool rfbProcessArguments(rfbScreenInfoPtr rfbScreen,int* argc, char *argv[])
     { if (i + 1 >= *argc) 
       { rfbUsage();
       		return FALSE;
-	    }
-            rfbScreen->authPasswdData = argv[++i];
+      }
 
-        } else if (strcmp(argv[i], "-permitfiletransfer") == 0) {  /* -permitfiletransfer  */
-            rfbScreen->permitFileTransfer = TRUE;
-        } else if (strcmp(argv[i], "-rfbversion") == 0) {  /* -rfbversion 3.6  */
-            if (i + 1 >= *argc) {
-		rfbUsage();
-		return FALSE;
-	    }
+      rfbScreen->authPasswdData = argv[++i];
+
+    } 
+    else if (strcmp(argv[i], "-permitfiletransfer") == 0)   /* -permitfiletransfer  */
+    {  rfbScreen->permitFileTransfer = TRUE;
+    } 
+    else if (strcmp(argv[i], "-rfbversion") == 0)    /* -rfbversion 3.6  */
+    { if (i + 1 >= *argc) 
+      { rfbUsage();
+      		return FALSE;
+	     }
 	    sscanf(argv[++i],"%d.%d", &rfbScreen->protocolMajorVersion, &rfbScreen->protocolMinorVersion);
 	} else if (strcmp(argv[i], "-passwd") == 0) {  /* -passwd password */
 	    char **passwds = malloc(sizeof(char**)*2);

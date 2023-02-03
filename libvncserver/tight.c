@@ -567,24 +567,23 @@ ExtendSolidArea(rfbClientPtr cl,
  * that case new color will be stored in *colorPtr.
  */
 
-static rfbBool CheckSolidTile(rfbClientPtr cl, int x, int y, int w, int h, uint32_t* colorPtr, rfbBool needSameColor)
-{
-    switch(cl->screen->serverFormat.bitsPerPixel) {
-    case 32:
-        return CheckSolidTile32(cl, x, y, w, h, colorPtr, needSameColor);
-    case 16:
-        return CheckSolidTile16(cl, x, y, w, h, colorPtr, needSameColor);
-    default:
-        return CheckSolidTile8(cl, x, y, w, h, colorPtr, needSameColor);
-    }
-}
+static rfbBool CheckSolidTile( rfbClientPtr cl
+                             , int x, int y
+                             , int w, int h
+                             , uint32_t* colorPtr
+                             , rfbBool needSameColor )
+{ switch(cl->screen->serverFormat.bitsPerPixel) 
+  { case 32: return CheckSolidTile32( cl, x, y, w, h, colorPtr, needSameColor );
+    case 16: return CheckSolidTile16( cl, x, y, w, h, colorPtr, needSameColor );
+    default: return CheckSolidTile8(  cl, x, y, w, h, colorPtr, needSameColor );
+} }
 
 
-#define DEFINE_CHECK_SOLID_FUNCTION(bpp)                                      \
+#define DEFINE_CHECK_SOLID_FUNCTION( bpp )                                    \
                                                                               \
 static rfbBool                                                                \
-CheckSolidTile##bpp(rfbClientPtr cl, int x, int y, int w, int h,              \
-		uint32_t* colorPtr, rfbBool needSameColor)                    \
+CheckSolidTile##bpp( rfbClientPtr cl, int x, int y, int w, int h,              \
+		uint32_t* colorPtr, rfbBool needSameColor)                                  \
 {                                                                             \
     uint##bpp##_t *fbptr;                                                     \
     uint##bpp##_t colorValue;                                                 \
@@ -597,11 +596,11 @@ CheckSolidTile##bpp(rfbClientPtr cl, int x, int y, int w, int h,              \
     if (needSameColor && (uint32_t)colorValue != *colorPtr)                   \
         return FALSE;                                                         \
                                                                               \
-    for (dy = 0; dy < h; dy++) {                                              \
-        for (dx = 0; dx < w; dx++) {                                          \
-            if (colorValue != fbptr[dx])                                      \
-                return FALSE;                                                 \
-        }                                                                     \
+    for (dy = 0; dy < h; dy++)                                                \
+    { for (dx = 0; dx < w; dx++)                                              \
+      { if (colorValue != fbptr[dx])                                      \
+        {   return FALSE;                                                 \
+        } }                                                                     \
         fbptr = (uint##bpp##_t *)((uint8_t *)fbptr                            \
                  + cl->scaledScreen->paddedWidthInBytes);                     \
     }                                                                         \
@@ -631,86 +630,81 @@ SendRectSimple(rfbClientPtr cl, int x, int y, int w, int h)
 
   if (tightBeforeBufSize < maxBeforeSize) 
   { tightBeforeBufSize = maxBeforeSize;
-        if (tightBeforeBuf == NULL)
+    if (tightBeforeBuf == NULL)
             tightBeforeBuf = (char *)malloc(tightBeforeBufSize);
-        else
+    else
             tightBeforeBuf = (char *)realloc(tightBeforeBuf,
                                              tightBeforeBufSize);
-    }
+  }
 
-    if (tightAfterBufSize < maxAfterSize) {
-        tightAfterBufSize = maxAfterSize;
-        if (tightAfterBuf == NULL)
+  if (tightAfterBufSize < maxAfterSize) 
+  {  tightAfterBufSize = maxAfterSize;
+     if (tightAfterBuf == NULL)
             tightAfterBuf = (char *)malloc(tightAfterBufSize);
-        else
+     else
             tightAfterBuf = (char *)realloc(tightAfterBuf,
                                             tightAfterBufSize);
-    }
+  }
 
-    if (w > maxRectWidth || w * h > maxRectSize) {
-        subrectMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
-        subrectMaxHeight = maxRectSize / subrectMaxWidth;
+  if (w > maxRectWidth || w * h > maxRectSize) 
+  { subrectMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
+    subrectMaxHeight = maxRectSize / subrectMaxWidth;
 
-        for (dy = 0; dy < h; dy += subrectMaxHeight) {
-            for (dx = 0; dx < w; dx += maxRectWidth) {
-                rw = (dx + maxRectWidth < w) ? maxRectWidth : w - dx;
-                rh = (dy + subrectMaxHeight < h) ? subrectMaxHeight : h - dy;
-                if (!SendSubrect(cl, x + dx, y + dy, rw, rh))
-                    return FALSE;
-            }
-        }
-    } else {
-        if (!SendSubrect(cl, x, y, w, h))
-            return FALSE;
-    }
+    for (dy = 0; dy < h; dy += subrectMaxHeight) 
+    { for (dx = 0; dx < w; dx += maxRectWidth) 
+      { rw = (dx + maxRectWidth < w) ? maxRectWidth : w - dx;
+        rh = (dy + subrectMaxHeight < h) ? subrectMaxHeight : h - dy;
+        if (!SendSubrect(cl, x + dx, y + dy, rw, rh))
+                  return FALSE;
+  } } } 
+  else 
+  { if (!SendSubrect(cl, x, y, w, h))
+          return FALSE;
+  }
 
-    return TRUE;
+  return TRUE;
 }
 
-static rfbBool
-SendSubrect(rfbClientPtr cl,
-            int x,
-            int y,
-            int w,
-            int h)
-{
-    char *fbptr;
-    rfbBool success = FALSE;
+static rfbBool SendSubrect( rfbClientPtr cl
+                          , int x, int y
+                          , int w, int h )
+{ char *fbptr;
+  rfbBool success = FALSE;
 
     /* Send pending data if there is more than 128 bytes. */
-    if (cl->ublen > 128) {
-        if (!rfbSendUpdateBuf(cl))
+  if (cl->ublen > 128) 
+  { if (!rfbSendUpdateBuf(cl))
             return FALSE;
-    }
+  }
 
-    if (!rfbSendTightHeader(cl, x, y, w, h))
+  if (!rfbSendTightHeader(cl, x, y, w, h))
         return FALSE;
 
-    fbptr = (cl->scaledScreen->frameBuffer
-             + (cl->scaledScreen->paddedWidthInBytes * y)
-             + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+  fbptr = (cl->scaledScreen->frameBuffer
+           + (cl->scaledScreen->paddedWidthInBytes * y)
+           + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
-    if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1)
-        return SendJpegRect(cl, x, y, w, h, qualityLevel);
+  if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1)
+      return SendJpegRect(cl, x, y, w, h, qualityLevel);
 
-    paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
-    if(qualityLevel != -1)
-        paletteMaxColors = tightConf[compressLevel].palMaxColorsWithJPEG;
-    if ( paletteMaxColors < 2 &&
-         w * h >= tightConf[compressLevel].monoMinRectSize ) {
-        paletteMaxColors = 2;
-    }
+  paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
+  if(qualityLevel != -1)
+      paletteMaxColors = tightConf[compressLevel].palMaxColorsWithJPEG;
+  if ( paletteMaxColors < 2 &&
+       w * h >= tightConf[compressLevel].monoMinRectSize ) {
+      paletteMaxColors = 2;
+  }
 
-    if (cl->format.bitsPerPixel == cl->screen->serverFormat.bitsPerPixel &&
-        cl->format.redMax == cl->screen->serverFormat.redMax &&
-        cl->format.greenMax == cl->screen->serverFormat.greenMax &&
-        cl->format.blueMax == cl->screen->serverFormat.blueMax &&
-        cl->format.bitsPerPixel >= 16) {
 
         /* This is so we can avoid translating the pixels when compressing
            with JPEG, since it is unnecessary */
-        switch (cl->format.bitsPerPixel) {
-        case 16:
+    if ( cl->format.bitsPerPixel == cl->screen->serverFormat.bitsPerPixel 
+    && cl->format.redMax       == cl->screen->serverFormat.redMax 
+    && cl->format.greenMax     == cl->screen->serverFormat.greenMax 
+    && cl->format.blueMax      == cl->screen->serverFormat.blueMax 
+    && cl->format.bitsPerPixel >= 16) 
+  { switch (cl->format.bitsPerPixel) 
+    { case 16:
             FastFillPalette16(cl, (uint16_t *)fbptr, w,
                               cl->scaledScreen->paddedWidthInBytes / 2, h);
             break;
@@ -767,44 +761,39 @@ SendSubrect(rfbClientPtr cl,
     return success;
 }
 
-rfbBool
-rfbSendTightHeader(rfbClientPtr cl,
-                int x,
-                int y,
-                int w,
-                int h)
-{
-    rfbFramebufferUpdateRectHeader rect;
+rfbBool rfbSendTightHeader( rfbClientPtr cl
+                          , int x, int y
+                          , int w, int h)
+{ rfbFramebufferUpdateRectHeader rect;
 
-    if (cl->ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE) {
-        if (!rfbSendUpdateBuf(cl))
+  if (cl->ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE) 
+  { if (!rfbSendUpdateBuf(cl))
             return FALSE;
-    }
+  }
 
-    rect.r.x = Swap16IfLE(x);
-    rect.r.y = Swap16IfLE(y);
-    rect.r.w = Swap16IfLE(w);
-    rect.r.h = Swap16IfLE(h);
-    rect.encoding = Swap32IfLE(cl->tightEncoding);
+  rect.r.x = Swap16IfLE( x );
+  rect.r.y = Swap16IfLE( y );
+  rect.r.w = Swap16IfLE( w );
+  rect.r.h = Swap16IfLE( h );
+  rect.encoding = Swap32IfLE(cl->tightEncoding);
 
-    memcpy(&cl->updateBuf[cl->ublen], (char *)&rect,
+  memcpy(&cl->updateBuf[cl->ublen], (char *)&rect,
            sz_rfbFramebufferUpdateRectHeader);
-    cl->ublen += sz_rfbFramebufferUpdateRectHeader;
+  cl->ublen += sz_rfbFramebufferUpdateRectHeader;
 
-    rfbStatRecordEncodingSent(cl, cl->tightEncoding,
+  rfbStatRecordEncodingSent(cl, cl->tightEncoding,
                               sz_rfbFramebufferUpdateRectHeader,
                               sz_rfbFramebufferUpdateRectHeader
                                   + w * (cl->format.bitsPerPixel / 8) * h);
 
-    return TRUE;
+  return TRUE;
 }
 
 /*
  * Subencoding implementations.
  */
 
-static rfbBool
-SendSolidRect(rfbClientPtr cl)
+static rfbBool SendSolidRect( rfbClientPtr cl )
 {
     int len;
 
@@ -1438,23 +1427,25 @@ static void Pack24(rfbClientPtr cl,
 
     buf32 = (uint32_t *)buf;
 
-    if (!cl->screen->serverFormat.bigEndian == !fmt->bigEndian) {
-        r_shift = fmt->redShift;
-        g_shift = fmt->greenShift;
-        b_shift = fmt->blueShift;
-    } else {
-        r_shift = 24 - fmt->redShift;
-        g_shift = 24 - fmt->greenShift;
-        b_shift = 24 - fmt->blueShift;
+    if (!cl->screen->serverFormat.bigEndian == !fmt->bigEndian) 
+    { r_shift = fmt->redShift;
+      g_shift = fmt->greenShift;
+      b_shift = fmt->blueShift;
+    } 
+    else 
+    {
+       r_shift = 24 - fmt->redShift;
+       g_shift = 24 - fmt->greenShift;
+       b_shift = 24 - fmt->blueShift;
     }
 
-    while (count--) {
+    while (count--) 
+    {
         pix = *buf32++;
         *buf++ = (char)(pix >> r_shift);
         *buf++ = (char)(pix >> g_shift);
         *buf++ = (char)(pix >> b_shift);
-    }
-}
+} }
 
 
 /*

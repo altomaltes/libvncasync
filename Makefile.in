@@ -1141,8 +1141,7 @@ uninstall-am: uninstall-libLTLIBRARIES \
 @BUILDING_SLACK_TRUE@	make install DESTDIR=$(abs_builddir)/pkg.${build_cpu}
 @BUILDING_SLACK_TRUE@	$(MKDIR_P) $(abs_builddir)/pkg.${build_cpu}/install
 @BUILDING_SLACK_TRUE@	cp ${top_srcdir}/slack-desc $(abs_builddir)/pkg.${build_cpu}/install
-@BUILDING_SLACK_TRUE@	cd $(abs_builddir)/pkg.${build_cpu}; ${SLACKBUILD} -l y -c n $(abs_builddir)/../../${build_cpu}/${PACKAGE}-${VERSION}-${build_cpu}-${SVN_BUILD}.txz
-#	cd $(abs_builddir)/pkg.${build_cpu}; ${SLACKBUILD} -l y -c n /var/cache/packages/${build_cpu}/extra/${PACKAGE}-${VERSION}-${build_cpu}-${SVN_BUILD}.txz
+@BUILDING_SLACK_TRUE@	cd $(abs_builddir)/pkg.${build_cpu}; ${SLACKBUILD} -l y -c n $(abs_builddir)/${PACKAGE}-${VERSION}-${build_cpu}-${SVN_BUILD}.txz
 
 @BUILDING_SLACK_FALSE@slack:
 @BUILDING_SLACK_FALSE@	echo "No slackware package requested ${PACKAGE}-${VERSION}-${SVN_BUILD}"

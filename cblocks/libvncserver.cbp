@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="libvncasync" />
+		<Option title="libvncasync-0.9.12" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -254,6 +254,9 @@
 		<Unit filename="../examples/simple.c">
 			<Option compilerVar="CC" />
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../libvncasync.pc">
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="../libvncclient/corre.c">
 			<Option compilerVar="CC" />

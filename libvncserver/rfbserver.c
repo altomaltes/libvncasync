@@ -609,55 +609,57 @@ void rfbClientConnFailed( rfbClientPtr cl
  * initialisation message.
  */
 
-static void
-rfbProcessClientInitMessage(rfbClientPtr cl)
-{
-    rfbClientInitMsg * ci;
-    union {
-        char buf[256];
-        rfbServerInitMsg si;
-    } u;
-    int len;
-    rfbClientIteratorPtr iterator;
-    rfbClientPtr otherCl;
-    rfbExtensionData* extension;
+static void rfbProcessClientInitMessage(rfbClientPtr cl)
+{ rfbClientInitMsg * ci;
+  union 
+  { char buf[256];
+    rfbServerInitMsg si;
+  } u;
 
-   /* In this case behave as though an implicit ClientInit message has
-    * already been received with a shared-flag of true. */
-    if (cl->state == RFB_INITIALISATION_SHARED) {
-        ci->shared = 1;
+  int len;
+  rfbClientIteratorPtr iterator;
+  rfbClientPtr otherCl;
+  rfbExtensionData* extension;
+
+/* In this case behave as though an implicit ClientInit message has
+ * already been received with a shared-flag of true. 
+ */
+  if (cl->state == RFB_INITIALISATION_SHARED) 
+  { ci->shared = 1;
         /* Avoid the possibility of exposing the RFB_INITIALISATION_SHARED
          * state to calling software. */
-        cl->state = RFB_INITIALISATION;
-    }
-    else
-    { ci= getStreamBytes( cl, sizeof( *ci ) ); if ( !ci ) return;
-    }
+    cl->state = RFB_INITIALISATION;
+  }
+  else
+  { ci= getStreamBytes( cl, sizeof( *ci ) ); if ( !ci ) return;
+  }
 
-    memset(u.buf,0,sizeof(u.buf));
+  memset(u.buf,0,sizeof(u.buf));
 
-    u.si.framebufferWidth = Swap16IfLE(cl->screen->width);
-    u.si.framebufferHeight = Swap16IfLE(cl->screen->height);
-    u.si.format = cl->screen->serverFormat;
-    u.si.format.redMax = Swap16IfLE(u.si.format.redMax);
-    u.si.format.greenMax = Swap16IfLE(u.si.format.greenMax);
-    u.si.format.blueMax = Swap16IfLE(u.si.format.blueMax);
+  u.si.framebufferWidth = Swap16IfLE(cl->screen->width);
+  u.si.framebufferHeight= Swap16IfLE(cl->screen->height);
+  u.si.format           = cl->screen->serverFormat;
+  u.si.format.redMax    = Swap16IfLE(u.si.format.redMax);
+  u.si.format.greenMax  = Swap16IfLE(u.si.format.greenMax);
+  u.si.format.blueMax   = Swap16IfLE(u.si.format.blueMax);
 
-    strncpy( u.buf + sz_rfbServerInitMsg
-           , cl->screen->desktopName, 127);
-    len = strlen(u.buf + sz_rfbServerInitMsg);
-    u.si.nameLength = Swap32IfLE(len);
+  strncpy( u.buf + sz_rfbServerInitMsg
+           , cl->screen->desktopName ? cl->screen->desktopName : "NO NAME" , 127);  
+ 
+  len = strlen(u.buf + sz_rfbServerInitMsg);
+  u.si.nameLength = Swap32IfLE(len);
 
-    if (rfbPushClientStream( cl,  u.buf, sz_rfbServerInitMsg + len) < 0) {
-        rfbLogPerror("rfbProcessClientInitMessage: write");
-        rfbCloseClient(cl);
-        return;
-    }
+  if (rfbPushClientStream( cl,  u.buf, sz_rfbServerInitMsg + len) < 0)  
+  { rfbLogPerror("rfbProcessClientInitMessage: write");
+    rfbCloseClient(cl);
+    return;
+  }
 
-    for(extension = cl->extensions; extension;) {
-	rfbExtensionData* next = extension->next;
-	if(extension->extension->init &&
-		!extension->extension->init(cl, extension->data))
+    for( extension = cl->extensions
+       ; extension;) 
+    { rfbExtensionData* next = extension->next;
+     	if (  extension->extension->init 
+        && !extension->extension->init(cl, extension->data))
 	    /* extension requested that it be removed */
 	    rfbDisableExtension(cl, extension->extension);
 	extension = next;
@@ -696,24 +698,26 @@ rfbProcessClientInitMessage(rfbClientPtr cl)
 /* The values come in based on the scaled screen, we need to convert them to
  * values based on the man screen's coordinate system
  */
-static rfbBool rectSwapIfLEAndClip(uint16_t* x,uint16_t* y,uint16_t* w,uint16_t* h,
-		rfbClientPtr cl)
-{
-	int x1=Swap16IfLE(*x);
-	int y1=Swap16IfLE(*y);
-	int w1=Swap16IfLE(*w);
-	int h1=Swap16IfLE(*h);
+static rfbBool rectSwapIfLEAndClip( uint16_t * x 
+                                  , uint16_t * y
+                                  , uint16_t * w
+                                  , uint16_t * h
+                                  ,	rfbClientPtr cl )
+{	int x1=Swap16IfLE(*x);
+ 	int y1=Swap16IfLE(*y);
+ 	int w1=Swap16IfLE(*w);
+ 	int h1=Swap16IfLE(*h);
 
-	rfbScaledCorrection(cl->scaledScreen, cl->screen, &x1, &y1, &w1, &h1, "rectSwapIfLEAndClip");
-	*x = x1;
-	*y = y1;
-	*w = w1;
-	*h = h1;
+	  rfbScaledCorrection(cl->scaledScreen, cl->screen, &x1, &y1, &w1, &h1, "rectSwapIfLEAndClip");
+	  *x = x1;
+	  *y = y1;
+	  *w = w1;
+	  *h = h1;
 
-	if(*w>cl->screen->width-*x)
-		*w=cl->screen->width-*x;
-	/* possible underflow */
-	if(*w>cl->screen->width-*x)
+	  if(*w>cl->screen->width-*x)
+		   *w=cl->screen->width-*x;
+	
+  	if(*w>cl->screen->width-*x) /* possible underflow */
 		return FALSE;
 	if(*h>cl->screen->height-*y)
 		*h=cl->screen->height-*y;
@@ -2111,7 +2115,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 					rfbLog("rfbProcessClientNormalMessage: "
 					    "ignoring unsupported encoding type %s\n",
 					    encodingName(enc,encBuf,sizeof(encBuf)));
-			}		}         }        }
+			}		}   }   }
 
 
 
@@ -2195,48 +2199,54 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
     }
 
     case rfbKeyEvent:
+      if ( !getStreamBytes( cl, sz_rfbKeyEventMsg-1 ) ) 
+      { return;
+      } 
 
-      if ( !getStreamBytes( cl, sz_rfbKeyEventMsg-1 ) ) return;
 
+    	rfbStatRecordMessageRcvd(cl, msg->type, sz_rfbKeyEventMsg, sz_rfbKeyEventMsg);
 
-	rfbStatRecordMessageRcvd(cl, msg->type, sz_rfbKeyEventMsg, sz_rfbKeyEventMsg);
-
-	if(!cl->viewOnly) {
-	    cl->screen->kbdAddEvent(msg->ke.down, (rfbKeySym)Swap32IfLE(msg->ke.key), cl);
-	}
-
-        return;
+    	if( !cl->viewOnly ) 
+     { cl->screen->kbdAddEvent(msg->ke.down, (rfbKeySym)Swap32IfLE(msg->ke.key), cl);
+     }
+   return;
 
 
     case rfbPointerEvent:
-      if ( !getStreamBytes( cl, sz_rfbPointerEventMsg-1 ) ) return;
-
-	rfbStatRecordMessageRcvd(cl, msg->type, sz_rfbPointerEventMsg, sz_rfbPointerEventMsg);
-
-	if (cl->screen->pointerClient && cl->screen->pointerClient != cl)
-	    return;
-
-	if (msg->pe.buttonMask == 0)
-	    cl->screen->pointerClient = NULL;
-	else
-	    cl->screen->pointerClient = cl;
-
-	if(!cl->viewOnly) 
- { if ( msg->pe.buttonMask != cl->lastPtrButtons 
-     || cl->screen->deferPtrUpdateTime == 0) 
-   { cl->screen->ptrAddEvent( msg->pe.buttonMask
-                            ,	ScaleX(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.x))
-                            ,	ScaleY(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.y))
-                            , cl );
-		cl->lastPtrButtons = msg->pe.buttonMask;
-	    } else {
-		cl->lastPtrX = ScaleX(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.x));
-		cl->lastPtrY = ScaleY(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.y));
-		cl->lastPtrButtons = msg->pe.buttonMask;
-	    }
+      if ( !getStreamBytes( cl, sz_rfbPointerEventMsg-1 ) ) 
+      { return;
       }
-      return;
 
+     	rfbStatRecordMessageRcvd( cl
+                              , msg->type
+                              , sz_rfbPointerEventMsg
+                              , sz_rfbPointerEventMsg );
+
+     	if ( cl->screen->pointerClient 
+        && cl->screen->pointerClient != cl)
+	     { return;
+      }
+
+     	if (msg->pe.buttonMask == 0)
+	        cl->screen->pointerClient = NULL;
+     	else
+	        cl->screen->pointerClient = cl;
+
+     	if( !cl->viewOnly ) 
+      { if ( msg->pe.buttonMask != cl->lastPtrButtons 
+          || cl->screen->deferPtrUpdateTime == 0) 
+        { cl->screen->ptrAddEvent( msg->pe.buttonMask
+                                 ,	ScaleX(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.x))
+                                 ,	ScaleY(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.y))
+                                 , cl );
+        		cl->lastPtrButtons = msg->pe.buttonMask;
+	       }  
+        else 
+        { cl->lastPtrX = ScaleX(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.x));
+    		    cl->lastPtrY = ScaleY(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.y));
+        		cl->lastPtrButtons = msg->pe.buttonMask;
+	     } }
+    return;
 
     case rfbFileTransfer:
       if ( !getStreamBytes( cl, sz_rfbFileTransferMsg-1 ) ) return;
@@ -2273,20 +2283,23 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         return;
 
     case rfbTextChat:
-      if ( !getStreamBytes( cl, sz_rfbTextChatMsg-1 ) ) return;
+      if ( !getStreamBytes( cl, sz_rfbTextChatMsg-1 ) )
+      { return;
+      }
 
-        msg->tc.pad2   = Swap16IfLE(msg->tc.pad2);
-        msg->tc.length = Swap32IfLE(msg->tc.length);
+       msg->tc.pad2   = Swap16IfLE(msg->tc.pad2);
+       msg->tc.length = Swap32IfLE(msg->tc.length);
 
-        switch (msg->tc.length) {
-        case rfbTextChatOpen:
+      switch (msg->tc.length) 
+     {  case rfbTextChatOpen:
         case rfbTextChatClose:
         case rfbTextChatFinished:
             /* commands do not have text following */
             /* Why couldn't they have used the pad byte??? */
             str=NULL;
             rfbStatRecordMessageRcvd(cl, msg->type, sz_rfbTextChatMsg, sz_rfbTextChatMsg);
-            break;
+        break;
+
         default:
             if ((msg->tc.length>0) && (msg->tc.length<rfbTextMaxSize))
             { str= getStreamBytes( cl, msg->tc.length ); if ( !str ) return;
@@ -2298,8 +2311,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                 rfbLog("client sent us a Text Message that is too big %d>%d\n", msg->tc.length, rfbTextMaxSize);
                 rfbCloseClient(cl);
                 return;
-            }
-        }
+            }        }
 
         /* Note: length can be commands: rfbTextChatOpen, rfbTextChatClose, and rfbTextChatFinished
          * at which point, the str is NULL (as it is not sent)

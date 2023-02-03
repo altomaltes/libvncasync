@@ -1185,9 +1185,10 @@ InitialiseRFBConnection(rfbClient* client)
       return FALSE;
   }
 
-  client->desktopName = malloc(client->si.nameLength + 1);
-  if (!client->desktopName) {
-    rfbClientLog("Error allocating memory for desktop name, %lu bytes\n",
+  client->desktopName= malloc(client->si.nameLength + 1);
+
+  if ( !client->desktopName ) 
+  { rfbClientLog("Error allocating memory for desktop name, %lu bytes\n",
             (unsigned long)client->si.nameLength);
     return FALSE;
   }

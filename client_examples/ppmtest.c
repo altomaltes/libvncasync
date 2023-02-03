@@ -20,20 +20,21 @@ static void PrintRect(rfbClient* client, int x, int y, int w, int h) {
 	rfbClientLog("Received an update for %d,%d,%d,%d.\n",x,y,w,h);
 }
 
-static void SaveFramebufferAsPPM(rfbClient* client, int x, int y, int w, int h) {
-	static time_t t=0,t1;
-	FILE* f;
-	int i,j;
-	rfbPixelFormat* pf=&client->format;
-	int bpp=pf->bitsPerPixel/8;
-	int row_stride=client->width*bpp;
+static void SaveFramebufferAsPPM(rfbClient* client, int x, int y, int w, int h) 
+{ static time_t t=0,t1;
+	 FILE* f;
+	 int i,j;
+	 rfbPixelFormat* pf=&client->format;
+	 int bpp=pf->bitsPerPixel/8;
+	 int row_stride=client->width*bpp;
 
 	/* save one picture only if the last is older than 2 seconds */
-	t1=time(NULL);
-	if(t1-t>2)
-		t=t1;
-	else
-		return;
+	 t1=time(NULL);
+
+ 	if(t1-t>2)
+	 	t=t1;
+ 	else
+	 	return;
 
 	/* assert bpp=4 */
 	if(bpp!=4 && bpp!=2) {
