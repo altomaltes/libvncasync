@@ -2892,16 +2892,22 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
     {	case -1:
         case rfbEncodingRaw:
             if (!rfbSendRectEncodingRaw(cl, x, y, w, h))
-	        goto updateFailed;
-            break;
+	           { goto updateFailed;
+            }
+        break;
+
         case rfbEncodingRRE:
             if (!rfbSendRectEncodingRRE(cl, x, y, w, h))
-	        goto updateFailed;
-            break;
+	           { goto updateFailed;
+            }
+        break;
+
         case rfbEncodingCoRRE:
-            if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h))
-	        goto updateFailed;
-	    break;
+           if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h))
+	          { goto updateFailed;
+           } 
+   	    break;
+
         case rfbEncodingHextile:
             if (!rfbSendRectEncodingHextile(cl, x, y, w, h))
 	        goto updateFailed;
@@ -2910,6 +2916,7 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
             if (!rfbSendRectEncodingUltra(cl, x, y, w, h))
                 goto updateFailed;
             break;
+
 #ifdef LIBVNCSERVER_HAVE_LIBZ
 	case rfbEncodingZlib:
 	    if (!rfbSendRectEncodingZlib(cl, x, y, w, h))
@@ -2921,6 +2928,7 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
 	       goto updateFailed;
            break;
 #endif
+
 #if defined(LIBVNCSERVER_HAVE_LIBJPEG) && (defined(LIBVNCSERVER_HAVE_LIBZ) || defined(LIBVNCSERVER_HAVE_LIBPNG))
 	case rfbEncodingTight:
 	    if (!rfbSendRectEncodingTight(cl, x, y, w, h))
@@ -2935,7 +2943,8 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
 #endif
         }
     }
-    if (i) {
+    if (i) 
+    {
         sraRgnReleaseIterator(i);
         i = NULL;
     }
@@ -2949,7 +2958,8 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
     	result = FALSE;
     }
 
-    if (!cl->enableCursorShapeUpdates) {
+    if (!cl->enableCursorShapeUpdates) 
+    {
       rfbHideCursor(cl);
   }
 
@@ -3040,10 +3050,10 @@ rfbBool rfbSendRectEncodingRaw( rfbClientPtr cl
      return FALSE;
   }
 
-  rect.r.x = Swap16IfLE(x);
-  rect.r.y = Swap16IfLE(y);
-  rect.r.w = Swap16IfLE(w);
-  rect.r.h = Swap16IfLE(h);
+  rect.r.x = Swap16IfLE( x );
+  rect.r.y = Swap16IfLE( y );
+  rect.r.w = Swap16IfLE( w );
+  rect.r.h = Swap16IfLE( h );
   rect.encoding = Swap32IfLE(rfbEncodingRaw);
 
   memcpy(&cl->updateBuf[cl->ublen], (char *)&rect,sz_rfbFramebufferUpdateRectHeader);
@@ -3259,51 +3269,52 @@ rfbBool rfbSendUpdateBuf(rfbClientPtr cl)
 rfbBool rfbSendSetColourMapEntries(rfbClientPtr cl,
                            int firstColour,
                            int nColours)
-{
-    char buf[sz_rfbSetColourMapEntriesMsg + 256 * 3 * 2];
-    char *wbuf = buf;
-    rfbSetColourMapEntriesMsg *scme;
-    uint16_t *rgb;
-    rfbColourMap* cm = &cl->screen->colourMap;
-    int i, len;
+{ char buf[sz_rfbSetColourMapEntriesMsg + 256 * 3 * 2];
+  char *wbuf = buf;
+  rfbSetColourMapEntriesMsg *scme;
+  uint16_t *rgb;
+  rfbColourMap* cm = &cl->screen->colourMap;
+  int i, len;
 
-    if (nColours > 256) {
 	/* some rare hardware has, e.g., 4096 colors cells: PseudoColor:12 */
-    	wbuf = (char *) malloc(sz_rfbSetColourMapEntriesMsg + nColours * 3 * 2);
-    }
+  if (nColours > 256) 
+  { 	wbuf = (char *) malloc(sz_rfbSetColourMapEntriesMsg + nColours * 3 * 2);
+  }
 
-    scme = (rfbSetColourMapEntriesMsg *)wbuf;
-    rgb = (uint16_t *)(&wbuf[sz_rfbSetColourMapEntriesMsg]);
+  scme = (rfbSetColourMapEntriesMsg *)wbuf;
+  rgb = (uint16_t *)(&wbuf[sz_rfbSetColourMapEntriesMsg]);
 
-    scme->type = rfbSetColourMapEntries;
+  scme->type = rfbSetColourMapEntries;
 
-    scme->firstColour = Swap16IfLE(firstColour);
-    scme->nColours = Swap16IfLE(nColours);
+  scme->firstColour = Swap16IfLE(firstColour);
+  scme->nColours = Swap16IfLE(nColours);
 
-    len = sz_rfbSetColourMapEntriesMsg;
+  len = sz_rfbSetColourMapEntriesMsg;
 
-    for (i = 0; i < nColours; i++) {
-      if(i<(int)cm->count) {
-	if(cm->is16) {
-	  rgb[i*3] = Swap16IfLE(cm->data.shorts[i*3]);
-	  rgb[i*3+1] = Swap16IfLE(cm->data.shorts[i*3+1]);
-	  rgb[i*3+2] = Swap16IfLE(cm->data.shorts[i*3+2]);
-	} else {
-	  rgb[i*3] = Swap16IfLE((unsigned short)cm->data.bytes[i*3]);
-	  rgb[i*3+1] = Swap16IfLE((unsigned short)cm->data.bytes[i*3+1]);
-	  rgb[i*3+2] = Swap16IfLE((unsigned short)cm->data.bytes[i*3+2]);
-	}
-      }
-    }
+  for ( i = 0
+      ; i < nColours
+      ; i++) 
+  { if(i<(int)cm->count) 
+    { if(cm->is16) 
+      { rgb[i*3] = Swap16IfLE(cm->data.shorts[i*3]);
+     	  rgb[i*3+1] = Swap16IfLE(cm->data.shorts[i*3+1]);
+     	  rgb[i*3+2] = Swap16IfLE(cm->data.shorts[i*3+2]);
+	     } 
+      else 
+      {
+    	   rgb[i*3] = Swap16IfLE((unsigned short)cm->data.bytes[i*3]);
+     	  rgb[i*3+1] = Swap16IfLE((unsigned short)cm->data.bytes[i*3+1]);
+	       rgb[i*3+2] = Swap16IfLE((unsigned short)cm->data.bytes[i*3+2]);
+   	}      }    }
 
     len += nColours * 3 * 2;
 
-    if (rfbPushClientStream( cl,  wbuf, len) < 0)
-    { rfbLogPerror("rfbSendSetColourMapEntries: write");
-     	rfbCloseClient(cl);
-      FREE( wbuf );
-   	 return FALSE;
-    }
+  if (rfbPushClientStream( cl,  wbuf, len) < 0)
+  { rfbLogPerror("rfbSendSetColourMapEntries: write");
+   	rfbCloseClient(cl);
+    FREE( wbuf );
+   return FALSE;
+  }
 
   rfbStatRecordMessageSent(cl, rfbSetColourMapEntries, len, len);
   FREE( wbuf );
