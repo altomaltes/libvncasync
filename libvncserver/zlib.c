@@ -78,32 +78,29 @@ void rfbZlibCleanup(rfbScreenInfoPtr screen)
  *                              rectangle encoding.
  */
 
-static rfbBool
-rfbSendOneRectEncodingZlib(rfbClientPtr cl,
-                           int x,
-                           int y,
-                           int w,
-                           int h)
-{
-    rfbFramebufferUpdateRectHeader rect;
-    rfbZlibHeader hdr;
-    int deflateResult;
-    int previousOut;
-    int i;
-    char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
-    	   + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+static rfbBool rfbSendOneRectEncodingZlib( rfbClientPtr cl
+                                         , int x, int y
+                                         , int w, int h )
+{ rfbFramebufferUpdateRectHeader rect;
+  rfbZlibHeader hdr;
+  int deflateResult;
+  int previousOut;
+  int i;
+  char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
+    	    + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
-    int maxRawSize;
-    int maxCompSize;
+  int maxRawSize;
+  int maxCompSize;
 
-    maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
+  maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
                   * (cl->format.bitsPerPixel / 8));
 
-    if (zlibBeforeBufSize < maxRawSize) {
-	zlibBeforeBufSize = maxRawSize;
-	if (zlibBeforeBuf == NULL)
+  if (zlibBeforeBufSize < maxRawSize)
+  { zlibBeforeBufSize = maxRawSize;
+
+   	if (zlibBeforeBuf == NULL)
 	    zlibBeforeBuf = (char *)malloc(zlibBeforeBufSize);
-	else
+   	else
 	    zlibBeforeBuf = (char *)realloc(zlibBeforeBuf, zlibBeforeBufSize);
     }
 

@@ -8,7 +8,7 @@
 /*
  *  Copyright (C) 2002 RealVNC Ltd.
  *  OSXvnc Copyright (C) 2001 Dan McGuirk <mcguirk@incompleteness.net>.
- *  Original Xvnc code Copyright (C) 1999 AT&T Laboratories Cambridge.  
+ *  Original Xvnc code Copyright (C) 1999 AT&T Laboratories Cambridge.
  *  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -79,30 +79,27 @@ rfbSendRectEncodingCoRRE(rfbClientPtr cl,
  * rectangle using CoRRE encoding.
  */
 
-static rfbBool
-rfbSendSmallRectEncodingCoRRE(rfbClientPtr cl,
-                              int x,
-                              int y,
-                              int w,
-                              int h)
-{
-    rfbFramebufferUpdateRectHeader rect;
-    rfbRREHeader hdr;
-    int nSubrects;
-    int i;
-    char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
+static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClientPtr cl
+                                            , int x, int y
+                                            , int w, int h )
+{ rfbFramebufferUpdateRectHeader rect;
+  rfbRREHeader hdr;
+  int nSubrects;
+  int i;
+
+  char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
                    + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
-    int maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
+  int maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
                       * (cl->format.bitsPerPixel / 8));
 
-    if (cl->beforeEncBufSize < maxRawSize) {
-        cl->beforeEncBufSize = maxRawSize;
+  if (cl->beforeEncBufSize < maxRawSize)
+  { cl->beforeEncBufSize = maxRawSize;
         if (cl->beforeEncBuf == NULL)
             cl->beforeEncBuf = (char *)malloc(cl->beforeEncBufSize);
         else
             cl->beforeEncBuf = (char *)realloc(cl->beforeEncBuf, cl->beforeEncBufSize);
-    }
+  }
 
     if (cl->afterEncBufSize < maxRawSize) {
         cl->afterEncBufSize = maxRawSize;
@@ -130,7 +127,7 @@ rfbSendSmallRectEncodingCoRRE(rfbClientPtr cl,
         rfbLog("getBgColour: bpp %d?\n",cl->format.bitsPerPixel);
         return FALSE;
     }
-        
+
     if (nSubrects < 0) {
 
         /* RRE encoding was too large, use raw */
@@ -189,15 +186,15 @@ rfbSendSmallRectEncodingCoRRE(rfbClientPtr cl,
 
 
 /*
- * subrectEncode() encodes the given multicoloured rectangle as a background 
- * colour overwritten by single-coloured rectangles.  It returns the number 
+ * subrectEncode() encodes the given multicoloured rectangle as a background
+ * colour overwritten by single-coloured rectangles.  It returns the number
  * of subrectangles in the encoded buffer, or -1 if subrect encoding won't
  * fit in the buffer.  It puts the encoded rectangles in cl->afterEncBuf.  The
  * single-colour rectangle partition is not optimal, but does find the biggest
- * horizontal or vertical rectangle top-left anchored to each consecutive 
+ * horizontal or vertical rectangle top-left anchored to each consecutive
  * coordinate position.
  *
- * The coding scheme is simply [<bgcolour><subrect><subrect>...] where each 
+ * The coding scheme is simply [<bgcolour><subrect><subrect>...] where each
  * <subrect> is [<colour><x><y><w><h>].
  */
 
@@ -303,7 +300,7 @@ getBgColour(char *data, int size, int bpp)
 {
 
 #define NUMCLRS 256
-  
+
   static int counts[NUMCLRS];
   int i,j,k;
 
@@ -337,6 +334,6 @@ getBgColour(char *data, int size, int bpp)
       maxclr = ((uint8_t *)data)[j];
     }
   }
-  
+
   return maxclr;
 }

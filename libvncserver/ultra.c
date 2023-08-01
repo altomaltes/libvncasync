@@ -39,10 +39,9 @@ void rfbFreeUltraData( rfbClientPtr cl )
 } } }
 
 
-static rfbBool
-rfbSendOneRectEncodingUltra( rfbClientPtr cl
-                           , int x, int y
-                           , int w, int h )
+static rfbBool rfbSendOneRectEncodingUltra( rfbClientPtr cl
+                                          , int x, int y
+                                          , int w, int h )
 { rfbFramebufferUpdateRectHeader rect;
   rfbZlibHeader hdr;
   int deflateResult;
@@ -55,8 +54,8 @@ rfbSendOneRectEncodingUltra( rfbClientPtr cl
 
   maxRawSize = (w * h * (cl->format.bitsPerPixel / 8));
 
-  if (cl->beforeEncBufSize < maxRawSize) 
-  { 
+  if (cl->beforeEncBufSize < maxRawSize)
+  {
     cl->beforeEncBufSize = maxRawSize;
    	if (cl->beforeEncBuf == NULL)
 	    cl->beforeEncBuf = (char *)malloc(cl->beforeEncBufSize);
@@ -198,7 +197,7 @@ rfbSendRectEncodingUltra(rfbClientPtr cl,
                                            partialRect.x,
                                            partialRect.y,
                                            partialRect.w,
-                                           partialRect.h )) 
+                                           partialRect.h ))
         {
 
             return FALSE;
@@ -215,13 +214,13 @@ rfbSendRectEncodingUltra(rfbClientPtr cl,
  * Since, lzo is most useful for slow networks, this flush
  * is appropriate for the desired behavior of the lzo encoding.
  */
-        if (( cl->ublen > 0 ) 
-        &&   ( linesToComp == maxLines )) 
-        { if (!rfbSendUpdateBuf(cl)) 
+        if (( cl->ublen > 0 )
+        &&   ( linesToComp == maxLines ))
+        { if (!rfbSendUpdateBuf(cl))
           {  return FALSE;
         } }
 
-/* Update remaining and incremental rectangle location. 
+/* Update remaining and incremental rectangle location.
  */
     linesRemaining -= linesToComp;
     partialRect.y += linesToComp;

@@ -3053,6 +3053,7 @@ rfbBool rfbSendRectEncodingRaw( rfbClientPtr cl
 { rfbFramebufferUpdateRectHeader rect;
   int nlines;
   int bytesPerLine = w * (cl->format.bitsPerPixel / 8);
+
   char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
                    + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 

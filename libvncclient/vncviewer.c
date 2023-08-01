@@ -90,8 +90,9 @@ static char* ReadPassword(rfbClient* client) {
 	return p;
 #endif
 }
-static rfbBool MallocFrameBuffer(rfbClient* client) {
-  uint64_t allocSize;
+
+static rfbBool MallocFrameBuffer(rfbClient* client)
+{ uint64_t allocSize;
 
   FREE(client->frameBuffer);
 
@@ -101,8 +102,8 @@ static rfbBool MallocFrameBuffer(rfbClient* client) {
   */
   allocSize = (uint64_t)client->width * client->height * client->format.bitsPerPixel/8;
 
-  if (allocSize >= SIZE_MAX) {
-    rfbClientErr("CRITICAL: cannot allocate frameBuffer, requested size is too large\n");
+  if (allocSize >= SIZE_MAX)
+  { rfbClientErr("CRITICAL: cannot allocate frameBuffer, requested size is too large\n");
     return FALSE;
   }
 
@@ -138,9 +139,9 @@ static void FillRectangle(rfbClient* client, int x, int y, int w, int h, uint32_
 	((uint##BPP##_t*)client->frameBuffer)[j+i]=colour;
 
   switch(client->format.bitsPerPixel)
-  { case  8: FILL_RECT(8);  break;
-    case 16: FILL_RECT(16); break;
-    case 32: FILL_RECT(32); break;
+  { case  8: FILL_RECT(  8 ); break;
+    case 16: FILL_RECT( 16 ); break;
+    case 32: FILL_RECT( 32 ); break;
     default: rfbClientLog("Unsupported bitsPerPixel: %d\n",client->format.bitsPerPixel);
   }
 }
