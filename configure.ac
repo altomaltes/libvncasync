@@ -96,6 +96,8 @@ AM_MAINTAINER_MODE
 #            , [AC_MSG_WARN([zlib is required ])]
 #            , [-lm])
 
+PKG_CHECK_MODULES([libpng], [libpng16])
+
 
 
 dnl# If it's there, what the hell?
