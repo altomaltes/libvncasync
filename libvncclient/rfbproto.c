@@ -2257,8 +2257,8 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
     if (!ReadFromRFBServer(client, ((char *)&msg) + 1,
                            sz_rfbPalmVNCReSizeFrameBufferMsg -1))
       return FALSE;
-    client->width = rfbClientSwap16IfLE(msg.prsfb.buffer_w);
-    client->height = rfbClientSwap16IfLE(msg.prsfb.buffer_h);
+    client->width = rfbClientSwap16IfLE(  msg.prsfb.buffer_w );
+    client->height = rfbClientSwap16IfLE( msg.prsfb.buffer_h );
     client->updateRect.x = client->updateRect.y = 0;
     client->updateRect.w = client->width;
     client->updateRect.h = client->height;
@@ -2270,22 +2270,21 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
   }
 
   default:
-    {
-      rfbBool handled = FALSE;
-      rfbClientProtocolExtension* e;
+  { rfbBool handled = FALSE;
+    rfbClientProtocolExtension* e;
 
-      for(e = rfbClientExtensions; !handled && e; e = e->next)
-	if(e->handleMessage && e->handleMessage(client, &msg))
-	  handled = TRUE;
+    for( e = rfbClientExtensions
+       ; !handled && e
+       ; e = e->nex t)
+	   if(e->handleMessage && e->handleMessage(client, &msg))
+	     handled = TRUE;
 
-      if(!handled) {
-	char buffer[256];
-	rfbClientLog("Unknown message type %d from VNC server\n",msg.type);
-	ReadFromRFBServer(client, buffer, 256);
-	return FALSE;
-      }
-    }
-  }
+    if(!handled)
+    {	char buffer[256];
+     	rfbClientLog("Unknown message type %d from VNC server\n",msg.type);
+	     ReadFromRFBServer(client, buffer, 256);
+     	return FALSE;
+  } } }
 
   return TRUE;
 }
@@ -2365,20 +2364,21 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
  * PrintPixelFormat.
  */
 
-void
-PrintPixelFormat(rfbPixelFormat *format)
+void PrintPixelFormat(rfbPixelFormat *format)
 {
   if (format->bitsPerPixel == 1) {
     rfbClientLog("  Single bit per pixel.\n");
     rfbClientLog(
 	    "  %s significant bit in each byte is leftmost on the screen.\n",
 	    (format->bigEndian ? "Most" : "Least"));
-  } else {
+  }
+  else {
     rfbClientLog("  %d bits per pixel.\n",format->bitsPerPixel);
     if (format->bitsPerPixel != 8) {
       rfbClientLog("  %s significant byte first in each pixel.\n",
 	      (format->bigEndian ? "Most" : "Least"));
     }
+
     if (format->trueColour) {
       rfbClientLog("  TRUE colour: max red %d green %d blue %d"
 		   ", shift red %d green %d blue %d\n",
@@ -2386,9 +2386,7 @@ PrintPixelFormat(rfbPixelFormat *format)
 		   format->redShift, format->greenShift, format->blueShift);
     } else {
       rfbClientLog("  Colour map (not true colour).\n");
-    }
-  }
-}
+ } } }
 
 /* avoid name clashes with LibVNCServer */
 

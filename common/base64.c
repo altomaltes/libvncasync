@@ -45,7 +45,7 @@
 #include <sys/types.h>
 
 #include <ctype.h>
-#include <resolv.h>
+//#include <resolv.h>
 #include <stdio.h>
 
 #include <stdlib.h>
@@ -120,14 +120,14 @@ static const char Pad64 = '=';
 
 int
 __b64_ntop(src, srclength, target, targsize)
-	u_char const *src;
+	unsigned char const *src;
 	size_t srclength;
 	char *target;
 	size_t targsize;
 {
 	size_t datalength = 0;
-	u_char input[3];
-	u_char output[4];
+	unsigned char input[3];
+	unsigned char output[4];
 	int i;
 
 	while (2 < srclength) {
@@ -185,11 +185,11 @@ __b64_ntop(src, srclength, target, targsize)
 int
 __b64_pton(src, target, targsize)
 	char const *src;
-	u_char *target;
+	unsigned char *target;
 	size_t targsize;
 {
 	int tarindex, state, ch;
-	u_char nextbyte;
+	unsigned char nextbyte;
 	char *pos;
 
 	state = 0;

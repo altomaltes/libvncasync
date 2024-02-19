@@ -2,7 +2,18 @@
 AC_INIT([libvncasync],[0.9.12])
 AC_CONFIG_SRCDIR([common/vncauth.c])
 AM_INIT_AUTOMAKE( [subdir-objects] )
-AM_CONFIG_HEADER( common/rfb-config.h )
+
+
+dnl Persist windows configuration to offchain builds
+dnl if test "${version_type}" = "windows" ; then
+  AM_CONFIG_HEADER( common/win-config.h )
+dnl else
+  AM_CONFIG_HEADER( common/rfb-config.h )
+dnl fi
+
+dnl Detect windows
+AM_CONDITIONAL( WINDOWS, test "${version_type}" = "windows" )
+
 
 DATE="`date '+%d %B %Y'`"
 
@@ -209,9 +220,6 @@ else
 fi
 AM_CONDITIONAL(HAVE_MMX, test "x$HAVE_MMX" = "xyes")
 
-dnl Detect windows
-
-AM_CONDITIONAL( WINDOWS,   test "${version_type}" = "windows" )
 
 AC_PATH_PROG([SLACKBUILD], [makepkg], [notfound])
 

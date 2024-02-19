@@ -26,6 +26,8 @@
 #include "sha.h"
 #include "rfbcrypto.h"
 
+#ifdef HAVE_SYS_UIO_H
+
 void digestmd5( const struct iovec *iov
               , int iovcnt
               , void *dest )
@@ -51,3 +53,5 @@ void digestsha1( const struct iovec *iov
 	SHA1Input(&c, iov[i].iov_base, iov[i].iov_len);
     SHA1Result(&c, dest);
 }
+
+#endif

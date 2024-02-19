@@ -877,18 +877,22 @@ void rfbShutdownServer(rfbScreenInfoPtr screen,rfbBool disconnectClients) {
  // rfbHttpShutdownSockets(screen);
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 
-#include <fcntl.h>
-#include <conio.h>
-#include <sys/timeb.h>
+#include <windows.h>
+//#include <fcntl.h>
+//#include <conio.h>
+//#include <sys/timeb.h>
 
-void gettimeofday(struct timeval* tv,char* dummy)
+int  gettimeofday123( struct timeval*  tv,char *  dummy )
 {
    SYSTEMTIME t;
-   GetSystemTime(&t);
-   tv->tv_sec=t.wHour*3600+t.wMinute*60+t.wSecond;
-   tv->tv_usec=t.wMilliseconds*1000;
+
+   GetSystemTime( &t );
+   tv->tv_sec=  t.wHour*3600+t.wMinute*60+t.wSecond;
+   tv->tv_usec= t.wMilliseconds*1000;
+
+   return( 0 );
 }
 
 #endif
@@ -945,11 +949,13 @@ rfbBool rfbUpdateClient( rfbClientPtr cl )
     if ( screen->deferUpdateTime == 0)
     { rfbSendFramebufferUpdate(cl,cl->modifiedRegion);
     }
+
     else if(cl->startDeferring.tv_usec == 0)
     { gettimeofday(&cl->startDeferring,NULL);
       if(cl->startDeferring.tv_usec == 0)
           cl->startDeferring.tv_usec++;
     }
+
     else
     { gettimeofday(&tv,NULL);
       if ( tv.tv_sec < cl->startDeferring.tv_sec /* at midnight */
@@ -967,6 +973,7 @@ rfbBool rfbUpdateClient( rfbClientPtr cl )
       if(cl->startPtrDeferring.tv_usec == 0)
           cl->startPtrDeferring.tv_usec++;
     }
+
     else
     { struct timeval tv;
       gettimeofday(&tv,NULL);

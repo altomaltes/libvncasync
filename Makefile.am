@@ -10,21 +10,23 @@ AM_CPPFLAGS= -I$(top_srcdir)/common -I$(top_srcdir)/libvncserver ${JPEG_CFLAGS}
 
 
 library_includedir=$(includedir)/rfb
-library_include_HEADERS= rfb/rfb.h rfb/rfbproto.h 
+library_include_HEADERS= rfb/rfb.h rfb/rfbproto.h
 
 libvncasync_la_SOURCES= libvncserver/translate.c libvncserver/auth.c libvncserver/cargs.c libvncserver/corre.c libvncserver/cursor.c libvncserver/cutpaste.c libvncserver/draw.c libvncserver/font.c libvncserver/hextile.c libvncserver/main.c libvncserver/rfbregion.c libvncserver/rfbserver.c libvncserver/rre.c libvncserver/scale.c libvncserver/selbox.c libvncserver/stats.c libvncserver/tight.c libvncserver/ultra.c libvncserver/zlib.c libvncserver/zrlepalettehelper.c  libvncserver/ws_decode.c libvncserver/zrle.c libvncserver/zrleoutstream.c
 libvncasync_la_SOURCES+= common/d3des.c common/md5.c common/minilzo.c common/rfbcrypto_included.c common/sha1.c  common/turbojpeg.c common/vncauth.c common/base64.c
 
 libvncasync_la_LDFLAGS= $(JPEG_LIBS) $(LIBPNG_LIBS)
 
-if WINDOWS
-  libvncasync_la_SOURCES+=
-else
-  libvncasync_la_SOURCES+=
-endif
+
 
 libvncasync_la_LDFLAGS+= -ldl
 libvncasync_la_LDFLAGS+= -release $(VERSION) -shared
+
+if WINDOWS
+  libvncasync_la_LDFLAGS+= -no-undefined
+else
+  libvncasync_la_SOURCES+=
+endif
 
 if BUILDING_SLACK
 

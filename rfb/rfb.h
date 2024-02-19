@@ -59,7 +59,7 @@ struct _rfbClientRec;
 struct _rfbScreenInfo;
 struct rfbCursor;
 
-enum rfbNewClientAction 
+enum rfbNewClientAction
 { RFB_CLIENT_ACCEPT
 , RFB_CLIENT_ON_HOLD
 , RFB_CLIENT_REFUSE
@@ -144,9 +144,7 @@ typedef struct _rfbProtocolExtension {
 	rfbBool (*enablePseudoEncoding)(struct _rfbClientRec* client,
 			void** data, int encodingNumber);
 	/** returns TRUE if message was handled */
-	rfbBool (*handleMessage)(struct _rfbClientRec* client,
-				void* data,
-				const rfbClientToServerMsg* message);
+	rfbBool (*handleMessage)(struct _rfbClientRec* client,				void* data,		const rfbClientToServerMsg* message);
 	void (*close)(struct _rfbClientRec* client, void* data);
 	void (*usage)(void);
 	/** processArguments returns the number of handled arguments */

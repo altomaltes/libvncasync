@@ -46,7 +46,7 @@
 #ifdef HAVE_UNISTD_H
   #include <unistd.h>
 #endif
-#include <pwd.h>
+//#include <pwd.h>
 
 #ifdef DEBUGPROTO
 #undef DEBUGPROTO
@@ -83,15 +83,16 @@
 #endif
 
 #ifdef WIN32
-#include <direct.h>
-#ifdef __MINGW32__
-#define mkdir(path, perms) mkdir(path) /* Omit the perms argument to match POSIX signature */
-#else /* MSVC and other windows compilers */
-#define mkdir(path, perms) _mkdir(path) /* Omit the perms argument to match POSIX signature */
-#endif /* __MINGW32__ else... */
-#ifndef S_ISDIR
-#define S_ISDIR(m)	(((m) & S_IFDIR) == S_IFDIR)
-#endif
+  #include <windows.h>
+  #include <direct.h>
+  #ifdef __MINGW32__
+  #define mkdir(path, perms) mkdir(path) /* Omit the perms argument to match POSIX signature */
+  #else /* MSVC and other windows compilers */
+  #define mkdir(path, perms) _mkdir(path) /* Omit the perms argument to match POSIX signature */
+  #endif /* __MINGW32__ else... */
+  #ifndef S_ISDIR
+  #define S_ISDIR(m)	(((m) & S_IFDIR) == S_IFDIR)
+  #endif
 #endif
 
 #ifdef HAVE_LIBJPEG
@@ -912,7 +913,7 @@ rfbBool rfbSendServerIdentity(rfbClientPtr cl)
 
     /* tack on our library version */
     snprintf(buffer,sizeof(buffer)-1, "%s (%s)",
-        (cl->screen->versionString==NULL ? "unknown" 
+        (cl->screen->versionString==NULL ? "unknown"
                                          : cl->screen->versionString )
         , PACKAGE_STRING);
 
@@ -2458,10 +2459,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 	   {
 	    rfbExtensionData *e,*next;
 
-	    for(e=cl->extensions; e;)
+	    for( e=cl->extensions
+	       ; e
+	       ;)
      {	next = e->next;
-     		if(e->extension->handleMessage &&
-		     e->extension->handleMessage(cl, e->data, &msg))
+
+     		if ( e->extension->handleMessage
+     		  && e->extension->handleMessage(cl, e->data, msg))
        { rfbStatRecordMessageRcvd(cl, msg->type, 0, 0); /* Extension should handle this */
 		       return;
        }

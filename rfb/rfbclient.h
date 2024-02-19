@@ -628,18 +628,14 @@ void* rfbClientGetClientData(rfbClient* client, void* tag);
 
 /* protocol extensions */
 
-typedef struct _rfbClientProtocolExtension {
-	int* encodings;
-	/** returns TRUE if the encoding was handled */
-	rfbBool (*handleEncoding)(rfbClient* cl,
-		rfbFramebufferUpdateRectHeader* rect);
-	/** returns TRUE if it handled the message */
-	rfbBool (*handleMessage)(rfbClient* cl,
-		 rfbServerToClientMsg* message);
-	struct _rfbClientProtocolExtension* next;
-	uint32_t const* securityTypes;
+typedef struct _rfbClientProtocolExtension
+{	int* encodings;	/** returns TRUE if the encoding was handled */
+	 rfbBool ( *handleEncoding )(rfbClient,	rfbFramebufferUpdateRectHeader* );	/** returns TRUE if it handled the message */
+  rfbBool ( *handleMessage  )(rfbClient,	rfbServerToClientMsg          * );
+	 struct _rfbClientProtocolExtension* next;
+ 	uint32_t const* securityTypes;
 	/** returns TRUE if it handled the authentication */
-	rfbBool (*handleAuthentication)(rfbClient* cl, uint32_t authScheme);
+ 	rfbBool (*handleAuthentication)(rfbClient* cl, uint32_t authScheme);
 } rfbClientProtocolExtension;
 
 void rfbClientRegisterExtension(rfbClientProtocolExtension* e);
