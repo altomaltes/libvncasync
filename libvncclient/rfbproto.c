@@ -52,12 +52,12 @@
 #include <stdarg.h>
 #include <time.h>
 
-#ifdef LIBVNCSERVER_WITH_CLIENT_GCRYPT
+#ifdef WITH_CLIENT_GCRYPT
 #include <gcrypt.h>
 #endif
 
 #include "sasl.h"
-#ifdef LIBVNCSERVER_HAVE_LZO
+#ifdef HAVE_LZO
 #include <lzo/lzo1x.h>
 #else
 #include "minilzo.h"
@@ -338,10 +338,6 @@ rfbBool ConnectToRFBRepeater(rfbClient* client,const char *repeaterHost, int rep
   char tmphost[250];
   int tmphostlen;
 
-//#ifdef LIBVNCSERVER_IPv6
-//  client->sock = ConnectClientToTcpAddr6(repeaterHost, repeaterPort);
-//  if (client->sock == -1)
-//#endif
   {
     // unsigned int host;
  //   if (!StringToIPAddr(repeaterHost, &host)) {
@@ -480,12 +476,12 @@ ReadSupportedSecurityType(rfbClient* client, uint32_t *result, rfbBool subAuth)
         }
         if (tAuth[loop]==rfbVncAuth || tAuth[loop]==rfbNoAuth ||
 			extAuthHandler ||
-#if defined(LIBVNCSERVER_HAVE_GNUTLS) || defined(LIBVNCSERVER_HAVE_LIBSSL)
+#if defined(HAVE_GNUTLS) || defined(HAVE_LIBSSL)
             tAuth[loop]==rfbVeNCrypt ||
 #endif
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
             tAuth[loop]==rfbSASL ||
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
             (tAuth[loop]==rfbARD && client->GetCredential) ||
             (!subAuth && (tAuth[loop]==rfbTLS || (tAuth[loop]==rfbVeNCrypt && client->GetCredential))))
         {
@@ -705,7 +701,7 @@ HandleMSLogonAuth(rfbClient *client)
   return TRUE;
 }
 
-#ifdef LIBVNCSERVER_WITH_CLIENT_GCRYPT
+#ifdef WITH_CLIENT_GCRYPT
 static rfbBool
 rfbMpiToBytes(const gcry_mpi_t value, uint8_t *result, size_t size)
 {
@@ -1047,18 +1043,18 @@ InitialiseRFBConnection(rfbClient* client)
     if (!HandleVncAuth(client)) return FALSE;
     break;
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
   case rfbSASL:
     if (!HandleSASLAuth(client)) return FALSE;
     break;
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
 
   case rfbMSLogon:
     if (!HandleMSLogonAuth(client)) return FALSE;
     break;
 
   case rfbARD:
-#ifndef LIBVNCSERVER_WITH_CLIENT_GCRYPT
+#ifndef WITH_CLIENT_GCRYPT
     rfbClientLog("GCrypt support was not compiled in\n");
     return FALSE;
 #else
@@ -1070,7 +1066,7 @@ InitialiseRFBConnection(rfbClient* client)
      * Note that all following reading/writing are through the TLS session from here.
      */
 
-#ifdef LIBVNCSERVER_HAVE_TLS
+#ifdef HAVE_TLS
   case rfbTLS:
     if (!HandleAnonTLSAuth(client)) return FALSE;
     if (!ReadSupportedSecurityType(client, &subAuthScheme, TRUE)) return FALSE;
@@ -1092,11 +1088,11 @@ InitialiseRFBConnection(rfbClient* client)
         if (!HandleVncAuth(client)) return FALSE;
       break;
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
       case rfbSASL:
         if (!HandleSASLAuth(client)) return FALSE;
         break;
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
 
       default:
         rfbClientLog("Unknown sub authentication scheme from VNC server: %d\n",
@@ -1128,12 +1124,12 @@ InitialiseRFBConnection(rfbClient* client)
         if (!HandlePlainAuth(client)) return FALSE;
         break;
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
       case rfbVeNCryptX509SASL:
       case rfbVeNCryptTLSSASL:
         if (!HandleSASLAuth(client)) return FALSE;
         break;
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
 
       default:
         rfbClientLog("Unknown sub authentication scheme from VNC server: %d\n",

@@ -1,17 +1,6 @@
 #ifndef RFBPROTO_H
 #define RFBPROTO_H
 
-/**
- @mainpage
- @li @ref libvncserver_api
- @li @ref libvncserver_doc
-
-
- @li @ref libvncclient_api
- @li @ref libvncclient_doc
-
-*/
-
 /*
  *  Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
  *  Copyright (C) 2005 Rohit Kumar, Johannes E. Schindelin
@@ -62,18 +51,19 @@
 
 #include <stdint.h>
 
+typedef int8_t rfbBool;
+
 #define FREE( item ) if ( item ) { free( item ); item= NULL; }
 
 #if defined(WIN32) && !defined(__MINGW32__)
-#define LIBVNCSERVER_WORDS_BIGENDIAN
-typedef int8_t rfbBool;
+#define WORDS_BIGENDIAN
 #include <sys/timeb.h>
 #endif
 
 #if defined(WIN32)
-  #include <rfb/win-config.h>
+  #include <common/win-config.h>
 #else
-  #include <rfb/rfbconfig.h>
+  #include <common/rfb-config.h>
 #endif
 
 #ifdef HAVE_LIBZ
@@ -84,10 +74,10 @@ typedef int8_t rfbBool;
 #endif
 #endif
 
-#if LIBVNCSERVER_HAVE_ENDIAN_H
+#if HAVE_ENDIAN_H
 # include <endian.h>
 # if __BYTE_ORDER == __BIG_ENDIAN
-#  define LIBVNCSERVER_WORDS_BIGENDIAN 1
+#  define WORDS_BIGENDIAN 1
 # endif
 #endif
 
@@ -98,11 +88,10 @@ typedef int8_t rfbBool;
 
 #define rfbMax(a,b) (((a)>(b))?(a):(b))
 #if !defined(WIN32) || defined(__MINGW32__)
-#ifdef LIBVNCSERVER_HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
-typedef int8_t rfbBool;
 
 #undef FALSE
 #define FALSE 0
@@ -113,13 +102,7 @@ typedef int8_t rfbBool;
 typedef uint32_t rfbKeySym;
 typedef uint32_t rfbPixel;
 
-#ifdef LIBVNCSERVER_NEED_INADDR_T
-typedef uint32_t in_addr_t;
-#endif
 
-#ifndef INADDR_NONE
-#define                INADDR_NONE     ((in_addr_t) 0xffffffff)
-#endif
 
 #define MAX_ENCODINGS 64
 
@@ -135,11 +118,11 @@ typedef uint32_t in_addr_t;
  * affecting alignment.
  */
 
-typedef struct {
-    uint16_t x;
-    uint16_t y;
-    uint16_t w;
-    uint16_t h;
+typedef struct 
+{ uint16_t x;
+  uint16_t y;
+  uint16_t w;
+  uint16_t h;
 } rfbRectangle;
 
 #define sz_rfbRectangle 8
@@ -341,8 +324,8 @@ typedef char rfbProtocolVersionMsg[ 13 ];	/* allow extra byte for null */
  * access to this client by disconnecting all other clients.
  */
 
-typedef struct {
-    uint8_t shared;
+typedef struct 
+{ uint8_t shared;
 } rfbClientInitMsg;
 
 #define sz_rfbClientInitMsg 1
@@ -356,8 +339,8 @@ typedef struct {
  * its pixel format and the name associated with the desktop.
  */
 
-typedef struct {
-    uint16_t framebufferWidth;
+typedef struct 
+{ uint16_t framebufferWidth;
     uint16_t framebufferHeight;
     rfbPixelFormat format;	/* the server's preferred pixel format */
     uint32_t nameLength;
@@ -540,10 +523,10 @@ typedef struct {
  * with alignment of 32-bit pixels):
  */
 
-typedef struct {
-    uint8_t type;			/* always rfbFramebufferUpdate */
-    uint8_t pad;
-    uint16_t nRects;
+typedef struct 
+{ uint8_t type;			/* always rfbFramebufferUpdate */
+  uint8_t pad;
+  uint16_t nRects;
     /* followed by nRects rectangles */
 } rfbFramebufferUpdateMsg;
 
@@ -1494,23 +1477,23 @@ typedef struct _rfbSetSWMsg {
  * Union of all client->server messages.
  */
 
-typedef union {
-    uint8_t type;
-    rfbSetPixelFormatMsg spf;
-    rfbFixColourMapEntriesMsg fcme;
-    rfbSetEncodingsMsg se;
-    rfbFramebufferUpdateRequestMsg fur;
-    rfbKeyEventMsg ke;
-    rfbPointerEventMsg pe;
-    rfbClientCutTextMsg cct;
-	rfbSetScaleMsg ssc;
-	rfbPalmVNCSetScaleFactorMsg pssf;
-	rfbSetServerInputMsg sim;
-	rfbFileTransferMsg ft;
-	rfbSetSWMsg sw;
-	rfbTextChatMsg tc;
-	rfbXvpMsg xvp;
-	rfbSetDesktopSizeMsg sdm;
+typedef union 
+{ uint8_t type;
+  rfbSetPixelFormatMsg spf;
+  rfbFixColourMapEntriesMsg fcme;
+  rfbSetEncodingsMsg se;
+  rfbFramebufferUpdateRequestMsg fur;
+  rfbKeyEventMsg ke;
+  rfbPointerEventMsg pe;
+  rfbClientCutTextMsg cct;
+  rfbSetScaleMsg ssc;
+  rfbPalmVNCSetScaleFactorMsg pssf;
+  rfbSetServerInputMsg sim;
+  rfbFileTransferMsg ft;
+  rfbSetSWMsg sw;
+  rfbTextChatMsg tc;
+  rfbXvpMsg xvp;
+  rfbSetDesktopSizeMsg sdm;
 } rfbClientToServerMsg;
 
 /*

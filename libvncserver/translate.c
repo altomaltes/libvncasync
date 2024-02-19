@@ -108,7 +108,7 @@ static const rfbPixelFormat BGR233Format = {
 #undef IN
 #undef OUT
 
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
 #define COUNT_OFFSETS 4
 #define BPP2OFFSET(bpp) ((bpp)/8-1)
 #include "tableinit24.c"
@@ -137,7 +137,7 @@ typedef void (*rfbInitTableFnType)(char **table, rfbPixelFormat *in,
 static rfbInitCMTableFnType rfbInitColourMapSingleTableFns[COUNT_OFFSETS] = {
     rfbInitColourMapSingleTable8,
     rfbInitColourMapSingleTable16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
     rfbInitColourMapSingleTable24,
 #endif
     rfbInitColourMapSingleTable32
@@ -146,7 +146,7 @@ static rfbInitCMTableFnType rfbInitColourMapSingleTableFns[COUNT_OFFSETS] = {
 static rfbInitTableFnType rfbInitTrueColourSingleTableFns[COUNT_OFFSETS] = {
     rfbInitTrueColourSingleTable8,
     rfbInitTrueColourSingleTable16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
     rfbInitTrueColourSingleTable24,
 #endif
     rfbInitTrueColourSingleTable32
@@ -155,7 +155,7 @@ static rfbInitTableFnType rfbInitTrueColourSingleTableFns[COUNT_OFFSETS] = {
 static rfbInitTableFnType rfbInitTrueColourRGBTablesFns[COUNT_OFFSETS] = {
     rfbInitTrueColourRGBTables8,
     rfbInitTrueColourRGBTables16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
     rfbInitTrueColourRGBTables24,
 #endif
     rfbInitTrueColourRGBTables32
@@ -164,17 +164,17 @@ static rfbInitTableFnType rfbInitTrueColourRGBTablesFns[COUNT_OFFSETS] = {
 static rfbTranslateFnType rfbTranslateWithSingleTableFns[COUNT_OFFSETS][COUNT_OFFSETS] = {
     { rfbTranslateWithSingleTable8to8,
       rfbTranslateWithSingleTable8to16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
       rfbTranslateWithSingleTable8to24,
 #endif
       rfbTranslateWithSingleTable8to32 },
     { rfbTranslateWithSingleTable16to8,
       rfbTranslateWithSingleTable16to16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
       rfbTranslateWithSingleTable16to24,
 #endif
       rfbTranslateWithSingleTable16to32 },
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
     { rfbTranslateWithSingleTable24to8,
       rfbTranslateWithSingleTable24to16,
       rfbTranslateWithSingleTable24to24,
@@ -182,7 +182,7 @@ static rfbTranslateFnType rfbTranslateWithSingleTableFns[COUNT_OFFSETS][COUNT_OF
 #endif
     { rfbTranslateWithSingleTable32to8,
       rfbTranslateWithSingleTable32to16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
       rfbTranslateWithSingleTable32to24,
 #endif
       rfbTranslateWithSingleTable32to32 }
@@ -191,17 +191,17 @@ static rfbTranslateFnType rfbTranslateWithSingleTableFns[COUNT_OFFSETS][COUNT_OF
 static rfbTranslateFnType rfbTranslateWithRGBTablesFns[COUNT_OFFSETS][COUNT_OFFSETS] = {
     { rfbTranslateWithRGBTables8to8,
       rfbTranslateWithRGBTables8to16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
       rfbTranslateWithRGBTables8to24,
 #endif
       rfbTranslateWithRGBTables8to32 },
     { rfbTranslateWithRGBTables16to8,
       rfbTranslateWithRGBTables16to16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
       rfbTranslateWithRGBTables16to24,
 #endif
       rfbTranslateWithRGBTables16to32 },
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
     { rfbTranslateWithRGBTables24to8,
       rfbTranslateWithRGBTables24to16,
       rfbTranslateWithRGBTables24to24,
@@ -209,7 +209,7 @@ static rfbTranslateFnType rfbTranslateWithRGBTablesFns[COUNT_OFFSETS][COUNT_OFFS
 #endif
     { rfbTranslateWithRGBTables32to8,
       rfbTranslateWithRGBTables32to16,
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
       rfbTranslateWithRGBTables32to24,
 #endif
       rfbTranslateWithRGBTables32to32 }
@@ -253,7 +253,7 @@ rfbSetTranslateFunction(rfbClientPtr cl)
 
     if ((cl->screen->serverFormat.bitsPerPixel != 8) &&
         (cl->screen->serverFormat.bitsPerPixel != 16) &&
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
 	(cl->screen->serverFormat.bitsPerPixel != 24) &&
 #endif
         (cl->screen->serverFormat.bitsPerPixel != 32))
@@ -267,7 +267,7 @@ rfbSetTranslateFunction(rfbClientPtr cl)
 
     if ((cl->format.bitsPerPixel != 8) &&
         (cl->format.bitsPerPixel != 16) &&
-#ifdef LIBVNCSERVER_ALLOW24BPP
+#ifdef ALLOW24BPP
 	(cl->format.bitsPerPixel != 24) &&
 #endif
         (cl->format.bitsPerPixel != 32))

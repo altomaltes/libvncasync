@@ -25,7 +25,7 @@
 #define true -1
 #endif
 
-#ifdef LIBVNCSERVER_HAVE_SYS_TYPES_H
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 
@@ -42,7 +42,7 @@
 
 static int rfbEnableLogging=1;
 
-#ifdef LIBVNCSERVER_WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
   char rfbEndianTest = (1==0);
 #else
   char rfbEndianTest = (1==1);

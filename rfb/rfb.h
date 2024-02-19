@@ -43,19 +43,14 @@ extern "C"
 #include <string.h>
 #include <rfb/rfbproto.h>
 
-#if defined(ANDROID) || defined(LIBVNCSERVER_HAVE_ANDROID)
+#if defined(ANDROID) || defined(HAVE_ANDROID)
 #include <arpa/inet.h>
 #include <sys/select.h>
 #endif
 
-#ifdef LIBVNCSERVER_HAVE_SYS_TYPES_H
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-
-#ifdef WIN32
- #include <winsock2.h>
-#endif
-
 
 
 /* end of stuff for autoconf */
@@ -64,21 +59,21 @@ struct _rfbClientRec;
 struct _rfbScreenInfo;
 struct rfbCursor;
 
-enum rfbNewClientAction {
-	RFB_CLIENT_ACCEPT,
-	RFB_CLIENT_ON_HOLD,
-	RFB_CLIENT_REFUSE
+enum rfbNewClientAction 
+{ RFB_CLIENT_ACCEPT
+, RFB_CLIENT_ON_HOLD
+, RFB_CLIENT_REFUSE
 };
 
 struct rfbScreenInfo;
 
-typedef void   ( * rfbKbdAddEventProcPtr) (rfbBool down, rfbKeySym keySym, struct _rfbClientRec* cl);
+typedef void   ( * rfbKbdAddEventProcPtr      ) (rfbBool down, rfbKeySym keySym, struct _rfbClientRec* cl);
 typedef void   ( * rfbKbdReleaseAllKeysProcPtr) (struct _rfbClientRec* cl);
-typedef void   ( * rfbPtrAddEventProcPtr) (int buttonMask, int x, int y, struct _rfbClientRec* cl);
-typedef void   ( * rfbSetXCutTextProcPtr) (char* str,int len, struct _rfbClientRec* cl);
+typedef void   ( * rfbPtrAddEventProcPtr      ) (int buttonMask, int x, int y, struct _rfbClientRec* cl);
+typedef void   ( * rfbSetXCutTextProcPtr      ) (char* str,int len, struct _rfbClientRec* cl);
 typedef rfbBool( * rfbSetTranslateFunctionProcPtr)(struct _rfbClientRec* cl);
-typedef rfbBool( * rfbPasswordCheckProcPtr)(  struct _rfbClientRec * cl,const char* encryptedPassWord,int len);
-typedef void   ( * rfbSetModifiedProcPtr  ) ( struct rfbScreenInfo *,int x1,int y1,int x2,int y2 );
+typedef rfbBool( * rfbPasswordCheckProcPtr    )(  struct _rfbClientRec * cl,const char* encryptedPassWord,int len);
+typedef void   ( * rfbSetModifiedProcPtr      ) ( struct rfbScreenInfo *,int x1,int y1,int x2,int y2 );
 
 
 typedef struct rfbCursor* (*rfbGetCursorProcPtr) (struct _rfbClientRec* pScreen);
@@ -605,11 +600,10 @@ typedef struct _rfbClientRec
   int afterEncBufLen;
 #if defined(HAVE_LIBZ) || defined(HAVE_LIBPNG)
     uint32_t tightEncoding;  /* rfbEncodingTight or rfbEncodingTightPng */
-#ifdef HAVE_LIBJPEG
-    /* TurboVNC Encoding support (extends TightVNC) */
+  #ifdef HAVE_LIBJPEG /* TurboVNC Encoding support (extends TightVNC) */
     int turboSubsampLevel;
     int turboQualityLevel;  /* 1-100 scale */
-#endif
+  #endif
 #endif
     rfbSslCtx *sslctx;
     wsCtx     *wsctx;
@@ -671,7 +665,6 @@ int rfbPushClientStream( rfbClientPtr cl, const void * data, size_t sz );  // JA
 /* sockets.c */
 
 extern int rfbMaxClientWait;
-
 extern void rfbCloseClient(rfbClientPtr cl);
 
 /* rfbserver.c */
@@ -699,13 +692,13 @@ extern  int rfbSinkClientStream(     rfbClientPtr, void *, size_t ); // JACS, cl
 extern void * getStreamBytes(        rfbClientPtr, size_t sz );
 
 
-extern void rfbClientConnFailed(rfbClientPtr cl, const char *reason);
-extern void rfbProcessUDPInput(rfbScreenInfoPtr rfbScreen);
-extern rfbBool rfbSendFramebufferUpdate(rfbClientPtr cl, sraRegionPtr updateRegion);
-extern rfbBool rfbSendRectEncodingRaw(rfbClientPtr cl, int x,int y,int w,int h);
-extern rfbBool rfbSendUpdateBuf(rfbClientPtr cl);
-extern void rfbSendServerCutText(rfbScreenInfoPtr rfbScreen,char *str, int len);
-extern rfbBool rfbSendCopyRegion(rfbClientPtr cl,sraRegionPtr reg,int dx,int dy);
+extern void rfbClientConnFailed(         rfbClientPtr cl, const char *reason);
+extern void rfbProcessUDPInput(          rfbScreenInfoPtr rfbScreen);
+extern rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl, sraRegionPtr updateRegion);
+extern rfbBool rfbSendRectEncodingRaw(   rfbClientPtr cl, int x,int y,int w,int h);
+extern rfbBool rfbSendUpdateBuf(         rfbClientPtr cl);
+extern void rfbSendServerCutText( rfbScreenInfoPtr rfbScreen,char *str, int len);
+extern rfbBool rfbSendCopyRegion( rfbClientPtr cl,sraRegionPtr reg,int dx,int dy);
 extern rfbBool rfbSendLastRectMarker(rfbClientPtr cl);
 extern rfbBool rfbSendNewFBSize(rfbClientPtr cl, int w, int h);
 extern rfbBool rfbSendExtDesktopSize(rfbClientPtr cl, int w, int h);
@@ -756,8 +749,7 @@ extern rfbBool rfbSendRectEncodingCoRRE(rfbClientPtr cl, int x,int y,int w,int h
 
 /* hextile.c */
 
-extern rfbBool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
-                                       int h);
+extern rfbBool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w, int h);
 
 /* ultra.c */
 
@@ -770,14 +762,12 @@ extern rfbBool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
 
 extern rfbBool rfbSendRectEncodingUltra(rfbClientPtr cl, int x,int y,int w,int h);
 
-
-#ifdef HAVE_LIBZ
-/* zlib.c */
+#ifdef HAVE_LIBZ /* zlib.c */
 
 /** Minimum zlib rectangle size in bytes.  Anything smaller will
  * not compress well due to overhead.
  */
-#define VNC_ENCODE_ZLIB_MIN_COMP_SIZE (17)
+#define VNC_ENCODE_ZLIB_MIN_COMP_SIZE ( 17 )
 
 /* Set maximum zlib rectangle size in pixels.  Always allow at least
  * two scan lines.
@@ -789,39 +779,37 @@ extern rfbBool rfbSendRectEncodingUltra(rfbClientPtr cl, int x,int y,int w,int h
 extern rfbBool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 				    int h);
 
-#ifdef HAVE_LIBJPEG
-/* tight.c */
+#ifdef HAVE_LIBJPEG /* tight.c */
 
 #define TIGHT_DEFAULT_COMPRESSION  6
 #define TURBO_DEFAULT_SUBSAMP 0
 
 extern rfbBool rfbTightDisableGradient;
-
 extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x,int y,int w,int h);
 
-extern rfbBool rfbSendRectEncodingTight(rfbClientPtr cl, int x,int y,int w,int h);
-extern rfbBool rfbSendTightHeader(rfbClientPtr cl, int x, int y, int w, int h);
-extern rfbBool rfbSendCompressedDataTight( rfbClientPtr cl, char *buf,
-                                   int compressedLen)
+ rfbBool rfbSendRectEncodingTight(rfbClientPtr cl, int x,int y,int w,int h);
+ rfbBool rfbSendTightHeader(rfbClientPtr cl, int x, int y, int w, int h);
+ rfbBool rfbSendCompressedDataTight( rfbClientPtr cl, char *buf , int compressedLen);
 
-#if defined(HAVE_LIBPNG)
-extern rfbBool rfbSendRectEncodingTightPng(rfbClientPtr cl, int x,int y,int w,int h);
-#endif
+  #if defined(HAVE_LIBPNG)
+     rfbBool rfbSendRectEncodingTightPng(rfbClientPtr cl, int x,int y,int w,int h);
+  #endif
 
 #endif
 #endif
-
 
 /* cursor.c */
 
+
+
 typedef struct rfbCursor
 { rfbBool cleanup, cleanupSource, cleanupMask, cleanupRichSource; /** set this to true if LibVNCServer has to free this cursor */
-  unsigned char *source;			/**< points to bits */
-  unsigned char *mask;			/**< points to bits */
-  unsigned short width, height, xhot, yhot;	/**< metrics */
+  unsigned char *source;	               /**< points to bits */
+  unsigned char *mask;			       /**< points to bits */
+  unsigned short width, height, xhot, yhot;     /**< metrics */
   unsigned short foreRed, foreGreen, foreBlue; /**< device-independent colour */
   unsigned short backRed, backGreen, backBlue; /**< device-independent colour */
-  unsigned char *richSource; /**< source bytes for a rich cursor */
+  unsigned char *richSource;                   /**< source bytes for a rich cursor */
   unsigned char *alphaSource; /**< source for alpha blending info */
   rfbBool alphaPreMultiplied; /**< if richSource already has alpha applied */
 } rfbCursor, *rfbCursorPtr;

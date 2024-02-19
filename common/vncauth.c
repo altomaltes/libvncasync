@@ -29,12 +29,12 @@
 #define _POSIX_SOURCE
 #define _XOPEN_SOURCE 600
 #endif
-#ifdef LIBVNCSERVER_HAVE_SYS_TYPES_H
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef LIBVNCSERVER_HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -43,7 +43,7 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef LIBVNCSERVER_HAVE_SYS_STAT_H
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 

@@ -33,14 +33,14 @@
 #include <rfb/rfbregion.h>
 #include "private.h"
 
-#ifdef LIBVNCSERVER_HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
 #ifdef WIN32
 #define write(sock,buf,len) send(sock,buf,len,0)
 #else
-#ifdef LIBVNCSERVER_HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <pwd.h>

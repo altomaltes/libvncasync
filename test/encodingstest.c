@@ -6,7 +6,7 @@
 #include <rfb/rfb.h>
 #include <rfb/rfbclient.h>
 
-#ifndef LIBVNCSERVER_HAVE_LIBPTHREAD
+#ifndef HAVE_LIBPTHREAD
 #error This test need pthread support (otherwise the client blocks the client)
 #endif
 
@@ -21,12 +21,12 @@ static encoding_t testEncodings[]={
 	{ rfbEncodingCoRRE, "corre" },
 	{ rfbEncodingHextile, "hextile" },
 	{ rfbEncodingUltra, "ultra" },
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 	{ rfbEncodingZlib, "zlib" },
 	{ rfbEncodingZlibHex, "zlibhex" },
 	{ rfbEncodingZRLE, "zrle" },
 	{ rfbEncodingZYWRLE, "zywrle" },
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 	{ rfbEncodingTight, "tight" },
 #endif
 #endif
@@ -127,10 +127,10 @@ static void update_finished(rfbClient* client) {
 	clientData* cd=(clientData*)client->clientData;
         int maxDelta=0;
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 	if(testEncodings[cd->encodingIndex].id==rfbEncodingZYWRLE)
 		maxDelta=5;
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 	if(testEncodings[cd->encodingIndex].id==rfbEncodingTight)
 		maxDelta=5;
 #endif

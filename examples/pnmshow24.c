@@ -6,7 +6,7 @@
 #include <rfb/rfb.h>
 #include <rfb/keysym.h>
 
-#ifndef LIBVNCSERVER_ALLOW24BPP
+#ifndef ALLOW24BPP
 int main() {
 	printf("I need the ALLOW24BPP LibVNCServer flag to work\n");
 	exit(1);

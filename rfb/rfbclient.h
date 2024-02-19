@@ -36,7 +36,7 @@
 #define WIN32_LEAN_AND_MEAN /* Prevent loading any Winsock 1.x headers from windows.h */
 #endif
 
-#if defined(ANDROID) || defined(LIBVNCSERVER_HAVE_ANDROID)
+#if defined(ANDROID) || defined(HAVE_ANDROID)
 #include <arpa/inet.h>
 #include <sys/select.h>
 #endif
@@ -44,19 +44,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if LIBVNCSERVER_HAVE_SYS_TIME_H
+#if HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#if LIBVNCSERVER_HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #include <rfb/rfbproto.h>
 #include <rfb/keysym.h>
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
 #include <sasl/sasl.h>
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
 
 #define rfbClientSwap16IfLE(s) \
     (*(char *)&client->endianTest ? ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)) : (s))
@@ -227,10 +227,10 @@ typedef rfbBool (*GotJpegProc)(struct _rfbClient* client, const uint8_t* buffer,
 typedef rfbBool (*LockWriteToTLSProc)(struct _rfbClient* client);
 typedef rfbBool (*UnlockWriteToTLSProc)(struct _rfbClient* client);
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
 typedef char* (*GetUserProc)(struct _rfbClient* client);
 typedef char* (*GetSASLMechanismProc)(struct _rfbClient* client, char* mechlist);
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
 
 typedef struct _rfbClient {
 	uint8_t* frameBuffer;
@@ -427,7 +427,7 @@ typedef struct _rfbClient {
         /** Hook for custom JPEG decoding and rendering */
         GotJpegProc GotJpeg;
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
         sasl_conn_t *saslconn;
         const char *saslDecoded;
         unsigned int saslDecodedLength;
@@ -439,7 +439,7 @@ typedef struct _rfbClient {
         GetSASLMechanismProc GetSASLMechanism;
         GetUserProc GetUser;
 
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
 
 #ifdef HAVE_LIBZ
 #ifdef HAVE_LIBJPEG

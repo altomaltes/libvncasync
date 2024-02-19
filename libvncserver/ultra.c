@@ -8,7 +8,7 @@
  */
 
 #include <rfb/rfb.h>
-#ifdef LIBVNCSERVER_HAVE_LZO
+#ifdef HAVE_LZO
 #include <lzo/lzo1x.h>
 #else
 #include "minilzo.h"

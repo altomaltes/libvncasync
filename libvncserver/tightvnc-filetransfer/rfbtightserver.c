@@ -323,7 +323,7 @@ rfbSendInteractionCaps(rfbClientPtr cl)
     SetCapInfo(&enc_list[i++],  rfbEncodingRRE,            rfbStandardVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingCoRRE,          rfbStandardVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingHextile,        rfbStandardVendor);
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     SetCapInfo(&enc_list[i++],  rfbEncodingZlib,           rfbTridiaVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingTight,          rfbTightVncVendor);
 #else

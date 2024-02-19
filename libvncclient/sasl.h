@@ -20,7 +20,7 @@
  *  USA.
  */
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
 
 #include <rfb/rfbclient.h>
 
@@ -34,6 +34,6 @@ rfbBool HandleSASLAuth(rfbClient *client);
  */
 int ReadFromSASL(rfbClient* client, char *out, unsigned int n);
 
-#endif  /* LIBVNCSERVER_HAVE_SASL */
+#endif  /* HAVE_SASL */
 
 #endif /* RFBSASL_H */

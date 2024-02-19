@@ -356,11 +356,11 @@ rfbClient* rfbGetClient( int bitsPerSample
   client->listen6Address = NULL;
   client->clientAuthSchemes = NULL;
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
   client->GetSASLMechanism = NULL;
   client->GetUser = NULL;
   client->saslSecret = NULL;
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
 
   return client;
 }
@@ -531,7 +531,7 @@ void rfbClientCleanup(rfbClient* client) {
   FREE(client->ultra_buffer);
   FREE(client->raw_buffer);
 
-#ifdef LIBVNCSERVER_HAVE_TLS
+#ifdef HAVE_TLS
   FreeTLS( client );
 #endif
 
@@ -553,9 +553,9 @@ void rfbClientCleanup(rfbClient* client) {
   FREE( client->destHost);
   FREE( client->clientAuthSchemes);
 
-#ifdef LIBVNCSERVER_HAVE_SASL
+#ifdef HAVE_SASL
   FREE( client->saslSecret );
-#endif /* LIBVNCSERVER_HAVE_SASL */
+#endif /* HAVE_SASL */
 
   FREE( client );
 }

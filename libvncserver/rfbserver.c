@@ -39,31 +39,14 @@
 #include <rfb/rfbregion.h>
 #include "private.h"
 
-#ifdef LIBVNCSERVER_HAVE_FCNTL_H
-#include <fcntl.h>
+#ifdef HAVE_FCNTL_H
+  #include <fcntl.h>
 #endif
 
-#ifdef WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <io.h>
-#define write(sock,buf,len) send(sock,buf,len,0)
-#else
-#ifdef LIBVNCSERVER_HAVE_UNISTD_H
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+  #include <unistd.h>
 #endif
 #include <pwd.h>
-#ifdef LIBVNCSERVER_HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
-#ifdef LIBVNCSERVER_HAVE_NETINET_IN_H
-  #include <netinet/in.h>
-  #include <netinet/tcp.h>
-  #include <netdb.h>
-  #include <arpa/inet.h>
-  #endif
-#endif
 
 #ifdef DEBUGPROTO
 #undef DEBUGPROTO
@@ -76,7 +59,7 @@
 /* stst() */
 #include <sys/types.h>
 #include <sys/stat.h>
-#if LIBVNCSERVER_HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -923,16 +906,15 @@ void rfbSetServerVersionIdentity(rfbScreenInfoPtr screen, char *fmt, ...)
  * Send rfbEncodingServerIdentity.
  */
 
-rfbBool
-rfbSendServerIdentity(rfbClientPtr cl)
-{
-    rfbFramebufferUpdateRectHeader rect;
+rfbBool rfbSendServerIdentity(rfbClientPtr cl)
+{ rfbFramebufferUpdateRectHeader rect;
     char buffer[512];
 
     /* tack on our library version */
     snprintf(buffer,sizeof(buffer)-1, "%s (%s)",
-        (cl->screen->versionString==NULL ? "unknown" : cl->screen->versionString),
-        LIBVNCSERVER_PACKAGE_STRING);
+        (cl->screen->versionString==NULL ? "unknown" 
+                                         : cl->screen->versionString )
+        , PACKAGE_STRING);
 
     if (cl->ublen + sz_rfbFramebufferUpdateRectHeader
                   + (strlen(buffer)+1) > UPDATE_BUF_SIZE) {

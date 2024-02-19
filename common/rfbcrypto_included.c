@@ -26,7 +26,9 @@
 #include "sha.h"
 #include "rfbcrypto.h"
 
-void digestmd5(const struct iovec *iov, int iovcnt, void *dest)
+void digestmd5( const struct iovec *iov
+              , int iovcnt
+              , void *dest )
 {
     struct md5_ctx c;
     int i;
@@ -37,7 +39,9 @@ void digestmd5(const struct iovec *iov, int iovcnt, void *dest)
     __md5_finish_ctx(&c, dest);
 }
 
-void digestsha1(const struct iovec *iov, int iovcnt, void *dest)
+void digestsha1( const struct iovec *iov
+               , int iovcnt
+               , void *dest)
 {
     SHA1Context c;
     int i;

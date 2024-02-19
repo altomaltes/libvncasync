@@ -2,7 +2,7 @@
 AC_INIT([libvncasync],[0.9.12])
 AC_CONFIG_SRCDIR([common/vncauth.c])
 AM_INIT_AUTOMAKE( [subdir-objects] )
-AM_CONFIG_HEADER( common/config.h )
+AM_CONFIG_HEADER( common/rfb-config.h )
 
 DATE="`date '+%d %B %Y'`"
 
@@ -124,7 +124,7 @@ AC_C_INLINE
 
 dnl# Checks for header files.
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS( include/procesos.h signal.h errno.h fcntl.h sys/times.h sys/ioctl.h sys/select.h sys/time.h malloc.h unistd.h stdarg.h sys/filio.h sys/wait.h )
+AC_CHECK_HEADERS( signal.h errno.h fcntl.h sys/times.h sys/ioctl.h sys/time.h malloc.h unistd.h stdarg.h sys/filio.h sys/wait.h sys/uio.h )
 AC_CHECK_HEADERS_ONCE([sys/time.h])
 # Obsolete code to be removed.
 if test $ac_cv_header_sys_time_h = yes; then
@@ -144,11 +144,9 @@ AC_TYPE_MODE_T
 AC_CHECK_TYPE(   off_t, long )
 AC_CHECK_TYPE(  temp_t, unsigned long long )
 AC_CHECK_TYPE( ticks_t, unsigned long      )
-AC_CHECK_TYPE(    byte, unsigned char      )
 AC_CHECK_TYPE(    word, unsigned short     )
 AC_CHECK_TYPE(   dword, unsigned int       )
 AC_CHECK_TYPE(   qword, unsigned long long )
-AC_CHECK_TYPE(  handle, int                )
 AC_CHECK_TYPE(socklen_t, int )
 AC_TYPE_PID_T
 AC_TYPE_UID_T

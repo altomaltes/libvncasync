@@ -25,14 +25,20 @@
 #include <gcrypt.h>
 #include "rfbcrypto.h"
 
-void digestmd5(const struct iovec *iov, int iovcnt, void *dest)
+void digestmd5( const struct iovec *iov
+              , int iovcnt
+              , void *dest )
 {
     gcry_md_hd_t c;
     int i;
 
     gcry_md_open(&c, GCRY_MD_MD5, 0);
-    for (i = 0; i < iovcnt; i++)
-	gcry_md_write(c, iov[i].iov_base, iov[i].iov_len);
+
+    for (i = 0
+        ; i < iovcnt
+        ; i++)
+      gcry_md_write(c, iov[i].iov_base, iov[i].iov_len);
+
     gcry_md_final(c);
     memcpy(dest, gcry_md_read(c, 0), gcry_md_get_algo_dlen(GCRY_MD_MD5));
 }

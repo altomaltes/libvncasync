@@ -351,7 +351,7 @@ int main( int argc,char** argv )
   rfbRunEventLoop(rfbScreen,40000,FALSE);
 #endif /* OWN LOOP */
 #else
-#if !defined(LIBVNCSERVER_HAVE_LIBPTHREAD)
+#if !defined(HAVE_LIBPTHREAD)
 #error "I need pthreads for that."
 #endif
 

@@ -9,9 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#if LIBVNCSERVER_HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #include <rfb/rfb.h>
 #include <rfb/default8x16.h>
 
