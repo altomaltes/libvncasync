@@ -96,8 +96,15 @@ AM_MAINTAINER_MODE
 #            , [AC_MSG_WARN([zlib is required ])]
 #            , [-lm])
 
-PKG_CHECK_MODULES([libpng], [libpng16])
+AC_CHECK_LIB( [z], [deflate], [LIBS="-lz $LIBS" AC_DEFINE(HAVE_LIBZ, 1, [ Define if you have libz. ])]
+            , [AC_MSG_WARN([zlib is required ])]
+            , [-lm])
 
+PKG_CHECK_MODULES( LIBPNG, libpng  >= 1.0.0, HAVE_LIBPNG="yes",  HAVE_LIBPNG="no" )
+PKG_CHECK_MODULES(   JPEG, libjpeg >= 2.0.0, HAVE_LIBJPEG="yes", HAVE_LIBJPEG="no")
+
+AC_DEFINE( [HAVE_LIBPNG],  [1], [PNG compressed image support]  )
+AC_DEFINE( [HAVE_LIBJPEG], [1], [jpeg compressed image support] )
 
 
 dnl# If it's there, what the hell?
@@ -117,13 +124,7 @@ AC_C_INLINE
 
 dnl# Checks for header files.
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS( include/procesos.h signal.h errno.h fcntl.h sys/times.h sys/ioctl.h sys/select.h sys/time.h malloc.h unistd.h stdarg.h sys/filio.h sys/wait.h sys/sendfile.h sys/socket.h sys/un.h netinet/in.h netinet/ip6.h netdb.h)
-m4_warn([obsolete],
-[Update your code to rely only on HAVE_SYS_TIME_H,
-then remove this warning and the obsolete code below it.
-All current systems provide time.h; it need not be checked for.
-Not all systems provide sys/time.h, but those that do, all allow
-you to include it and time.h simultaneously.])dnl
+AC_CHECK_HEADERS( include/procesos.h signal.h errno.h fcntl.h sys/times.h sys/ioctl.h sys/select.h sys/time.h malloc.h unistd.h stdarg.h sys/filio.h sys/wait.h )
 AC_CHECK_HEADERS_ONCE([sys/time.h])
 # Obsolete code to be removed.
 if test $ac_cv_header_sys_time_h = yes; then
@@ -170,8 +171,7 @@ AC_CHECK_FUNCS( atexit unsetenv setutent seteuid putenv setresuid setresgid usle
 
 dnl# Portability checks for various functions
 AC_SEARCH_LIBS( getpwuid, sun )
-AC_SEARCH_LIBS( connect, socket )
-AC_SEARCH_LIBS( gethostbyname, nsl )
+
 
 dnl#
 dnl# Utility stuff

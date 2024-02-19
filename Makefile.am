@@ -6,26 +6,24 @@ CCOPTS= -DNO_FORK
 EXTRA_DIST = configure.ac
 
 lib_LTLIBRARIES= libvncasync.la
-AM_CPPFLAGS= -I$(top_srcdir)/common -I$(top_srcdir)/libvncserver
+AM_CPPFLAGS= -I$(top_srcdir)/common -I$(top_srcdir)/libvncserver ${JPEG_CFLAGS}
 
 
-library_includedir=$(includedir)/rfb $(libpng_CFLAGS)
+library_includedir=$(includedir)/rfb $(LIBPNG_CFLAGS)
 library_include_HEADERS= rfb/rfb.h rfb/rfbproto.h rfb/rfbconfig.h
 
 libvncasync_la_SOURCES= libvncserver/translate.c libvncserver/auth.c libvncserver/cargs.c libvncserver/corre.c libvncserver/cursor.c libvncserver/cutpaste.c libvncserver/draw.c libvncserver/font.c libvncserver/hextile.c libvncserver/main.c libvncserver/rfbregion.c libvncserver/rfbserver.c libvncserver/rre.c libvncserver/scale.c libvncserver/selbox.c libvncserver/stats.c libvncserver/tight.c libvncserver/ultra.c libvncserver/zlib.c libvncserver/zrlepalettehelper.c  libvncserver/ws_decode.c libvncserver/zrle.c libvncserver/zrleoutstream.c
-
 libvncasync_la_SOURCES+= common/d3des.c common/md5.c common/minilzo.c common/rfbcrypto_included.c common/sha1.c  common/turbojpeg.c common/vncauth.c common/base64.c
 
-libvncasync_la_LDFLAGS= -ljpeg  $(libpng_LIBS)  -lz
+libvncasync_la_LDFLAGS= $(JPEG_LIBS)  $(LIBPNG_LIBS)  -lz
 
 if WINDOWS
-  libvncasync_la_SOURCES+= 
-  libvncasync_la_LDFLAGS+= -lws2_32
+  libvncasync_la_SOURCES+=
 else
-  libvncasync_la_SOURCES+= 
-  libvncasync_la_LDFLAGS+= -ldl
+  libvncasync_la_SOURCES+=
 endif
 
+libvncasync_la_LDFLAGS+= -ldl
 libvncasync_la_LDFLAGS+= -release $(VERSION) -shared
 
 if BUILDING_SLACK

@@ -36,7 +36,7 @@
 #endif
 #include <errno.h>
 #include <rfb/rfbclient.h>
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 #include <zlib.h>
 #ifdef __CHECKER__
 #undef Z_NULL
@@ -140,33 +140,33 @@ void* rfbClientGetClientData(rfbClient* client, void* tag)
 	return NULL;
 }
 
-static rfbBool HandleRRE8(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleRRE16(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleRRE32(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleCoRRE8(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleCoRRE16(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleCoRRE32(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleHextile8(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleHextile16(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleHextile32(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleUltra8(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleUltra16(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleUltra32(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleUltraZip8(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleUltraZip16(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleUltraZip32(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTRLE8(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTRLE15(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTRLE16(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTRLE24(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTRLE24Up(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTRLE24Down(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTRLE32(rfbClient* client, int rx, int ry, int rw, int rh);
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+static rfbBool HandleRRE8(       rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleRRE16(      rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleRRE32(      rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleCoRRE8(     rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleCoRRE16(    rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleCoRRE32(    rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleHextile8(   rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleHextile16(  rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleHextile32(  rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleUltra8(     rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleUltra16(    rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleUltra32(    rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleUltraZip8(  rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleUltraZip16( rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleUltraZip32( rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleTRLE8(      rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleTRLE15(     rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleTRLE16(     rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleTRLE24(     rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleTRLE24Up(   rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleTRLE24Down( rfbClient* client, int rx, int ry, int rw, int rh);
+static rfbBool HandleTRLE32(     rfbClient* client, int rx, int ry, int rw, int rh);
+#ifdef HAVE_LIBZ
 static rfbBool HandleZlib8(rfbClient* client, int rx, int ry, int rw, int rh);
 static rfbBool HandleZlib16(rfbClient* client, int rx, int ry, int rw, int rh);
 static rfbBool HandleZlib32(rfbClient* client, int rx, int ry, int rw, int rh);
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 static rfbBool HandleTight8(rfbClient* client, int rx, int ry, int rw, int rh);
 static rfbBool HandleTight16(rfbClient* client, int rx, int ry, int rw, int rh);
 static rfbBool HandleTight32(rfbClient* client, int rx, int ry, int rw, int rh);
@@ -1187,7 +1187,7 @@ InitialiseRFBConnection(rfbClient* client)
 
   client->desktopName= malloc(client->si.nameLength + 1);
 
-  if ( !client->desktopName ) 
+  if ( !client->desktopName )
   { rfbClientLog("Error allocating memory for desktop name, %lu bytes\n",
             (unsigned long)client->si.nameLength);
     return FALSE;
@@ -1263,8 +1263,8 @@ SetFormatAndEncodings(rfbClient* client)
 	encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingRaw);
       } else if (strncasecmp(encStr,"copyrect",encStrLen) == 0) {
 	encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingCopyRect);
-#ifdef LIBVNCSERVER_HAVE_LIBZ
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBZ
+#ifdef HAVE_LIBJPEG
       } else if (strncasecmp(encStr,"tight",encStrLen) == 0) {
 	encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingTight);
 	requestLastRectEncoding = TRUE;
@@ -1276,7 +1276,7 @@ SetFormatAndEncodings(rfbClient* client)
 #endif
       } else if (strncasecmp(encStr,"hextile",encStrLen) == 0) {
 	encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingHextile);
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
       } else if (strncasecmp(encStr,"zlib",encStrLen) == 0) {
 	encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingZlib);
 	if (client->appData.compressLevel >= 0 && client->appData.compressLevel <= 9)
@@ -1335,14 +1335,14 @@ SetFormatAndEncodings(rfbClient* client)
  //   }
 
     encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingCopyRect);
-#ifdef LIBVNCSERVER_HAVE_LIBZ
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBZ
+#ifdef HAVE_LIBJPEG
     encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingTight);
     requestLastRectEncoding = TRUE;
 #endif
 #endif
     encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingHextile);
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingZlib);
     encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingZRLE);
     encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingZYWRLE);
@@ -2024,7 +2024,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
         break;
       }
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
       case rfbEncodingZlib:
       {
 	switch (client->format.bitsPerPixel) {
@@ -2044,7 +2044,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
 	break;
      }
 
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
       case rfbEncodingTight:
       {
 	switch (client->format.bitsPerPixel) {

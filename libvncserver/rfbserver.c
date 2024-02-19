@@ -56,12 +56,13 @@
 #ifdef LIBVNCSERVER_HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+
 #ifdef LIBVNCSERVER_HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#endif
+  #include <netinet/in.h>
+  #include <netinet/tcp.h>
+  #include <netdb.h>
+  #include <arpa/inet.h>
+  #endif
 #endif
 
 #ifdef DEBUGPROTO
@@ -110,7 +111,7 @@
 #endif
 #endif
 
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 /*
  * Map of quality levels to provide compatibility with TightVNC/TigerVNC
  * clients.  This emulates the behavior of the TigerVNC Server.
@@ -285,7 +286,8 @@ rfbClientPtr rfbNewStreamClient( rfbClientPtr     cl
       cl->preferredEncoding = -1;
       cl->correMaxWidth = 48;
       cl->correMaxHeight = 48;
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+
+#ifdef HAVE_LIBZ
       cl->zrleData = NULL;
 #endif
 
@@ -309,9 +311,9 @@ rfbClientPtr rfbNewStreamClient( rfbClientPtr     cl
 
       rfbScreen->clientHead = cl;
 
-#if defined(LIBVNCSERVER_HAVE_LIBZ) || defined(LIBVNCSERVER_HAVE_LIBPNG)
+#if defined(HAVE_LIBZ) || defined(HAVE_LIBPNG)
       cl->tightQualityLevel = -1;
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
       cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
       cl->turboSubsampLevel = TURBO_DEFAULT_SUBSAMP;
       {
@@ -340,7 +342,7 @@ rfbClientPtr rfbNewStreamClient( rfbClientPtr     cl
       cl->requestedDesktopSizeChange = 0;
       cl->lastDesktopSizeChangeError = 0;
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
       cl->compStreamInited = FALSE;
       cl->compStream.total_in = 0;
       cl->compStream.total_out = 0;
@@ -407,7 +409,7 @@ rfbClientPtr rfbNewStreamClient( rfbClientPtr     cl
 void
 rfbClientConnectionGone(rfbClientPtr cl)
 {
-#if defined(LIBVNCSERVER_HAVE_LIBZ) && defined(LIBVNCSERVER_HAVE_LIBJPEG)
+#if defined(HAVE_LIBZ) && defined(HAVE_LIBJPEG)
     int i;
 #endif
 
@@ -421,7 +423,7 @@ rfbClientConnectionGone(rfbClientPtr cl)
     if (cl->scaledScreen!=NULL)
         cl->scaledScreen->scaledScreenRefCount--;
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     rfbFreeZrleData(cl);
 #endif
 
@@ -435,13 +437,13 @@ rfbClientConnectionGone(rfbClientPtr cl)
 
     rfbLog("Client %s gone\n", "cl->host" );
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     /* Release the compression state structures if any. */
     if ( cl->compStreamInited ) {
 	deflateEnd( &(cl->compStream) );
     }
 
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
     for (i = 0; i < 4; i++) {
 	if (cl->zsActive[i])
 	    deflateEnd(&cl->zsStruct[i]);
@@ -844,15 +846,15 @@ rfbSendSupportedEncodings(rfbClientPtr cl)
 	rfbEncodingRRE,
 	rfbEncodingCoRRE,
 	rfbEncodingHextile,
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 	rfbEncodingZlib,
 	rfbEncodingZRLE,
 	rfbEncodingZYWRLE,
 #endif
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 	rfbEncodingTight,
 #endif
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
 	rfbEncodingTightPng,
 #endif
 	rfbEncodingUltra,
@@ -1335,7 +1337,7 @@ rfbBool rfbSendFileTransferChunk(rfbClientPtr cl)
    // fd_set wfds;
    // struct timeval tv;
     int n;
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     unsigned char compBuf[sz_rfbBlockSize + 1024];
     unsigned long nMaxCompSize = sizeof(compBuf);
     int nRetC = 0;
@@ -1404,7 +1406,7 @@ rfbBool rfbSendFileTransferChunk(rfbClientPtr cl)
                     return  rfbSendFileTransferMessage(cl, rfbFilePacket, 0, 0, bytesRead, (char *)readBuf);
                 else
                 {
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
                     nRetC = compress(compBuf, &nMaxCompSize, readBuf, bytesRead);
                     /*
                     rfbLog("Compressed the packet from %d -> %d bytes\n", nMaxCompSize, bytesRead);
@@ -1436,7 +1438,7 @@ rfbBool rfbProcessFileTransfer(rfbClientPtr cl, uint8_t contentType, uint8_t con
     uint32_t * sizeHtmp=NULL;
 //    int n=0;
     char timespec[64];
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     unsigned char compBuff[sz_rfbBlockSize];
     unsigned long nRawBytes = sz_rfbBlockSize;
     int nRet = 0;
@@ -1660,7 +1662,7 @@ rfbBool rfbProcessFileTransfer(rfbClientPtr cl, uint8_t contentType, uint8_t con
   //              retval=writeFile( cl->fileTransfer.fd, buffer, length);
 //            else
             {
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
                 /* compressed packet */
                 nRet = uncompress(compBuff,&nRawBytes,(const unsigned char*)buffer, length);
 //		if(nRet == Z_OK)
@@ -1904,9 +1906,9 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       cl->enableSupportedEncodings = FALSE;
       cl->enableServerIdentity     = FALSE;
 
-#if defined(LIBVNCSERVER_HAVE_LIBZ) || defined(LIBVNCSERVER_HAVE_LIBPNG)
+#if defined(HAVE_LIBZ) || defined(HAVE_LIBPNG)
         cl->tightQualityLevel        = -1;
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
         cl->tightCompressLevel       = TIGHT_DEFAULT_COMPRESSION;
         cl->turboSubsampLevel        = TURBO_DEFAULT_SUBSAMP;
         cl->turboQualityLevel        = -1;
@@ -1926,15 +1928,15 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
             case rfbEncodingCoRRE:
             case rfbEncodingHextile:
             case rfbEncodingUltra:
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 	    case rfbEncodingZlib:
             case rfbEncodingZRLE:
             case rfbEncodingZYWRLE:
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 	    case rfbEncodingTight:
 #endif
 #endif
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
 	    case rfbEncodingTightPng:
 #endif
             /* The first supported encoding is the 'preferred' encoding */
@@ -2037,11 +2039,11 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
             break;
 
             default:
-#if defined(LIBVNCSERVER_HAVE_LIBZ) || defined(LIBVNCSERVER_HAVE_LIBPNG)
+#if defined(HAVE_LIBZ) || defined(HAVE_LIBPNG)
 		if ( enc >= (uint32_t)rfbEncodingCompressLevel0 &&
 		     enc <= (uint32_t)rfbEncodingCompressLevel9 ) {
 		    cl->zlibCompressLevel = enc & 0x0F;
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 		    cl->tightCompressLevel = enc & 0x0F;
 		    rfbLog("Using compression level %d for client %s\n",
 			   cl->tightCompressLevel, "cl->host");
@@ -2051,7 +2053,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 		    cl->tightQualityLevel = enc & 0x0F;
 		    rfbLog("Using image quality level %d for client %s\n",
 			   cl->tightQualityLevel, "cl->host");
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 		    cl->turboQualityLevel = tight2turbo_qual[enc & 0x0F];
 		    cl->turboSubsampLevel = tight2turbo_subsamp[enc & 0x0F];
 		    rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
@@ -2753,7 +2755,7 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
             nUpdateRegionRects += (((h-1) / (ULTRA_MAX_SIZE( w ) / w)) + 1);
           }
         sraRgnReleaseIterator(i); i=NULL;
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     } else if (cl->preferredEncoding == rfbEncodingZlib) {
 	nUpdateRegionRects = 0;
 
@@ -2768,7 +2770,7 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
 	    nUpdateRegionRects += (((h-1) / (ZLIB_MAX_SIZE( w ) / w)) + 1);
 	}
 	sraRgnReleaseIterator(i); i=NULL;
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
     } else if (cl->preferredEncoding == rfbEncodingTight) {
 	nUpdateRegionRects = 0;
 
@@ -2791,7 +2793,7 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
 	sraRgnReleaseIterator(i); i=NULL;
 #endif
 #endif
-#if defined(LIBVNCSERVER_HAVE_LIBJPEG) && defined(LIBVNCSERVER_HAVE_LIBPNG)
+#if defined(HAVE_LIBJPEG) && defined(HAVE_LIBPNG)
     } else if (cl->preferredEncoding == rfbEncodingTightPng) {
 	nUpdateRegionRects = 0;
 
@@ -2824,15 +2826,15 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
 	   && cl->preferredEncoding != rfbEncodingCoRRE
 	   /* Ultra encoding splits rectangles up into smaller chunks */
            && cl->preferredEncoding != rfbEncodingUltra
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 	   /* Zlib encoding splits rectangles up into smaller chunks */
 	   && cl->preferredEncoding != rfbEncodingZlib
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 	   /* Tight encoding counts the rectangles differently */
 	   && cl->preferredEncoding != rfbEncodingTight
 #endif
 #endif
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
 	   /* Tight encoding counts the rectangles differently */
 	   && cl->preferredEncoding != rfbEncodingTightPng
 #endif
@@ -2929,7 +2931,7 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
                 goto updateFailed;
             break;
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 	case rfbEncodingZlib:
 	    if (!rfbSendRectEncodingZlib(cl, x, y, w, h))
 	        goto updateFailed;
@@ -2941,12 +2943,12 @@ rfbBool rfbSendFramebufferUpdate( rfbClientPtr cl
            break;
 #endif
 
-#if defined(LIBVNCSERVER_HAVE_LIBJPEG) && (defined(LIBVNCSERVER_HAVE_LIBZ) || defined(LIBVNCSERVER_HAVE_LIBPNG))
+#if defined(HAVE_LIBJPEG) && (defined(HAVE_LIBZ) || defined(HAVE_LIBPNG))
 	case rfbEncodingTight:
 	    if (!rfbSendRectEncodingTight(cl, x, y, w, h))
 	        goto updateFailed;
 	    break;
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
 	case rfbEncodingTightPng:
 	    if (!rfbSendRectEncodingTightPng(cl, x, y, w, h))
 	        goto updateFailed;

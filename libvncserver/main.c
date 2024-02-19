@@ -135,7 +135,7 @@ rfbBool rfbEnableExtension( rfbClientPtr cl
                           ,	void* data )
 { rfbExtensionData* extData;
 
-/* make sure extension is not yet enabled. 
+/* make sure extension is not yet enabled.
  */
 	for( extData = cl->extensions
     ; extData
@@ -193,7 +193,7 @@ void* rfbGetExtensionClientData(rfbClientPtr cl, rfbProtocolExtension* extension
  * Logging
  */
 
-void rfbLogEnable(int enabled) 
+void rfbLogEnable(int enabled)
 { rfbEnableLogging=enabled;
 }
 
@@ -230,11 +230,11 @@ void rfbScheduleCopyRegion( rfbScreenInfoPtr rfbScreen,sraRegionPtr copyRegion
   rfbClientPtr cl;
 
   iterator=rfbGetClientIterator(rfbScreen);
-  while((cl=rfbClientIteratorNext(iterator))) 
-  { if(cl->useCopyRect) 
+  while((cl=rfbClientIteratorNext(iterator)))
+  { if(cl->useCopyRect)
     { sraRegionPtr modifiedRegionBackup;
-      if(!sraRgnEmpty(cl->copyRegion)) 
-      { if(cl->copyDX!=dx || cl->copyDY!=dy) 
+      if(!sraRgnEmpty(cl->copyRegion))
+      { if(cl->copyDX!=dx || cl->copyDY!=dy)
         {
 	     /* if a copyRegion was not yet executed, treat it as a
 	      * modifiedRegion. The idea: in this case it could be
@@ -270,7 +270,7 @@ void rfbScheduleCopyRegion( rfbScreenInfoPtr rfbScreen,sraRegionPtr copyRegion
   * copyrect displacement will take place.  copyRegion is the
   * destination rectangle (say), not the source rectangle.
   */
-       if(!cl->enableCursorShapeUpdates) 
+       if(!cl->enableCursorShapeUpdates)
        {
           sraRegionPtr cursorRegion;
           int x = cl->cursorX - cl->screen->cursor->xhot;
@@ -300,13 +300,13 @@ void rfbScheduleCopyRegion( rfbScreenInfoPtr rfbScreen,sraRegionPtr copyRegion
               * won't copyrect stuff to it.
               */
 
-          if(!sraRgnEmpty(cursorRegion)) 
+          if(!sraRgnEmpty(cursorRegion))
           {
              sraRgnOr(cl->modifiedRegion, cursorRegion);
           }
           sraRgnDestroy(cursorRegion);
-     }  } 
-     else 
+     }  }
+     else
      {
        sraRgnOr(cl->modifiedRegion,copyRegion);
    } }
@@ -326,7 +326,7 @@ void rfbDoCopyRegion( rfbScreenInfoPtr screen
    /* copy it, really */
   i = sraRgnGetReverseIterator(copyRegion,dx<0,dy<0);
 
-  while(sraRgnIteratorNext(i,&rect)) 
+  while(sraRgnIteratorNext(i,&rect))
   { widthInBytes = (rect.x2-rect.x1)*bpp;
      out = screen->frameBuffer+rect.x1*bpp+rect.y1*rowstride;
      in = screen->frameBuffer+(rect.x1-dx)*bpp+(rect.y1-dy)*rowstride;
@@ -414,7 +414,7 @@ void rfbDefaultPtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
   rfbClientPtr other_client;
   rfbScreenInfoPtr s = cl->screen;
 
-  if (x != s->cursorX || y != s->cursorY) 
+  if (x != s->cursorX || y != s->cursorY)
   { s->cursorX = x;
     s->cursorY = y;
 
@@ -422,11 +422,11 @@ void rfbDefaultPtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
     if (cl->enableCursorPosUpdates)
       cl->cursorWasMoved = FALSE;
 
-/* But inform all remaining clients about this cursor movement. 
+/* But inform all remaining clients about this cursor movement.
 */
     iterator = rfbGetClientIterator(s);
-    while ((other_client = rfbClientIteratorNext(iterator)) != NULL) 
-    { if (other_client != cl && other_client->enableCursorPosUpdates) 
+    while ((other_client = rfbClientIteratorNext(iterator)) != NULL)
+    { if (other_client != cl && other_client->enableCursorPosUpdates)
       {	other_client->cursorWasMoved = TRUE;
     } }
     rfbReleaseClientIterator(iterator);
@@ -788,10 +788,10 @@ void rfbNewFramebuffer(rfbScreenInfoPtr screen, char *framebuffer,
   /* For each client: */
   iterator = rfbGetClientIterator(screen);
 
-  while ((cl = rfbClientIteratorNext(iterator))) 
+  while ((cl = rfbClientIteratorNext(iterator)))
   { if (format_changed) /* Re-install color translation tables if necessary */
     { screen->setTranslateFunction(cl);
-    } 
+    }
 
     /* Mark the screen contents as changed, and schedule sending
        NewFBSize message if supported by this client. */
@@ -829,9 +829,9 @@ void rfbScreenCleanup(rfbScreenInfoPtr screen)
   if(screen->cursor && screen->cursor->cleanup)
     rfbFreeCursor(screen->cursor);
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
   rfbZlibCleanup(screen);
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
   rfbTightCleanup(screen);
 #endif
 
@@ -923,7 +923,7 @@ rfbBool rfbProcessEvents(rfbScreenInfoPtr screen,long usec)
   i = rfbGetClientIteratorWithClosed(screen);
   cl=rfbClientIteratorHead(i);
 
-  while(cl) 
+  while(cl)
   { result = rfbUpdateClient(cl);
     clPrev=cl;
     cl=rfbClientIteratorNext(i);
@@ -938,36 +938,36 @@ rfbBool rfbUpdateClient( rfbClientPtr cl )
   rfbBool result=FALSE;
   rfbScreenInfoPtr screen = cl->screen;
 
-  if ( !cl->onHold 
-    && FB_UPDATE_PENDING(cl) 
-    && !sraRgnEmpty(cl->requestedRegion)) 
+  if ( !cl->onHold
+    && FB_UPDATE_PENDING(cl)
+    && !sraRgnEmpty(cl->requestedRegion))
   { result=TRUE;
-    if ( screen->deferUpdateTime == 0) 
+    if ( screen->deferUpdateTime == 0)
     { rfbSendFramebufferUpdate(cl,cl->modifiedRegion);
-    } 
-    else if(cl->startDeferring.tv_usec == 0) 
+    }
+    else if(cl->startDeferring.tv_usec == 0)
     { gettimeofday(&cl->startDeferring,NULL);
       if(cl->startDeferring.tv_usec == 0)
           cl->startDeferring.tv_usec++;
-    } 
-    else 
+    }
+    else
     { gettimeofday(&tv,NULL);
       if ( tv.tv_sec < cl->startDeferring.tv_sec /* at midnight */
         || ((tv.tv_sec-cl->startDeferring.tv_sec)*1000
            +(tv.tv_usec-cl->startDeferring.tv_usec)/1000)
-        > screen->deferUpdateTime) 
+        > screen->deferUpdateTime)
       { cl->startDeferring.tv_usec = 0;
         rfbSendFramebufferUpdate( cl,cl->modifiedRegion );
   } } }
 
-  if (!cl->viewOnly && cl->lastPtrX >= 0) 
-  { if( cl->startPtrDeferring.tv_usec == 0) 
+  if (!cl->viewOnly && cl->lastPtrX >= 0)
+  { if( cl->startPtrDeferring.tv_usec == 0)
     { gettimeofday(&cl->startPtrDeferring,NULL);
 
       if(cl->startPtrDeferring.tv_usec == 0)
           cl->startPtrDeferring.tv_usec++;
-    } 
-    else 
+    }
+    else
     { struct timeval tv;
       gettimeofday(&tv,NULL);
       if(tv.tv_sec < cl->startPtrDeferring.tv_sec /* at midnight */
@@ -984,14 +984,14 @@ rfbBool rfbUpdateClient( rfbClientPtr cl )
   return result;
 }
 
-rfbBool rfbIsActive(rfbScreenInfoPtr screenInfo) 
+rfbBool rfbIsActive(rfbScreenInfoPtr screenInfo)
 { return screenInfo->clientHead!=NULL;
 }
 
 /*
 
 void rfbRunEventLoop(rfbScreenInfoPtr screen, long usec, rfbBool runInBackground)
-{ if(runInBackground) 
+{ if(runInBackground)
   { rfbErr("Can't run in background, because I don't have PThreads!\n");
     return;
   }

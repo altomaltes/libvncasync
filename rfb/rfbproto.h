@@ -76,11 +76,11 @@ typedef int8_t rfbBool;
   #include <rfb/rfbconfig.h>
 #endif
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
-#include <zlib.h>
-#ifdef __CHECKER__
-#undef Z_NULL
-#define Z_NULL NULL
+#ifdef HAVE_LIBZ
+  #include <zlib.h>
+  #ifdef __CHECKER__
+  #undef Z_NULL
+  #define Z_NULL NULL
 #endif
 #endif
 
@@ -294,15 +294,15 @@ typedef char rfbProtocolVersionMsg[ 13 ];	/* allow extra byte for null */
 #define rfbARD 30
 #define rfbMSLogon 0xfffffffa
 
-#define rfbVeNCryptPlain 256
-#define rfbVeNCryptTLSNone 257
-#define rfbVeNCryptTLSVNC 258
-#define rfbVeNCryptTLSPlain 259
-#define rfbVeNCryptX509None 260
-#define rfbVeNCryptX509VNC 261
+#define rfbVeNCryptPlain    256
+#define rfbVeNCryptTLSNone   257
+#define rfbVeNCryptTLSVNC    258
+#define rfbVeNCryptTLSPlain  259
+#define rfbVeNCryptX509None  260
+#define rfbVeNCryptX509VNC   261
 #define rfbVeNCryptX509Plain 262
-#define rfbVeNCryptX509SASL 263
-#define rfbVeNCryptTLSSASL 264
+#define rfbVeNCryptX509SASL  263
+#define rfbVeNCryptTLSSASL   264
 
 /*
  * rfbConnFailed:	For some reason the connection failed (e.g. the server
@@ -724,7 +724,7 @@ typedef struct {
 
 #define sz_rfbZlibHeader 4
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Tight and TightPng Encoding.
@@ -961,7 +961,7 @@ typedef struct {
  * trueColour then it never needs to process this type of message.
  */
 
-typedef struct 
+typedef struct
 { uint8_t type;			/* always rfbSetColourMapEntries */
   uint8_t pad;
   uint16_t firstColour;
@@ -980,7 +980,7 @@ typedef struct
  * Bell - ring a bell on the client if it has one.
  */
 
-typedef struct 
+typedef struct
 { uint8_t type;			/* always rfbBell */
 } rfbBellMsg;
 
@@ -992,7 +992,7 @@ typedef struct
  * ServerCutText - the server has new text in its cut buffer.
  */
 
-typedef struct 
+typedef struct
 { uint8_t type;			/* always rfbServerCutText */
   uint8_t pad1;
   uint16_t pad2;
@@ -1009,7 +1009,7 @@ typedef struct
  * Bidirectional message - Files can be sent from client to server & vice versa
  */
 
-typedef struct _rfbFileTransferMsg 
+typedef struct _rfbFileTransferMsg
 { uint8_t type;			/* always rfbFileTransfer */
   uint8_t contentType;  /*  See defines below */
   uint8_t contentParam;/*  Other possible content classification (Dir or File name, etc..) */
@@ -1024,7 +1024,7 @@ typedef struct _rfbFileTransferMsg
 
 #define rfbFileTransferVersion  2 /*  v1 is the old FT version ( <= 1.0.0 RC18 versions) */
 
-/*  FileTransfer Content types and Params defines 
+/*  FileTransfer Content types and Params defines
 */
 #define rfbDirContentRequest	  1 /*  Client asks for the content of a given Server directory */
 #define rfbDirPacket			        2 /*  Full directory name or full file name. */
@@ -1086,7 +1086,7 @@ typedef struct _rfbFileTransferMsg
  * Bidirectional message
  */
 
-typedef struct _rfbTextChatMsg 
+typedef struct _rfbTextChatMsg
 { uint8_t type;			/* always rfbTextChat */
   uint8_t pad1;         /*  Could be used later as an additionnal param */
   uint16_t pad2;		/*  Could be used later as text offset, for instance */
@@ -1123,7 +1123,7 @@ typedef struct _rfbTextChatMsg
  */
 
 
-typedef struct 
+typedef struct
 { uint8_t type;			/* always rfbXvp */
  	uint8_t pad;
  	uint8_t version;	/* xvp extension version */
@@ -1148,14 +1148,14 @@ typedef struct
  * resolution changes using SetDesktopSize.
  */
 
-typedef struct rfbExtDesktopSizeMsg 
+typedef struct rfbExtDesktopSizeMsg
 { uint8_t numberOfScreens;
   uint8_t pad[3];
 
     /* Followed by rfbExtDesktopScreen[numberOfScreens] */
 } rfbExtDesktopSizeMsg;
 
-typedef struct rfbExtDesktopScreen 
+typedef struct rfbExtDesktopScreen
 { uint32_t id;
   uint16_t x;
   uint16_t y;
@@ -1185,7 +1185,7 @@ typedef struct rfbExtDesktopScreen
  * resolutions are changed.
  */
 
-typedef struct rfbSetDesktopSizeMsg 
+typedef struct rfbSetDesktopSizeMsg
 { uint8_t type;                       /* always rfbSetDesktopSize */
   uint8_t pad1;
   uint16_t width;

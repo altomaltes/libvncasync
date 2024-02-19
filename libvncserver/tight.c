@@ -38,7 +38,7 @@
 #include <rfb/rfb.h>
 #include "private.h"
 
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
 #include <png.h>
 #endif
 #include "turbojpeg.h"
@@ -90,7 +90,7 @@ static TIGHT_CONF tightConf[4] =
 ,{ 65536, 2048,  32, 7, 7, 5,  96, 256 } /* 9 */
 };
 
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
 typedef struct TIGHT_PNG_CONF_s {
     int png_zlib_level, png_filters;
 } TIGHT_PNG_CONF;
@@ -231,7 +231,7 @@ static void PrepareRowForImg24(rfbClientPtr cl, uint8_t *dst, int x, int y, int 
 static void PrepareRowForImg16(rfbClientPtr cl, uint8_t *dst, int x, int y, int count);
 static void PrepareRowForImg32(rfbClientPtr cl, uint8_t *dst, int x, int y, int count);
 
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
 static rfbBool SendPngRect(rfbClientPtr cl, int x, int y, int w, int h);
 static rfbBool CanSendPngRect(rfbClientPtr cl, int w, int h);
 #endif
@@ -860,7 +860,7 @@ static rfbBool SendMonoRect( rfbClientPtr cl
 { int streamId = 1;
   int paletteLen, dataLen;
 
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
     if (CanSendPngRect(cl, w, h)) {
         /* TODO: setup palette maybe */
         return SendPngRect(cl, x, y, w, h);
@@ -941,7 +941,7 @@ SendIndexedRect(rfbClientPtr cl,
     int streamId = 2;
     int i, entryLen;
 
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
     if (CanSendPngRect(cl, w, h)) {
         return SendPngRect(cl, x, y, w, h);
     }
@@ -1016,7 +1016,7 @@ static rfbBool SendFullColorRect( rfbClientPtr cl
 { int streamId = 0;
   int len;
 
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
     if (CanSendPngRect(cl, w, h)) {
         return SendPngRect(cl, x, y, w, h);
     }
@@ -1099,17 +1099,17 @@ static rfbBool CompressData( rfbClientPtr cl
   { return FALSE;
   }
 
-    return rfbSendCompressedDataTight(cl, tightAfterBuf,
-                                      tightAfterBufSize - pz->avail_out);
+  return rfbSendCompressedDataTight( cl, tightAfterBuf
+                                   , tightAfterBufSize - pz->avail_out );
 }
 
-rfbBool rfbSendCompressedDataTight(rfbClientPtr cl, char *buf,
+rfbBool rfbSendCompressedDataTight( rfbClientPtr cl, char *buf,
                                    int compressedLen)
-{
-    int i, portionLen;
+{ int i, portionLen;
 
     cl->updateBuf[cl->ublen++] = compressedLen & 0x7F;
     rfbStatRecordEncodingSentAdd(cl, cl->tightEncoding, 1);
+
     if (compressedLen > 0x7F) {
         cl->updateBuf[cl->ublen-1] |= 0x80;
         cl->updateBuf[cl->ublen++] = compressedLen >> 7 & 0x7F;
@@ -1760,7 +1760,7 @@ DEFINE_JPEG_GET_ROW_FUNCTION(32)
  * PNG compression stuff.
  */
 
-#ifdef LIBVNCSERVER_HAVE_LIBPNG
+#ifdef HAVE_LIBPNG
 
 static TLS int pngDstDataLen = 0;
 

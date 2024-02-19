@@ -22,8 +22,7 @@
  */
 
 #include <rfb/rfbproto.h>
-#ifdef LIBVNCSERVER_HAVE_SYS_STAT_H
-#endif
+
 
 #ifdef __STRICT_ANSI__
 #define _BSD_SOURCE

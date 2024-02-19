@@ -108,6 +108,7 @@
 			<Add directory="../rfb" />
 			<Add directory=".." />
 		</Compiler>
+		<Unit filename="../Makefile.am" />
 		<Unit filename="../client_examples/ppmtest.c">
 			<Option compilerVar="CC" />
 			<Option target="client" />
@@ -242,6 +243,7 @@
 			<Option target="static" />
 			<Option target="shared" />
 		</Unit>
+		<Unit filename="../configure.ac" />
 		<Unit filename="../examples/example.c">
 			<Option compilerVar="CC" />
 			<Option target="&lt;{~None~}&gt;" />

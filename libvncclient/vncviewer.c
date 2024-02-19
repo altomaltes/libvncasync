@@ -244,7 +244,7 @@ static void initAppData(AppData* data) {
 	data->requestedDepth=0;
 	data->compressLevel=3;
 	data->qualityLevel=5;
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 	data->enableJPEG=TRUE;
 #else
 	data->enableJPEG=FALSE;
@@ -319,11 +319,11 @@ rfbClient* rfbGetClient( int bitsPerSample
     client->bufoutptr=client->buf;
     client->buffered=0;
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
   client->raw_buffer_size = -1;
   client->decompStreamInited = FALSE;
 
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
   memset(client->zlibStreamActive,0,sizeof(rfbBool)*4);
 #endif
 #endif
@@ -508,8 +508,8 @@ rfbBool rfbInitClient(rfbClient* client,int* argc,char** argv) {
 }
 
 void rfbClientCleanup(rfbClient* client) {
-#ifdef LIBVNCSERVER_HAVE_LIBZ
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBZ
+#ifdef HAVE_LIBJPEG
   int i;
 
   for ( i = 0; i < 4; i++ ) {

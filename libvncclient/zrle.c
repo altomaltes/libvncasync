@@ -17,7 +17,7 @@
  *  USA.
  */
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 
 /*
  * zrle.c - handle zrle encoding.

@@ -18,7 +18,7 @@
  *  USA.
  */
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 
 /*
  * zlib.c - handle zlib encoding.

@@ -349,7 +349,7 @@ typedef struct sraRegion* sraRegionPtr;
 typedef void (*ClientGoneHookPtr)(struct _rfbClientRec* cl);
 typedef void (*ClientFramebufferUpdateRequestHookPtr)(struct _rfbClientRec* cl, rfbFramebufferUpdateRequestMsg* furMsg);
 
-typedef struct _rfbFileTransferData 
+typedef struct _rfbFileTransferData
 { int fd;
   int compressionEnabled;
   int fileSize;
@@ -359,7 +359,7 @@ typedef struct _rfbFileTransferData
 } rfbFileTransferData;
 
 
-typedef struct _rfbStatList 
+typedef struct _rfbStatList
 { uint32_t type;
   uint32_t sentCount;
   uint32_t bytesSent;
@@ -529,24 +529,26 @@ typedef struct _rfbClientRec
     int rawBytesEquivalent;
     int bytesSent;
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     /* zlib encoding -- necessary compression state info per client */
 
     struct z_stream_s compStream;
     rfbBool compStreamInited;
     uint32_t zlibCompressLevel;
 #endif
-#if defined(LIBVNCSERVER_HAVE_LIBZ) || defined(LIBVNCSERVER_HAVE_LIBPNG)
+
+#if defined(HAVE_LIBZ) || defined(HAVE_LIBPNG)
     /** the quality level is also used by ZYWRLE and TightPng */
     int tightQualityLevel;
 
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
     /* tight encoding -- preserve zlib streams' state for each client */
     z_stream zsStruct[4];
     rfbBool zsActive[4];
     int zsLevel[4];
     int tightCompressLevel;
 #endif
+
 #endif
 
     /* Ultra Encoding support */
@@ -576,7 +578,7 @@ typedef struct _rfbClientRec
     struct _rfbClientRec *next;
 
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
     void* zrleData;
     int zywrleLevel;
     int zywrleBuf[rfbZRLETileWidth * rfbZRLETileHeight];
@@ -601,9 +603,9 @@ typedef struct _rfbClientRec
   char *afterEncBuf;
   int afterEncBufSize;
   int afterEncBufLen;
-#if defined(LIBVNCSERVER_HAVE_LIBZ) || defined(LIBVNCSERVER_HAVE_LIBPNG)
+#if defined(HAVE_LIBZ) || defined(HAVE_LIBPNG)
     uint32_t tightEncoding;  /* rfbEncodingTight or rfbEncodingTightPng */
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
     /* TurboVNC Encoding support (extends TightVNC) */
     int turboSubsampLevel;
     int turboQualityLevel;  /* 1-100 scale */
@@ -769,7 +771,7 @@ extern rfbBool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
 extern rfbBool rfbSendRectEncodingUltra(rfbClientPtr cl, int x,int y,int w,int h);
 
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 /* zlib.c */
 
 /** Minimum zlib rectangle size in bytes.  Anything smaller will
@@ -787,7 +789,7 @@ extern rfbBool rfbSendRectEncodingUltra(rfbClientPtr cl, int x,int y,int w,int h
 extern rfbBool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 				    int h);
 
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 /* tight.c */
 
 #define TIGHT_DEFAULT_COMPRESSION  6
@@ -799,9 +801,10 @@ extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x,int y,int w,int h);
 
 extern rfbBool rfbSendRectEncodingTight(rfbClientPtr cl, int x,int y,int w,int h);
 extern rfbBool rfbSendTightHeader(rfbClientPtr cl, int x, int y, int w, int h);
-extern rfbBool rfbSendCompressedDataTight(rfbClientPtr cl, char *buf, int compressedLen);
+extern rfbBool rfbSendCompressedDataTight( rfbClientPtr cl, char *buf,
+                                   int compressedLen)
 
-#if defined(LIBVNCSERVER_HAVE_LIBPNG)
+#if defined(HAVE_LIBPNG)
 extern rfbBool rfbSendRectEncodingTightPng(rfbClientPtr cl, int x,int y,int w,int h);
 #endif
 
@@ -840,7 +843,7 @@ extern void rfbSetCursor(rfbScreenInfoPtr rfbScreen,rfbCursorPtr c);
 extern void rfbDefaultPtrAddEvent(int buttonMask,int x,int y,rfbClientPtr cl);
 
 /* zrle.c */
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 extern rfbBool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w,int h);
 #endif
 

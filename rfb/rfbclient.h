@@ -287,13 +287,13 @@ typedef struct _rfbClient {
 	int raw_buffer_size;
 	char *raw_buffer;
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 	z_stream decompStream;
 	rfbBool decompStreamInited;
 #endif
 
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
+#ifdef HAVE_LIBZ
 	/*
 	 * Variables for the ``tight'' encoding implementation.
 	 */
@@ -312,7 +312,7 @@ typedef struct _rfbClient {
 	char tightPalette[256*4];
 	uint8_t tightPrevRow[2048*3*sizeof(uint16_t)];
 
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBJPEG
 	/** JPEG decoder state (obsolete-- do not use). */
 	rfbBool jpegError;
 
@@ -441,8 +441,8 @@ typedef struct _rfbClient {
 
 #endif /* LIBVNCSERVER_HAVE_SASL */
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBZ
+#ifdef HAVE_LIBJPEG
 	/** JPEG decoder state. */
 	void *tjhnd;
 

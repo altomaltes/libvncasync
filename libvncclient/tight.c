@@ -20,8 +20,8 @@
  *  USA.
  */
 
-#ifdef LIBVNCSERVER_HAVE_LIBZ
-#ifdef LIBVNCSERVER_HAVE_LIBJPEG
+#ifdef HAVE_LIBZ
+#ifdef HAVE_LIBJPEG
 
 #include "turbojpeg.h"
 
@@ -659,7 +659,7 @@ ReadCompactLen (rfbClient* client)
 
 #undef CARDBPP
 
-/* LIBVNCSERVER_HAVE_LIBZ and LIBVNCSERVER_HAVE_LIBJPEG */
+/* HAVE_LIBZ and HAVE_LIBJPEG */
 #endif
 #endif
 
