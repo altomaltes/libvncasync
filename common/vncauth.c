@@ -24,18 +24,15 @@
 #include <rfb/rfbproto.h>
 
 
-#ifdef __STRICT_ANSI__
-#define _BSD_SOURCE
-#define _POSIX_SOURCE
-#define _XOPEN_SOURCE 600
-#endif
+
 #ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+  #include <sys/types.h>
 #endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+  #include <unistd.h>
 #endif
 
 #include "d3des.h"
@@ -49,7 +46,7 @@
 
 #include <time.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #define srandom srand
 #define random rand
 #else
@@ -84,7 +81,7 @@ rfbEncryptAndStorePasswd(char *passwd, char *fname)
     if ((fp = fopen(fname,"w")) == NULL) return 1;
 
 	/* windows security sux */
-#ifndef WIN32
+#ifndef _WIN32
     fchmod(fileno(fp), S_IRUSR|S_IWUSR);
 #endif
 

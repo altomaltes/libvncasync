@@ -14,12 +14,14 @@ AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
 
+
+
 dnl# These must be run after AC_PROG_CC but before any other macros that use
 dnl# the C compiler
 AC_USE_SYSTEM_EXTENSIONS
-# AC_CANONICAL_HOST is needed to access the 'host_os' variable    
+# AC_CANONICAL_HOST is needed to access the 'host_os' variable
 AC_CANONICAL_HOST
-
+LT_INIT
 buildLinux=no
 buildWindows=no
 buildMac=no
@@ -29,20 +31,17 @@ case "${host_os}" in
 
     linux*)
         buildLinux=yes
-        LT_INIT
-        $cfgFile=common/rfb-config.h
+        cfgFile=common/rfb-config.h
     ;;
 
     cygwin*|mingw*)
         buildWindows=yes
-        LT_INIT([win32-dll])
-        $cfgFile=common/win-config.h 
+        cfgFile=common/win-config.h
     ;;
 
     darwin*)
         buildMac=yes
-        LT_INIT
-        $cfgFile=common/mac-config.h 
+        cfgFile=common/mac-config.h
     ;;
 
     *)
@@ -50,13 +49,14 @@ case "${host_os}" in
     ;;
 esac
 
-AC_CONFIG_HEADER( "$cfgFile" )
+AC_CONFIG_HEADERS( [common/rfb-config.h] )
 
 # Pass the conditionals to automake
 #
 AM_CONDITIONAL([LINUX],   [test "$buildLinux"   = "yes"])
 AM_CONDITIONAL([WINDOWS], [test "$buildWindows" = "yes"])
 AM_CONDITIONAL([OSX],     [test "$buildMac"     = "yes"])
+
 
 
 DATE="`date '+%d %B %Y'`"

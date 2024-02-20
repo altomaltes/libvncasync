@@ -61,7 +61,7 @@ typedef int8_t rfbBool;
 #endif
 
 #if defined(WIN32)
-  #include <common/win-config.h>
+  #include <common/rfb-config.h>
 #else
   #include <common/rfb-config.h>
 #endif

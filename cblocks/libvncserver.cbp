@@ -477,6 +477,7 @@
 			<Option compilerVar="CC" />
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="../libvncserver/ws_decode.h" />
 		<Unit filename="../libvncserver/zlib.c">
 			<Option compilerVar="CC" />
 			<Option target="DLL" />

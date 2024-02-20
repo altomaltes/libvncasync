@@ -18,8 +18,11 @@ libvncasync_la_SOURCES+= common/d3des.c common/md5.c common/minilzo.c common/rfb
 libvncasync_la_LDFLAGS= $(JPEG_LIBS) $(LIBPNG_LIBS)
 libvncasync_la_LDFLAGS+= -release $(VERSION) -shared
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libvncasync.pc
+
 if WINDOWS
-  libvncasync_la_LDFLAGS+= -no-undefined
+  libvncasync_la_LDFLAGS+= -lws2_32 -no-undefined
 endif
 
 if LINUX

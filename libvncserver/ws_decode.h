@@ -1,25 +1,42 @@
 #ifndef _WS_DECODE_H_
 #define _WS_DECODE_H_
 
+#define INCL_EXTRA_HTON_FUNCTIONS
+
 #include <stdint.h>
 #include <rfb/rfb.h>
 
 #if defined(__APPLE__)
 
-#include <libkern/OSByteOrder.h>
-#define WS_NTOH64(n) OSSwapBigToHostInt64(n)
-#define WS_NTOH32(n) OSSwapBigToHostInt32(n)
-#define WS_NTOH16(n) OSSwapBigToHostInt16(n)
-#define WS_HTON64(n) OSSwapHostToBigInt64(n)
-#define WS_HTON16(n) OSSwapHostToBigInt16(n)
+  #include <libkern/OSByteOrder.h>
+  #define WS_NTOH64(n) OSSwapBigToHostInt64(n)
+  #define WS_NTOH32(n) OSSwapBigToHostInt32(n)
+  #define WS_NTOH16(n) OSSwapBigToHostInt16(n)
+  #define WS_HTON64(n) OSSwapHostToBigInt64(n)
+  #define WS_HTON16(n) OSSwapHostToBigInt16(n)
 
 #else
 
-#define WS_NTOH64(n) htobe64(n)
-#define WS_NTOH32(n) htobe32(n)
-#define WS_NTOH16(n) htobe16(n)
-#define WS_HTON64(n) htobe64(n)
-#define WS_HTON16(n) htobe16(n)
+  #define WS_NTOH64( n) htobe64(n)
+  #define WS_NTOH32( n) htobe32(n)
+  #define WS_NTOH16( n) htobe16(n)
+  #define WS_HTON64( n) htobe64(n)
+  #define WS_HTON16( n) htobe16(n)
+
+#endif
+
+#ifdef _WIN32
+
+ // #include <winsock2.h>
+
+  #define htonll(x) ((((uint64_t)htonl(x)) << 32) + htonl((x) >> 32))
+
+  #define htobe16(x) htons(x)
+  #define be16toh(x) ntohs(x)
+  #define htobe32(x) htonl(x)
+  #define be32toh(x) ntohl(x)
+  #define htobe64(x) htonll(x)
+  #define be64toh(x) ntohll(x)
 
 #endif
 
@@ -27,22 +44,23 @@
 #define WSHLENMAX 14LL  /* 2 + sizeof(uint64_t) + sizeof(uint32_t) */
 #define WS_HYBI_MASK_LEN 4
 
-#define ARRAYSIZE(a) ((sizeof(a) / sizeof((a[0]))) / (size_t)(!(sizeof(a) % sizeof((a[0])))))
+#define ARRAYSIZEOF(a) ((sizeof(a) / sizeof((a[0]))) / (size_t)(!(sizeof(a) % sizeof((a[0])))))
 
 struct ws_ctx_s;
 typedef struct ws_ctx_s ws_ctx_t;
 
 typedef int (*wsEncodeFunc)(rfbClientPtr cl, const char *src, int len, char **dst);
 typedef int (*wsDecodeFunc)(ws_ctx_t *wsctx, char *dst, int len);
+typedef int (*wsReadFunc  )(void *ctx, char *dst, size_t len);
 
-typedef int (*wsReadFunc)(void *ctx, char *dst, size_t len);
-
-typedef struct ctxInfo_s{
+typedef struct ctxInfo_s
+{
   void *ctxPtr;
   wsReadFunc readFunc;
 } ctxInfo_t;
 
-enum {
+enum
+{
   /* header not yet received completely */
   WS_HYBI_STATE_HEADER_PENDING,
   /* data available */
@@ -66,17 +84,17 @@ typedef union ws_mask_s {
  *      it from recognizing anonymous structs and unions.
  *      See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=4784
  */
-typedef struct 
+typedef struct
 #if __GNUC__
-__attribute__ ((__packed__)) 
+__attribute__ ((__packed__))
 #endif
 ws_header_s {
   unsigned char b0;
   unsigned char b1;
   union {
-    struct 
+    struct
 #if __GNUC__
-    __attribute__ ((__packed__)) 
+    __attribute__ ((__packed__))
 #endif
            {
       uint16_t l16;
@@ -84,7 +102,7 @@ ws_header_s {
     } s16;
     struct
 #if __GNUC__
-__attribute__ ((__packed__)) 
+__attribute__ ((__packed__))
 #endif
            {
       uint64_t l64;
@@ -129,8 +147,7 @@ struct ws_ctx_s {
 };
 
 enum
-{
-    WS_OPCODE_CONTINUATION = 0x00,
+{   WS_OPCODE_CONTINUATION = 0x00,
     WS_OPCODE_TEXT_FRAME = 0x01,
     WS_OPCODE_BINARY_FRAME = 0x02,
     WS_OPCODE_CLOSE = 0x08,

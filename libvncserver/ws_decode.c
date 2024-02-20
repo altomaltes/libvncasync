@@ -1,3 +1,7 @@
+#ifdef _WIN32
+  #include <winsock2.h>
+#endif
+
 #include "ws_decode.h"
 #include "base64.h"
 
@@ -216,18 +220,26 @@ hybiReadHeader(ws_ctx_t *wsctx, int *sockRet, int *nPayload)
   }
 
 
-  if (wsctx->header.payloadLen < 126 && wsctx->header.nRead >= 6) {
+  if (wsctx->header.payloadLen < 126 && wsctx->header.nRead >= 6)
+  {
     wsctx->header.headerLen = WS_HYBI_HEADER_LEN_SHORT;
     wsctx->header.mask = wsctx->header.data->u.m;
-  } else if (wsctx->header.payloadLen == 126 && 8 <= wsctx->header.nRead) {
+  }
+
+  else if (wsctx->header.payloadLen == 126 && 8 <= wsctx->header.nRead) {
     wsctx->header.headerLen = WS_HYBI_HEADER_LEN_EXTENDED;
     wsctx->header.payloadLen = WS_NTOH16(wsctx->header.data->u.s16.l16);
     wsctx->header.mask = wsctx->header.data->u.s16.m16;
-  } else if (wsctx->header.payloadLen == 127 && 14 <= wsctx->header.nRead) {
+  }
+
+  else if (wsctx->header.payloadLen == 127 && 14 <= wsctx->header.nRead) {
     wsctx->header.headerLen = WS_HYBI_HEADER_LEN_LONG;
     wsctx->header.payloadLen = WS_NTOH64(wsctx->header.data->u.s64.l64);
     wsctx->header.mask = wsctx->header.data->u.s64.m64;
-  } else {
+  }
+
+  else
+  {
     /* Incomplete frame header, try again */
     rfbErr("%s: incomplete frame header; ret=%d\n", __func__, ret);
     goto ret_header_pending;
@@ -333,7 +345,7 @@ hybiReadAndDecode(ws_ctx_t *wsctx, char *dst, int len, int *sockRet, int nInBuf)
   wsctx->writePos += wsctx->carrylen;
 
   /* -1 accounts for potential '\0' terminator for base64 decoding */
-  bufsize = wsctx->codeBufDecode + ARRAYSIZE(wsctx->codeBufDecode) - wsctx->writePos - 1;
+  bufsize = wsctx->codeBufDecode + ARRAYSIZEOF( wsctx->codeBufDecode) - wsctx->writePos - 1;
   ws_dbg("bufsize=%d\n", bufsize);
   if (hybiRemaining(wsctx) > bufsize) {
     nextRead = bufsize;
@@ -402,7 +414,7 @@ hybiReadAndDecode(ws_ctx_t *wsctx, char *dst, int len, int *sockRet, int nInBuf)
   } else {
     /* carry over remaining, non-multiple-of-four bytes */
     wsctx->carrylen = toDecode - (i * 4);
-    if (wsctx->carrylen < 0 || wsctx->carrylen > ARRAYSIZE(wsctx->carryBuf)) {
+    if (wsctx->carrylen < 0 || wsctx->carrylen > ARRAYSIZEOF(wsctx->carryBuf)) {
       rfbErr("%s: internal error, invalid carry over size: carrylen=%d, toDecode=%d, i=%d", __func__, wsctx->carrylen, toDecode, i);
       *sockRet = -1;
       errno = EIO;

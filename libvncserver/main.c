@@ -10,9 +10,7 @@
  *  see GPL (latest version) for full details
  */
 
-#ifdef __STRICT_ANSI__
-#define _BSD_SOURCE
-#endif
+
 #include <rfb/rfb.h>
 #include <rfb/rfbregion.h>
 #include "private.h"
@@ -29,11 +27,10 @@
 #include <sys/types.h>
 #endif
 
-#ifndef WIN32
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <fcntl.h>
+#ifndef _WIN32
+  #include <windows.h>
+  #include <unistd.h>
+  #include <fcntl.h>
 #endif
 
 #include <signal.h>
@@ -689,13 +686,15 @@ rfbScreenInfoPtr rfbGetScreen( int* argc, char** argv
      return NULL;
    }
 
-#ifdef WIN32
+#ifdef _WIN32
+
    {
 	   unsigned int dummy=255;
-	   GetComputerName(screen->thisHost,&dummy);
+	   GetComputerNameA(screen->thisHost,&dummy);
+	 // strcpy
    }
 #else
-   gethostname(screen->thisHost, 255);
+   gethostname( screen->thisHost, 255);
 #endif
 
  //  screen->paddedWidthInBytes = width*bytesPerPixel;

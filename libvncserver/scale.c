@@ -25,9 +25,6 @@
  *  USA.
  */
 
-#ifdef __STRICT_ANSI__
-#define _BSD_SOURCE
-#endif
 #include <string.h>
 #include <rfb/rfb.h>
 #include <rfb/rfbregion.h>
@@ -61,11 +58,9 @@
 #ifdef WIN32
 #define InlineX __inline
 #else
-# ifndef __STRICT_ANSI__
+
 #  define InlineX inline
-# else
-#  define InlineX
-# endif
+
 #endif
 
 
@@ -194,8 +189,8 @@ void rfbScaledScreenUpdateRect(rfbScreenInfoPtr screen, rfbScreenInfoPtr ptr, in
     unsigned long blueMax  = screen->serverFormat.blueMax;
 
      /* for each *destination* pixel... */
-    for (y = 0; y < h1; y++) 
-    { for (x = 0; x < w1; x++) 
+    for (y = 0; y < h1; y++)
+    { for (x = 0; x < w1; x++)
       { red = green = blue = 0;
          /* Get the totals for rgb from the source grid... */
          for (w = 0; w < areaX; w++) {
@@ -205,7 +200,7 @@ void rfbScaledScreenUpdateRect(rfbScreenInfoPtr screen, rfbScreenInfoPtr ptr, in
              pixel_value = 0;
 
 
-             switch (bytesPerPixel) 
+             switch (bytesPerPixel)
              { case 4: pixel_value = *((unsigned int *)srcptr2);   break;
                case 2: pixel_value = *((unsigned short *)srcptr2); break;
                case 1: pixel_value = *((unsigned char *)srcptr2);  break;
@@ -278,7 +273,7 @@ void rfbScaledScreenUpdate(rfbScreenInfoPtr screen, int x1, int y1, int x2, int 
     }
 }
 
-/* Create a new scaled version of the framebuffer 
+/* Create a new scaled version of the framebuffer
  */
 
 rfbScreenInfoPtr rfbScaledScreenAllocate( rfbClientPtr cl
@@ -288,7 +283,7 @@ rfbScreenInfoPtr rfbScaledScreenAllocate( rfbClientPtr cl
 
   if ( ptr )
   { int allocSize;
-       
+
     memcpy(ptr, cl->screen, sizeof(rfbScreenInfo));  /* copy *everything* (we don't use most of it, but just in case) */
 
 /* SECURITY: make sure that no integer overflow will occur afterwards.

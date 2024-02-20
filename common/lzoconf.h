@@ -342,22 +342,15 @@ LZO_EXTERN(const lzo_charp) _lzo_version_string(void);
 LZO_EXTERN(const lzo_charp) _lzo_version_date(void);
 
 /* string functions */
-LZO_EXTERN(int)
-    lzo_memcmp(const lzo_voidp a, const lzo_voidp b, lzo_uint len);
-LZO_EXTERN(lzo_voidp)
-    lzo_memcpy(lzo_voidp dst, const lzo_voidp src, lzo_uint len);
-LZO_EXTERN(lzo_voidp)
-    lzo_memmove(lzo_voidp dst, const lzo_voidp src, lzo_uint len);
-LZO_EXTERN(lzo_voidp)
-    lzo_memset(lzo_voidp buf, int c, lzo_uint len);
+LZO_EXTERN(int)     lzo_memcmp(const lzo_voidp a, const lzo_voidp b, lzo_uint len);
+LZO_EXTERN(lzo_voidp)    lzo_memcpy(lzo_voidp dst, const lzo_voidp src, lzo_uint len);
+LZO_EXTERN(lzo_voidp)    lzo_memmove(lzo_voidp dst, const lzo_voidp src, lzo_uint len);
+LZO_EXTERN(lzo_voidp)    lzo_memset(lzo_voidp buf, int c, lzo_uint len);
 
 /* checksum functions */
-LZO_EXTERN(lzo_uint32_t)
-    lzo_adler32(lzo_uint32_t c, const lzo_bytep buf, lzo_uint len);
-LZO_EXTERN(lzo_uint32_t)
-    lzo_crc32(lzo_uint32_t c, const lzo_bytep buf, lzo_uint len);
-LZO_EXTERN(const lzo_uint32_tp)
-    lzo_get_crc32_table(void);
+LZO_EXTERN(lzo_uint32_t)    lzo_adler32(lzo_uint32_t c, const lzo_bytep buf, lzo_uint len);
+LZO_EXTERN(lzo_uint32_t)    lzo_crc32(lzo_uint32_t c, const lzo_bytep buf, lzo_uint len);
+LZO_EXTERN(const lzo_uint32_tp)    lzo_get_crc32_table(void);
 
 /* misc. */
 LZO_EXTERN(int) _lzo_config_check(void);
