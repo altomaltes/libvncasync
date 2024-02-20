@@ -1,2 +1,12 @@
-mingw-w64-libjpeg-turbo
-pacman -S mingw-w64-x86_64-freetype
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: LibVNCasync
+Description: A library for easy implementation of a VNC client.
+Version: @VERSION@
+Requires:
+Libs: -L${libdir} -lvncasync @LIBS@ 
+Cflags: -I${includedir}
+

@@ -3,18 +3,60 @@ AC_INIT([libvncasync],[0.9.12])
 AC_CONFIG_SRCDIR([common/vncauth.c])
 AM_INIT_AUTOMAKE( [subdir-objects] )
 
-LT_INIT([win32-dll])
+dnl# Set some basic variables
+BUILD_DATE="`date`"
+AC_DEFINE_UNQUOTED(BUILD_DATE, "$BUILD_DATE", [ build date ])
+AUTHORS="Jose Angel Caso Sanchez (JACS) altomaltes@yahoo.es"
+AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS", [ library authors ] )
 
 
-dnl Persist windows configuration to offchain builds
-dnl if test "${version_type}" = "windows" ; then
-  AM_CONFIG_HEADER( common/win-config.h )
-dnl else
-  AM_CONFIG_HEADER( common/rfb-config.h )
-dnl fi
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_CXX
 
-dnl Detect windows
-AM_CONDITIONAL( WINDOWS, test "${version_type}" = "windows" )
+dnl# These must be run after AC_PROG_CC but before any other macros that use
+dnl# the C compiler
+AC_USE_SYSTEM_EXTENSIONS
+# AC_CANONICAL_HOST is needed to access the 'host_os' variable    
+AC_CANONICAL_HOST
+
+buildLinux=no
+buildWindows=no
+buildMac=no
+
+# Detect the target system
+case "${host_os}" in
+
+    linux*)
+        buildLinux=yes
+        LT_INIT
+        $cfgFile=common/rfb-config.h
+    ;;
+
+    cygwin*|mingw*)
+        buildWindows=yes
+        LT_INIT([win32-dll])
+        $cfgFile=common/win-config.h 
+    ;;
+
+    darwin*)
+        buildMac=yes
+        LT_INIT
+        $cfgFile=common/mac-config.h 
+    ;;
+
+    *)
+        AC_MSG_ERROR(["OS $host_os is not supported"])
+    ;;
+esac
+
+AC_CONFIG_HEADER( "$cfgFile" )
+
+# Pass the conditionals to automake
+#
+AM_CONDITIONAL([LINUX],   [test "$buildLinux"   = "yes"])
+AM_CONDITIONAL([WINDOWS], [test "$buildWindows" = "yes"])
+AM_CONDITIONAL([OSX],     [test "$buildMac"     = "yes"])
 
 
 DATE="`date '+%d %B %Y'`"
@@ -24,13 +66,6 @@ AC_REVISION($Revision: $SVN_BUILD $)
 SVN_BUILD=m4_esyscmd_s([sh -c "./bld"])
 
 AC_CONFIG_MACRO_DIR([m4])
-
-dnl# Set some basic variables
-BUILD_DATE="`date`"
-AC_DEFINE_UNQUOTED(BUILD_DATE, "$BUILD_DATE", [ build date ])
-AUTHORS="Jose Angel Caso Sanchez (JACS) altomaltes@yahoo.es"
-AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS", [ library authors ] )
-
 
 dnl# Supply default CFLAGS, if not specified by "CFLAGS=flags ./configure"
 if test ! -z "${CFLAGS}" -o ! -z "${CCOPTS}"; then
@@ -64,15 +99,7 @@ if test "$CC" = "check"; then
   fi
 fi
 
-AC_PROG_CC
-AC_PROG_CPP
-AC_PROG_CXX
-
-dnl# These must be run after AC_PROG_CC but before any other macros that use
-dnl# the C compiler
-AC_USE_SYSTEM_EXTENSIONS
 AC_SEARCH_LIBS([strerror],[cposix])
-LT_INIT
 
 dnl# Where are we?
 AC_MSG_CHECKING(for distribution root)
@@ -207,7 +234,7 @@ AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num i
 
 AC_MSG_CHECKING(for MMX support)
 HAVE_MMX=""
-AC_ARG_ENABLE(mmx, [  --enable-mmx            enable MMX assembly routines],
+AC_ARG_ENABLE(mmx, [  --enable-mmx   enable MMX assembly routines],
                test "x$enableval" = "xyes" && HAVE_MMX="yes"
               ,
                if test x$build_os = xlinux-gnu; then
@@ -240,7 +267,6 @@ AC_ARG_ENABLE([slack],
   [enable_slack=yes])
 
 AM_CONDITIONAL(BUILDING_SLACK, test "x$enable_slack" = "xyes" )
-
 
 
 AC_SUBST(DIST_ROOT)

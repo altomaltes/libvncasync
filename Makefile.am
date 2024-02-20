@@ -16,15 +16,13 @@ libvncasync_la_SOURCES= libvncserver/translate.c libvncserver/auth.c libvncserve
 libvncasync_la_SOURCES+= common/d3des.c common/md5.c common/minilzo.c common/rfbcrypto_included.c common/sha1.c  common/turbojpeg.c common/vncauth.c common/base64.c
 
 libvncasync_la_LDFLAGS= $(JPEG_LIBS) $(LIBPNG_LIBS)
-
-
-
-
 libvncasync_la_LDFLAGS+= -release $(VERSION) -shared
 
 if WINDOWS
   libvncasync_la_LDFLAGS+= -no-undefined
-else
+endif
+
+if LINUX
   libvncasync_la_LDFLAGS+= -ldl
 endif
 
