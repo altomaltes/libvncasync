@@ -22,6 +22,7 @@ AC_USE_SYSTEM_EXTENSIONS
 # AC_CANONICAL_HOST is needed to access the 'host_os' variable
 AC_CANONICAL_HOST
 LT_INIT
+
 buildLinux=no
 buildWindows=no
 buildMac=no
