@@ -3,6 +3,8 @@ AC_INIT([libvncasync],[0.9.12])
 AC_CONFIG_SRCDIR([common/vncauth.c])
 AM_INIT_AUTOMAKE( [subdir-objects] )
 
+LT_INIT([win32-dll])
+
 
 dnl Persist windows configuration to offchain builds
 dnl if test "${version_type}" = "windows" ; then

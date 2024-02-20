@@ -19,13 +19,13 @@ libvncasync_la_LDFLAGS= $(JPEG_LIBS) $(LIBPNG_LIBS)
 
 
 
-libvncasync_la_LDFLAGS+= -ldl
+
 libvncasync_la_LDFLAGS+= -release $(VERSION) -shared
 
 if WINDOWS
   libvncasync_la_LDFLAGS+= -no-undefined
 else
-  libvncasync_la_SOURCES+=
+  libvncasync_la_LDFLAGS+= -ldl
 endif
 
 if BUILDING_SLACK
