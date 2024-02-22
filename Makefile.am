@@ -29,6 +29,12 @@ if LINUX
   libvncasync_la_LDFLAGS+= -ldl
 endif
 
+# Get rid of these, you may also preach about its utility
+#
+install-exec-hook:
+	@(cd $(DESTDIR)$(libdir) && ls && pwd && $(RM) $(lib_LTLIBRARIES))
+
+
 if BUILDING_SLACK
 
 slack:
