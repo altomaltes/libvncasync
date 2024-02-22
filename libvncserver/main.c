@@ -27,8 +27,9 @@
 #include <sys/types.h>
 #endif
 
-#ifndef _WIN32
+#ifdef _WIN32
   #include <windows.h>
+#else
   #include <unistd.h>
   #include <fcntl.h>
 #endif

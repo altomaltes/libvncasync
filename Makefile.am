@@ -6,7 +6,7 @@ CCOPTS= -DNO_FORK
 EXTRA_DIST = configure.ac
 
 lib_LTLIBRARIES= libvncasync.la
-AM_CPPFLAGS= -I$(top_srcdir)/common -I$(top_srcdir)/libvncserver ${JPEG_CFLAGS}
+AM_CPPFLAGS= -I$(top_srcdir)/common -I$(top_srcdir)/libvncserver ${JPEG_CFLAGS} -DBUILDING_VNCASYNC
 
 
 library_includedir=$(includedir)/rfb

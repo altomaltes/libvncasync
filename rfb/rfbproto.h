@@ -60,36 +60,41 @@ typedef int8_t rfbBool;
 #include <sys/timeb.h>
 #endif
 
-#if defined(WIN32)
-  #include <common/rfb-config.h>
-#else
-  #include <common/rfb-config.h>
+#ifdef BUILDING_VNCASYNC           /* Internal use during build */
+  #if defined( WIN32 )
+    #include <common/rfb-config.h>
+  #else
+    #include <common/rfb-config.h>
+  #endif
+
+  #if HAVE_ENDIAN_H
+  # include <endian.h>
+  # if __BYTE_ORDER == __BIG_ENDIAN
+  #  define WORDS_BIGENDIAN 1
+  # endif
+  #endif
+
+/* MS compilers don't have strncasecmp 
+ */
+  #ifdef _MSC_VER
+    #define strncasecmp _strnicmp
+  #endif
+
 #endif
 
 #ifdef HAVE_LIBZ
   #include <zlib.h>
   #ifdef __CHECKER__
-  #undef Z_NULL
-  #define Z_NULL NULL
-#endif
-#endif
-
-#if HAVE_ENDIAN_H
-# include <endian.h>
-# if __BYTE_ORDER == __BIG_ENDIAN
-#  define WORDS_BIGENDIAN 1
-# endif
-#endif
-
-/* MS compilers don't have strncasecmp */
-#ifdef _MSC_VER
-#define strncasecmp _strnicmp
+    #undef Z_NULL
+    #define Z_NULL NULL
+  #endif
 #endif
 
 #define rfbMax(a,b) (((a)>(b))?(a):(b))
+
 #if !defined(WIN32) || defined(__MINGW32__)
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
+  #ifdef HAVE_SYS_TIME_H
+  #include <sys/time.h>
 #endif
 
 
