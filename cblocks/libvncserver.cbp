@@ -378,6 +378,7 @@
 			<Option target="static" />
 			<Option target="shared" />
 		</Unit>
+		<Unit filename="../libvncserver/private.h" />
 		<Unit filename="../libvncserver/rfbregion.c">
 			<Option compilerVar="CC" />
 			<Option target="DLL" />
@@ -421,6 +422,7 @@
 			<Option target="static" />
 			<Option target="shared" />
 		</Unit>
+		<Unit filename="../libvncserver/scale.h" />
 		<Unit filename="../libvncserver/selbox.c">
 			<Option compilerVar="CC" />
 			<Option target="DLL" />
@@ -503,6 +505,7 @@
 			<Option target="static" />
 			<Option target="shared" />
 		</Unit>
+		<Unit filename="../libvncserver/zrleoutstream.h" />
 		<Unit filename="../libvncserver/zrlepalettehelper.c">
 			<Option compilerVar="CC" />
 			<Option target="DLL" />
@@ -510,6 +513,8 @@
 			<Option target="static" />
 			<Option target="shared" />
 		</Unit>
+		<Unit filename="../libvncserver/zrlepalettehelper.h" />
+		<Unit filename="../libvncserver/zrletypes.h" />
 		<Unit filename="../rfb/default8x16.h">
 			<Option target="DLL" />
 			<Option target="Release" />

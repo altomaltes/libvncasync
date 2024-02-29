@@ -23,16 +23,16 @@
 
 #include <zlib.h>
 #include "zrletypes.h"
-#include "rfb/rfb.h"
+#include "rfb/rfbproto.h"
 
-typedef struct {
-  zrle_U8 *start;
+typedef struct
+{ zrle_U8 *start;
   zrle_U8 *ptr;
   zrle_U8 *end;
 } zrleBuffer;
 
-typedef struct {
-  zrleBuffer in;
+typedef struct
+{ zrleBuffer in;
   zrleBuffer out;
 
   z_stream   zs;
@@ -41,22 +41,14 @@ typedef struct {
 #define ZRLE_BUFFER_LENGTH(b) ((b)->ptr - (b)->start)
 
 zrleOutStream *zrleOutStreamNew           (void);
-void           zrleOutStreamFree          (zrleOutStream *os);
-rfbBool        zrleOutStreamFlush         (zrleOutStream *os);
-void           zrleOutStreamWriteBytes    (zrleOutStream *os,
-					   const zrle_U8 *data,
-					   int            length);
-void           zrleOutStreamWriteU8       (zrleOutStream *os,
-					   zrle_U8        u);
-void           zrleOutStreamWriteOpaque8  (zrleOutStream *os,
-					   zrle_U8        u);
-void           zrleOutStreamWriteOpaque16 (zrleOutStream *os,
-					   zrle_U16       u);
-void           zrleOutStreamWriteOpaque32 (zrleOutStream *os,
-					   zrle_U32       u);
-void           zrleOutStreamWriteOpaque24A(zrleOutStream *os,
-					   zrle_U32       u);
-void           zrleOutStreamWriteOpaque24B(zrleOutStream *os,
-					   zrle_U32       u);
+void           zrleOutStreamFree          (zrleOutStream * );
+rfbBool        zrleOutStreamFlush         (zrleOutStream * );
+void           zrleOutStreamWriteBytes    (zrleOutStream *, const zrle_U8 *data,					   int            length);
+void           zrleOutStreamWriteU8       (zrleOutStream *, zrle_U8        u);
+void           zrleOutStreamWriteOpaque8  (zrleOutStream *, zrle_U8        u);
+void           zrleOutStreamWriteOpaque16 (zrleOutStream *, zrle_U16       u);
+void           zrleOutStreamWriteOpaque32 (zrleOutStream *, zrle_U32       u);
+void           zrleOutStreamWriteOpaque24A(zrleOutStream *, zrle_U32       u);
+void           zrleOutStreamWriteOpaque24B(zrleOutStream *, zrle_U32       u);
 
 #endif /* __ZRLE_OUT_STREAM_H__ */

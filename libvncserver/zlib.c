@@ -30,7 +30,8 @@
  * or send email to feedback@developvnc.org.
  */
 
-#include <rfb/rfb.h>
+#include <string.h>
+#include <rfb/rfbproto.h>
 
 /*
  * zlibBeforeBuf contains pixel data in the client's format.
@@ -78,7 +79,7 @@ void rfbZlibCleanup(rfbScreenInfoPtr screen)
  *                              rectangle encoding.
  */
 
-static rfbBool rfbSendOneRectEncodingZlib( rfbClientPtr cl
+static rfbBool rfbSendOneRectEncodingZlib( rfbClient * cl
                                          , int x, int y
                                          , int w, int h )
 { rfbFramebufferUpdateRectHeader rect;
@@ -158,16 +159,17 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClientPtr cl
     cl->compStream.avail_out = maxCompSize;
     cl->compStream.data_type = Z_BINARY;
 
-    /* Initialize the deflation state. */
-    if ( cl->compStreamInited == FALSE ) {
+/* Initialize the deflation state.
+ */
+    if ( cl->compStreamInited == FALSE )
+    {
+      cl->compStream.total_in = 0;
+      cl->compStream.total_out = 0;
+      cl->compStream.zalloc = Z_NULL;
+      cl->compStream.zfree = Z_NULL;
+      cl->compStream.opaque = Z_NULL;
 
-        cl->compStream.total_in = 0;
-        cl->compStream.total_out = 0;
-        cl->compStream.zalloc = Z_NULL;
-        cl->compStream.zfree = Z_NULL;
-        cl->compStream.opaque = Z_NULL;
-
-        deflateInit2( &(cl->compStream),
+      deflateInit2( &(cl->compStream),
                         cl->zlibCompressLevel,
                         Z_DEFLATED,
                         MAX_WBITS,
@@ -175,7 +177,7 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClientPtr cl
                         Z_DEFAULT_STRATEGY );
         /* deflateInit( &(cl->compStream), Z_BEST_COMPRESSION ); */
         /* deflateInit( &(cl->compStream), Z_BEST_SPEED ); */
-        cl->compStreamInited = TRUE;
+      cl->compStreamInited = TRUE;
 
     }
 
@@ -255,7 +257,7 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClientPtr cl
  */
 
 rfbBool
-rfbSendRectEncodingZlib(rfbClientPtr cl,
+rfbSendRectEncodingZlib(rfbClient * cl,
                         int x,
                         int y,
                         int w,

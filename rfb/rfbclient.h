@@ -1,11 +1,6 @@
 #ifndef RFBCLIENT_H
 #define RFBCLIENT_H
 
-/**
- * @defgroup libvncclient_api LibVNCClient API Reference
- * @{
- */
-
 /*
  *  Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
@@ -34,11 +29,6 @@
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN /* Prevent loading any Winsock 1.x headers from windows.h */
-#endif
-
-#if defined(ANDROID) || defined(HAVE_ANDROID)
-#include <arpa/inet.h>
-#include <sys/select.h>
 #endif
 
 #include <stdio.h>
@@ -95,8 +85,8 @@ extern "C"
 
 /** vncrec */
 
-typedef struct {
-  FILE* file;
+typedef struct
+{ FILE* file;
  //struct timeval tv;
   rfbBool readTimestamp;
   rfbBool doNotSleep;
@@ -104,16 +94,16 @@ typedef struct {
 
 /** client data */
 
-typedef struct rfbClientData {
-	void* tag;
-	void* data;
-	struct rfbClientData* next;
+typedef struct rfbClientData
+{ void* tag;
+	 void* data;
+	 struct rfbClientData* next;
 } rfbClientData;
 
 /** app data (belongs into rfbClient?) */
 
-typedef struct {
-  rfbBool shareDesktop;
+typedef struct
+{ rfbBool shareDesktop;
   rfbBool viewOnly;
 
   const char* encodingsString;
@@ -137,17 +127,16 @@ typedef union _rfbCredential
 {
   /** X509 (VeNCrypt) */
   struct
-  {
-    char *x509CACertFile;
+  { char *x509CACertFile;
     char *x509CACrlFile;
     char *x509ClientCertFile;
     char *x509ClientKeyFile;
     uint8_t x509CrlVerifyMode; /* Only required for OpenSSL - see meanings below */
   } x509Credential;
+
   /** Plain (VeNCrypt), MSLogon (UltraVNC) */
   struct
-  {
-    char *username;
+  { char *username;
     char *password;
   } userCredential;
 } rfbCredential;
@@ -184,11 +173,11 @@ typedef void (*HandleTextChatProc)(struct _rfbClient* client, int value, char *t
  * @param version The highest XVP extension version that the server supports
  * @param opcode The opcode. 0 is XVP_FAIL, 1 is XVP_INIT
  */
-typedef void (*HandleXvpMsgProc)(struct _rfbClient* client, uint8_t version, uint8_t opcode);
-typedef void (*HandleKeyboardLedStateProc)(struct _rfbClient* client, int value, int pad);
-typedef rfbBool (*HandleCursorPosProc)(struct _rfbClient* client, int x, int y);
-typedef void (*SoftCursorLockAreaProc)(struct _rfbClient* client, int x, int y, int w, int h);
-typedef void (*SoftCursorUnlockScreenProc)(struct _rfbClient* client);
+typedef void    (*HandleXvpMsgProc          )(struct _rfbClient* , uint8_t version, uint8_t opcode);
+typedef void    (*HandleKeyboardLedStateProc)(struct _rfbClient* , int value, int pad);
+typedef rfbBool (*HandleCursorPosProc       )(struct _rfbClient* , int x, int y);
+typedef void    (*SoftCursorLockAreaProc    )(struct _rfbClient* , int x, int y, int w, int h);
+typedef void    (*SoftCursorUnlockScreenProc)(struct _rfbClient*  );
 /**
    Callback indicating that a rectangular area of the client's framebuffer was updated.
    As a server will usually send several rects per rfbFramebufferUpdate message, this
@@ -206,12 +195,13 @@ typedef void (*GotFrameBufferUpdateProc)(struct _rfbClient* client, int x, int y
    This is called exactly once per each handled rfbFramebufferUpdate message.
    @param client The client which finished processing an rfbFramebufferUpdate
  */
-typedef void (*FinishedFrameBufferUpdateProc)(struct _rfbClient* client);
-typedef char* (*GetPasswordProc)(struct _rfbClient* client);
-typedef rfbCredential* (*GetCredentialProc)(struct _rfbClient* client, int credentialType);
-typedef rfbBool (*MallocFrameBufferProc)(struct _rfbClient* client);
-typedef void (*GotXCutTextProc)(struct _rfbClient* client, const char *text, int textlen);
-typedef void (*BellProc)(struct _rfbClient* client);
+typedef void           (*FinishedFrameBufferUpdateProc)(struct _rfbClient* );
+typedef char*          (*GetPasswordProc              )(struct _rfbClient* );
+typedef rfbCredential* (*GetCredentialProc            )(struct _rfbClient* , int credentialType );
+typedef rfbBool        (*MallocFrameBufferProc        )(struct _rfbClient* );
+typedef void           (*GotXCutTextProc              )(struct _rfbClient* client, const char *text, int textlen);
+typedef void           (*BellProc                     )(struct _rfbClient* client);
+
 /**
     Called when a cursor shape update was received from the server. The decoded cursor shape
     will be in client->rcSource. It's up to the application to do something with this, e.g. draw
@@ -219,35 +209,36 @@ typedef void (*BellProc)(struct _rfbClient* client);
     careful not to announce remote cursor support, i.e. not include rfbEncodingXCursor or
     rfbEncodingRichCursor in SetFormatAndEncodings().
 */
-typedef void (*GotCursorShapeProc)(struct _rfbClient* client, int xhot, int yhot, int width, int height, int bytesPerPixel);
-typedef void (*GotCopyRectProc)(struct _rfbClient* client, int src_x, int src_y, int w, int h, int dest_x, int dest_y);
-typedef void (*GotFillRectProc)(struct _rfbClient* client, int x, int y, int w, int h, uint32_t colour);
-typedef void (*GotBitmapProc)(struct _rfbClient* client, const uint8_t* buffer, int x, int y, int w, int h);
-typedef rfbBool (*GotJpegProc)(struct _rfbClient* client, const uint8_t* buffer, int length, int x, int y, int w, int h);
-typedef rfbBool (*LockWriteToTLSProc)(struct _rfbClient* client);
-typedef rfbBool (*UnlockWriteToTLSProc)(struct _rfbClient* client);
+typedef void    (*GotCursorShapeProc  )(struct _rfbClient* , int xhot, int yhot, int width, int height, int bytesPerPixel);
+typedef void    (*GotCopyRectProc     )(struct _rfbClient* , int src_x, int src_y, int w, int h, int dest_x, int dest_y);
+typedef void    (*GotFillRectProc     )(struct _rfbClient* , int x, int y, int w, int h, uint32_t colour);
+typedef void    (*GotBitmapProc       )(struct _rfbClient* , const uint8_t* buffer, int x, int y, int w, int h);
+typedef rfbBool (*GotJpegProc         )(struct _rfbClient* , const uint8_t* buffer, int length, int x, int y, int w, int h);
+typedef rfbBool (*LockWriteToTLSProc  )(struct _rfbClient* );
+typedef rfbBool (*UnlockWriteToTLSProc)(struct _rfbClient* );
 
 #ifdef HAVE_SASL
 typedef char* (*GetUserProc)(struct _rfbClient* client);
 typedef char* (*GetSASLMechanismProc)(struct _rfbClient* client, char* mechlist);
 #endif /* HAVE_SASL */
 
-typedef struct _rfbClient {
-	uint8_t* frameBuffer;
-	int width, height;
+typedef struct _rfbClient
+{ uint8_t* frameBuffer;
+	 int width, height;
 
-	int endianTest;
+	 int endianTest;
 
-	AppData appData;
+	 AppData appData;
 
-	const char* programName;
-	char* serverHost;
-	int serverPort; /**< if -1, then use file recorded by vncrec */
-	rfbBool listenSpecified;
-	int listenPort, flashPort;
+	 const char* programName;
+	 char* serverHost;
+	 int serverPort; /**< if -1, then use file recorded by vncrec */
+	 rfbBool listenSpecified;
+	 int listenPort, flashPort;
 
-	struct {
-		int x, y, w, h;
+	 struct
+  { int x, y
+      , w, h;
 	} updateRect;
 
 	/** Note that the CoRRE encoding uses this buffer and assumes it is big enough
@@ -256,7 +247,7 @@ typedef struct _rfbClient {
 	   Tight encoding assumes BUFFER_SIZE is at least 16384 bytes. */
 
 #define RFB_BUFFER_SIZE (640*480)
-	char buffer[RFB_BUFFER_SIZE];
+	char buffer[ RFB_BUFFER_SIZE ];
 
 	/* rfbproto.c */
 
@@ -326,7 +317,8 @@ typedef struct _rfbClient {
 
 	/* cursor.c */
 	/** Holds cursor shape data when received from server. */
-	uint8_t *rcSource, *rcMask;
+	uint8_t *rcSource
+       , *rcMask;
 
 	/** private data pointer */
 	rfbClientData* clientData;
@@ -731,9 +723,7 @@ void rfbClientCleanup(rfbClient* client);
 }
 #endif
 
-/**
- * @}
- */
+
 
 /**
  @page libvncclient_doc LibVNCClient Documentation

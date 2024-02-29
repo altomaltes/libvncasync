@@ -8,11 +8,11 @@
 
 /* -=- sraRect */
 
-typedef struct _rect {
-	int x1;
-	int y1;
-	int x2;
-	int y2;
+typedef struct _rect
+{ int x1;
+	 int y1;
+	 int x2;
+	 int y2;
 } sraRect;
 
 typedef struct sraRegion sraRegion;
@@ -23,16 +23,15 @@ extern sraRegion *sraRgnCreate();
 extern sraRegion *sraRgnCreateRect(int x1, int y1, int x2, int y2);
 extern sraRegion *sraRgnCreateRgn(const sraRegion *src);
 
-extern void sraRgnDestroy(sraRegion *rgn);
-extern void sraRgnMakeEmpty(sraRegion *rgn);
-extern rfbBool sraRgnAnd(sraRegion *dst, const sraRegion *src);
-extern void sraRgnOr(sraRegion *dst, const sraRegion *src);
-extern rfbBool sraRgnSubtract(sraRegion *dst, const sraRegion *src);
+extern void    sraRgnDestroy(  sraRegion * );
+extern void    sraRgnMakeEmpty(sraRegion * );
+extern rfbBool sraRgnAnd(      sraRegion *dst, const sraRegion *src );
+extern void    sraRgnOr(       sraRegion *dst, const sraRegion *src );
+extern rfbBool sraRgnSubtract( sraRegion *dst, const sraRegion *src );
 
 extern void sraRgnOffset(sraRegion *dst, int dx, int dy);
 
-extern rfbBool sraRgnPopRect(sraRegion *region, sraRect *rect,
-			  unsigned long flags);
+extern rfbBool sraRgnPopRect(sraRegion *region, sraRect *rect, unsigned long flags);
 
 extern unsigned long sraRgnCountRects(const sraRegion *rgn);
 extern rfbBool sraRgnEmpty(const sraRegion *rgn);
@@ -41,8 +40,8 @@ extern sraRegion *sraRgnBBox(const sraRegion *src);
 
 /* -=- rectangle iterator */
 
-typedef struct sraRectangleIterator {
-  rfbBool reverseX,reverseY;
+typedef struct sraRectangleIterator
+{ rfbBool reverseX,reverseY;
   int ptrSize,ptrPos;
   struct sraSpan** sPtrs;
 } sraRectangleIterator;

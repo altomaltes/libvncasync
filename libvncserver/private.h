@@ -3,13 +3,13 @@
 
 /* from cursor.c */
 
-void rfbShowCursor(rfbClientPtr cl);
-void rfbHideCursor(rfbClientPtr cl);
-void rfbRedrawAfterHideCursor(rfbClientPtr cl,sraRegionPtr updateRegion);
+void rfbShowCursor(rfbClient * cl);
+void rfbHideCursor(rfbClient * cl);
+void rfbRedrawAfterHideCursor(rfbClient * cl,sraRegionPtr updateRegion);
 
 /* from main.c */
 
-rfbClientPtr rfbClientIteratorHead(rfbClientIteratorPtr i);
+rfbClient * rfbClientIteratorHead(rfbClientIteratorPtr i);
 
 /* from tight.c */
 
@@ -22,14 +22,14 @@ extern void rfbTightCleanup(rfbScreenInfoPtr screen);
 extern void rfbZlibCleanup(rfbScreenInfoPtr screen);
 
 /* from zrle.c */
-void rfbFreeZrleData(rfbClientPtr cl);
+void rfbFreeZrleData(rfbClient * cl);
 
 #endif
 
 
 /* from ultra.c */
 
-extern void rfbFreeUltraData(rfbClientPtr cl);
+extern void rfbFreeUltraData(rfbClient * cl);
 
 #endif
 

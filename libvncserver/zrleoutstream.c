@@ -18,8 +18,10 @@
  * USA.
  */
 
-#include "zrleoutstream.h"
+#include <string.h>
 #include <stdlib.h>
+
+#include "zrleoutstream.h"
 
 #define ZRLE_IN_BUFFER_SIZE  16384
 #define ZRLE_OUT_BUFFER_SIZE 1024

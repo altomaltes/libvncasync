@@ -6,7 +6,7 @@
 
 /*
  *  OSXvnc Copyright (C) 2001 Dan McGuirk <mcguirk@incompleteness.net>.
- *  Original Xvnc code Copyright (C) 1999 AT&T Laboratories Cambridge.  
+ *  Original Xvnc code Copyright (C) 1999 AT&T Laboratories Cambridge.
  *  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -25,11 +25,12 @@
  *  USA.
  */
 
-#include <rfb/rfb.h>
+#include <string.h>
+#include <rfb/rfbproto.h>
 
-static rfbBool sendHextiles8(rfbClientPtr cl, int x, int y, int w, int h);
-static rfbBool sendHextiles16(rfbClientPtr cl, int x, int y, int w, int h);
-static rfbBool sendHextiles32(rfbClientPtr cl, int x, int y, int w, int h);
+static rfbBool sendHextiles8(  rfbClient * cl, int x, int y, int w, int h);
+static rfbBool sendHextiles16( rfbClient * cl, int x, int y, int w, int h);
+static rfbBool sendHextiles32( rfbClient * cl, int x, int y, int w, int h);
 
 
 /*
@@ -37,14 +38,14 @@ static rfbBool sendHextiles32(rfbClientPtr cl, int x, int y, int w, int h);
  */
 
 rfbBool
-rfbSendRectEncodingHextile(rfbClientPtr cl,
+rfbSendRectEncodingHextile(rfbClient * cl,
                            int x,
                            int y,
                            int w,
                            int h)
 {
     rfbFramebufferUpdateRectHeader rect;
-    
+
     if (cl->ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE) {
         if (!rfbSendUpdateBuf(cl))
             return FALSE;
@@ -92,7 +93,7 @@ rfbSendRectEncodingHextile(rfbClientPtr cl,
 #define DEFINE_SEND_HEXTILES(bpp)                                               \
                                                                                 \
                                                                                 \
-static rfbBool subrectEncode##bpp(rfbClientPtr cli, uint##bpp##_t *data,        \
+static rfbBool subrectEncode##bpp(rfbClient * cli, uint##bpp##_t *data,        \
 		int w, int h, uint##bpp##_t bg, uint##bpp##_t fg, rfbBool mono);\
 static void testColours##bpp(uint##bpp##_t *data, int size, rfbBool *mono,      \
                   rfbBool *solid, uint##bpp##_t *bg, uint##bpp##_t *fg);        \
@@ -103,7 +104,7 @@ static void testColours##bpp(uint##bpp##_t *data, int size, rfbBool *mono,      
  */                                                                             \
                                                                                 \
 static rfbBool                                                                  \
-sendHextiles##bpp(rfbClientPtr cl, int rx, int ry, int rw, int rh) {            \
+sendHextiles##bpp(rfbClient * cl, int rx, int ry, int rw, int rh) {            \
     int x, y, w, h;                                                             \
     int startUblen;                                                             \
     char *fbptr;                                                                \
@@ -193,7 +194,7 @@ sendHextiles##bpp(rfbClientPtr cl, int rx, int ry, int rw, int rh) {            
                                                                                 \
                                                                                 \
 static rfbBool                                                                  \
-subrectEncode##bpp(rfbClientPtr cl, uint##bpp##_t *data, int w, int h,          \
+subrectEncode##bpp(rfbClient * cl, uint##bpp##_t *data, int w, int h,          \
                    uint##bpp##_t bg, uint##bpp##_t fg, rfbBool mono)            \
 {                                                                               \
     uint##bpp##_t cl2;                                                          \

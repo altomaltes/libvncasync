@@ -424,8 +424,8 @@ CCOPTS = -DNO_FORK
 EXTRA_DIST = configure.ac
 lib_LTLIBRARIES = libvncasync.la
 AM_CPPFLAGS = -I$(top_srcdir)/common -I$(top_srcdir)/libvncserver ${JPEG_CFLAGS} -DBUILDING_VNCASYNC
-library_includedir = $(includedir)/rfb
-library_include_HEADERS = rfb/rfb.h rfb/rfbproto.h
+library_includedir = $(includedir)
+library_include_HEADERS = rfb/rfb.h 
 libvncasync_la_SOURCES = libvncserver/translate.c libvncserver/auth.c \
 	libvncserver/cargs.c libvncserver/corre.c \
 	libvncserver/cursor.c libvncserver/cutpaste.c \
@@ -1168,7 +1168,7 @@ uninstall-am: uninstall-libLTLIBRARIES \
 # Get rid of these, you may also preach about its utility
 #
 install-exec-hook:
-	@(cd $(DESTDIR)$(libdir) && ls && pwd && $(RM) $(lib_LTLIBRARIES))
+	@(cd $(DESTDIR)$(libdir) && $(RM) $(lib_LTLIBRARIES))
 
 @BUILDING_SLACK_TRUE@slack:
 @BUILDING_SLACK_TRUE@	make install DESTDIR=$(abs_builddir)/pkg.${build_cpu}

@@ -7,7 +7,7 @@
 
 /*
  *  OSXvnc Copyright (C) 2001 Dan McGuirk <mcguirk@incompleteness.net>.
- *  Original Xvnc code Copyright (C) 1999 AT&T Laboratories Cambridge.  
+ *  Original Xvnc code Copyright (C) 1999 AT&T Laboratories Cambridge.
  *  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -26,7 +26,8 @@
  *  USA.
  */
 
-#include <rfb/rfb.h>
+#include <string.h>
+#include <rfb/rfbproto.h>
 
 /*
  * cl->beforeEncBuf contains pixel data in the client's format.
@@ -35,9 +36,9 @@
  * raw encoding is used instead.
  */
 
-static int subrectEncode8(  rfbClientPtr, uint8_t *data, int w, int h);
-static int subrectEncode16( rfbClientPtr, uint16_t *data, int w, int h);
-static int subrectEncode32( rfbClientPtr, uint32_t *data, int w, int h);
+static int subrectEncode8(  rfbClient *, uint8_t *data, int w, int h);
+static int subrectEncode16( rfbClient *, uint16_t *data, int w, int h);
+static int subrectEncode32( rfbClient *, uint32_t *data, int w, int h);
 static uint32_t getBgColour(char *data, int size, int bpp);
 
 
@@ -45,7 +46,7 @@ static uint32_t getBgColour(char *data, int size, int bpp);
  * rfbSendRectEncodingRRE - send a given rectangle using RRE encoding.
  */
 
-rfbBool rfbSendRectEncodingRRE( rfbClientPtr cl
+rfbBool rfbSendRectEncodingRRE( rfbClient * cl
                               , int x, int y
                               , int w, int h )
 { rfbFramebufferUpdateRectHeader rect;
@@ -67,7 +68,7 @@ rfbBool rfbSendRectEncodingRRE( rfbClientPtr cl
             cl->beforeEncBuf = (char *)realloc(cl->beforeEncBuf, cl->beforeEncBufSize);
     }
 
-  if (cl->afterEncBufSize < maxRawSize) 
+  if (cl->afterEncBufSize < maxRawSize)
   {
      cl->afterEncBufSize = maxRawSize;
      if (cl->afterEncBuf == NULL)
@@ -81,7 +82,7 @@ rfbBool rfbSendRectEncodingRRE( rfbClientPtr cl
                        &cl->format, fbptr, cl->beforeEncBuf,
                        cl->scaledScreen->paddedWidthInBytes, w, h);
 
-    switch (cl->format.bitsPerPixel) 
+    switch (cl->format.bitsPerPixel)
     { case 8:
         nSubrects = subrectEncode8(cl, (uint8_t *)cl->beforeEncBuf, w, h);
       break;
@@ -98,7 +99,7 @@ rfbBool rfbSendRectEncodingRRE( rfbClientPtr cl
         rfbLog("getBgColour: bpp %d?\n",cl->format.bitsPerPixel);
         return FALSE;
     }
-        
+
     if (nSubrects < 0) {
 
         /* RRE encoding was too large, use raw */
@@ -157,21 +158,21 @@ rfbBool rfbSendRectEncodingRRE( rfbClientPtr cl
 
 
 /*
- * subrectEncode() encodes the given multicoloured rectangle as a background 
- * colour overwritten by single-coloured rectangles.  It returns the number 
+ * subrectEncode() encodes the given multicoloured rectangle as a background
+ * colour overwritten by single-coloured rectangles.  It returns the number
  * of subrectangles in the encoded buffer, or -1 if subrect encoding won't
  * fit in the buffer.  It puts the encoded rectangles in cl->afterEncBuf.  The
  * single-colour rectangle partition is not optimal, but does find the biggest
- * horizontal or vertical rectangle top-left anchored to each consecutive 
+ * horizontal or vertical rectangle top-left anchored to each consecutive
  * coordinate position.
  *
- * The coding scheme is simply [<bgcolour><subrect><subrect>...] where each 
+ * The coding scheme is simply [<bgcolour><subrect><subrect>...] where each
  * <subrect> is [<colour><x><y><w><h>].
  */
 
 #define DEFINE_SUBRECT_ENCODE(bpp)                                            \
 static int                                                                    \
- subrectEncode##bpp(rfbClientPtr client, uint##bpp##_t *data, int w, int h) { \
+ subrectEncode##bpp(rfbClient * client, uint##bpp##_t *data, int w, int h) { \
     uint##bpp##_t cl;                                                         \
     rfbRectangle subrect;                                                     \
     int x,y;                                                                  \
@@ -269,9 +270,9 @@ DEFINE_SUBRECT_ENCODE( 32 )
 static uint32_t
 getBgColour(char *data, int size, int bpp)
 {
-    
+
 #define NUMCLRS 256
-  
+
   static int counts[NUMCLRS];
   int i,j,k;
 
@@ -305,6 +306,6 @@ getBgColour(char *data, int size, int bpp)
       maxclr = ((uint8_t *)data)[j];
     }
   }
-  
+
   return maxclr;
 }

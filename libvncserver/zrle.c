@@ -24,21 +24,22 @@
  * Routines to implement Zlib Run-length Encoding (ZRLE).
  */
 
-#include "rfb/rfb.h"
+#include <string.h>
+#include "rfb/rfbproto.h"
 #include "private.h"
 #include "zrleoutstream.h"
 
 
-#define GET_IMAGE_INTO_BUF(tx,ty,tw,th,buf)                                \
-{  char *fbptr = (cl->scaledScreen->frameBuffer                                   \
-		 + (cl->scaledScreen->paddedWidthInBytes * ty)                   \
-                 + (tx * (cl->scaledScreen->bitsPerPixel / 8)));                 \
-                                                                           \
+#define GET_IMAGE_INTO_BUF(tx,ty,tw,th,buf)                              \
+{  char *fbptr = (cl->scaledScreen->frameBuffer                          \
+		 + (cl->scaledScreen->paddedWidthInBytes * ty)                         \
+                 + (tx * (cl->scaledScreen->bitsPerPixel / 8)));         \
+                                                                         \
   (*cl->translateFn)(cl->translateLookupTable, &cl->screen->serverFormat,\
-                     &cl->format, fbptr, (char*)buf,                       \
+                     &cl->format, fbptr, (char*)buf,                     \
                      cl->scaledScreen->paddedWidthInBytes, tw, th); }
 
-#define EXTRA_ARGS , rfbClientPtr cl
+#define EXTRA_ARGS , rfbClient * cl
 
 #define ENDIAN_LITTLE 0
 #define ENDIAN_BIG 1
@@ -80,9 +81,11 @@
 #undef CPIXEL
 #define CPIXEL 24B
 #undef ZYWRLE_ENDIAN
+
 #define ZYWRLE_ENDIAN ENDIAN_LITTLE
 #include "zrleencodetemplate.c"
 #undef ZYWRLE_ENDIAN
+
 #define ZYWRLE_ENDIAN ENDIAN_BIG
 #include "zrleencodetemplate.c"
 #undef CPIXEL
@@ -101,7 +104,7 @@
  * rfbSendRectEncodingZRLE - send a given rectangle using ZRLE encoding.
  */
 
-rfbBool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
+rfbBool rfbSendRectEncodingZRLE(rfbClient * cl, int x, int y, int w, int h)
 {
   zrleOutStream* zos;
   rfbFramebufferUpdateRectHeader rect;
@@ -216,15 +219,17 @@ rfbBool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
 
   /* copy into updateBuf and send from there.  Maybe should send directly? */
 
-  for (i = 0; i < ZRLE_BUFFER_LENGTH(&zos->out);) {
-
+  for (i = 0; i < ZRLE_BUFFER_LENGTH(&zos->out);)
+  {
     int bytesToCopy = UPDATE_BUF_SIZE - cl->ublen;
 
-    if (i + bytesToCopy > ZRLE_BUFFER_LENGTH(&zos->out)) {
-      bytesToCopy = ZRLE_BUFFER_LENGTH(&zos->out) - i;
+    if (i + bytesToCopy > ZRLE_BUFFER_LENGTH(&zos->out))
+    { bytesToCopy = ZRLE_BUFFER_LENGTH(&zos->out) - i;
     }
 
-    memcpy(cl->updateBuf+cl->ublen, (uint8_t*)zos->out.start + i, bytesToCopy);
+    memcpy( cl->updateBuf+cl->ublen
+          , (uint8_t*)zos->out.start + i
+          , bytesToCopy );
 
     cl->ublen += bytesToCopy;
     i += bytesToCopy;
@@ -232,14 +237,13 @@ rfbBool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
     if (cl->ublen == UPDATE_BUF_SIZE) {
       if (!rfbSendUpdateBuf(cl))
         return FALSE;
-    }
-  }
+  }  }
 
   return TRUE;
 }
 
 
-void rfbFreeZrleData(rfbClientPtr cl)
+void rfbFreeZrleData(rfbClient * cl)
 { if ( cl )
 	 { FREE( cl->zrleData      );
   	 FREE( cl->zrleBeforeBuf );

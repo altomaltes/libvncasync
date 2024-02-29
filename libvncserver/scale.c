@@ -26,7 +26,7 @@
  */
 
 #include <string.h>
-#include <rfb/rfb.h>
+#include <rfb/rfbproto.h>
 #include <rfb/rfbregion.h>
 #include "private.h"
 
@@ -276,7 +276,7 @@ void rfbScaledScreenUpdate(rfbScreenInfoPtr screen, int x1, int y1, int x2, int 
 /* Create a new scaled version of the framebuffer
  */
 
-rfbScreenInfoPtr rfbScaledScreenAllocate( rfbClientPtr cl
+rfbScreenInfoPtr rfbScaledScreenAllocate( rfbClient * cl
                                         , int width, int height )
 { rfbScreenInfoPtr ptr;
   ptr = malloc(sizeof(rfbScreenInfo));
@@ -325,7 +325,7 @@ rfbScreenInfoPtr rfbScaledScreenAllocate( rfbClientPtr cl
  * TODO: implement a refcount per scaled screen to prevent
  * unreferenced scaled screens from hanging around
  */
-rfbScreenInfoPtr rfbScalingFind(rfbClientPtr cl, int width, int height)
+rfbScreenInfoPtr rfbScalingFind(rfbClient * cl, int width, int height)
 { rfbScreenInfoPtr ptr;
     /* include the original in the search (ie: fine 1:1 scaled version of the frameBuffer) */
   for (ptr=cl->screen; ptr!=NULL; ptr=ptr->scaledScreenNext)
@@ -336,7 +336,7 @@ rfbScreenInfoPtr rfbScalingFind(rfbClientPtr cl, int width, int height)
 }
 
 /* Future needs "scale to 320x240, as that's the client's screen size */
-void rfbScalingSetup(rfbClientPtr cl, int width, int height)
+void rfbScalingSetup(rfbClient * cl, int width, int height)
 { rfbScreenInfoPtr ptr;
 
   ptr = rfbScalingFind(cl,width,height);
@@ -366,7 +366,7 @@ void rfbScalingSetup(rfbClientPtr cl, int width, int height)
         rfbLog("Scaling to %dx%d failed, leaving things alone\n",width,height);
 }
 
-int rfbSendNewScaleSize(rfbClientPtr cl)
+int rfbSendNewScaleSize(rfbClient * cl)
 {
     /* if the client supports newFBsize Encoding, use it */
     if (cl->useNewFBSize && cl->newFBSizePending)

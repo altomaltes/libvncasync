@@ -24,7 +24,9 @@
  *  USA.
  */
 
-#include <rfb/rfb.h>
+#include <stdio.h>
+#include <string.h>
+#include <rfb/rfbproto.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf /* Missing in MSVC */
@@ -34,15 +36,15 @@ char *messageNameServer2Client(uint32_t type, char *buf, int len);
 char *messageNameClient2Server(uint32_t type, char *buf, int len);
 char *encodingName(uint32_t enc, char *buf, int len);
 
-rfbStatList *rfbStatLookupEncoding(rfbClientPtr cl, uint32_t type);
-rfbStatList *rfbStatLookupMessage(rfbClientPtr cl, uint32_t type);
+rfbStatList *rfbStatLookupEncoding(rfbClient * cl, uint32_t type);
+rfbStatList *rfbStatLookupMessage(rfbClient * cl, uint32_t type);
 
-void  rfbStatRecordEncodingSent(rfbClientPtr cl, uint32_t type, int byteCount, int byteIfRaw);
-void  rfbStatRecordEncodingRcvd(rfbClientPtr cl, uint32_t type, int byteCount, int byteIfRaw);
-void  rfbStatRecordMessageSent(rfbClientPtr cl, uint32_t type, int byteCount, int byteIfRaw);
-void  rfbStatRecordMessageRcvd(rfbClientPtr cl, uint32_t type, int byteCount, int byteIfRaw);
-void rfbResetStats(rfbClientPtr cl);
-void rfbPrintStats(rfbClientPtr cl);
+void  rfbStatRecordEncodingSent(rfbClient * cl, uint32_t type, int byteCount, int byteIfRaw);
+void  rfbStatRecordEncodingRcvd(rfbClient * cl, uint32_t type, int byteCount, int byteIfRaw);
+void  rfbStatRecordMessageSent(rfbClient * cl, uint32_t type, int byteCount, int byteIfRaw);
+void  rfbStatRecordMessageRcvd(rfbClient * cl, uint32_t type, int byteCount, int byteIfRaw);
+void rfbResetStats(rfbClient * cl);
+void rfbPrintStats(rfbClient * cl);
 
 
 
@@ -168,7 +170,7 @@ char *encodingName(uint32_t type, char *buf, int len) {
 
 
 
-rfbStatList *rfbStatLookupEncoding(rfbClientPtr cl, uint32_t type)
+rfbStatList *rfbStatLookupEncoding(rfbClient * cl, uint32_t type)
 {
     rfbStatList *ptr;
     if (cl==NULL) return NULL;
@@ -190,7 +192,7 @@ rfbStatList *rfbStatLookupEncoding(rfbClientPtr cl, uint32_t type)
 }
 
 
-rfbStatList *rfbStatLookupMessage(rfbClientPtr cl, uint32_t type)
+rfbStatList *rfbStatLookupMessage(rfbClient * cl, uint32_t type)
 {
     rfbStatList *ptr;
     if (cl==NULL) return NULL;
@@ -211,7 +213,7 @@ rfbStatList *rfbStatLookupMessage(rfbClientPtr cl, uint32_t type)
     return ptr;
 }
 
-void rfbStatRecordEncodingSentAdd(rfbClientPtr cl, uint32_t type, int byteCount) /* Specifically for tight encoding */
+void rfbStatRecordEncodingSentAdd(rfbClient * cl, uint32_t type, int byteCount) /* Specifically for tight encoding */
 {
     rfbStatList *ptr;
 
@@ -221,7 +223,7 @@ void rfbStatRecordEncodingSentAdd(rfbClientPtr cl, uint32_t type, int byteCount)
 }
 
 
-void  rfbStatRecordEncodingSent(rfbClientPtr cl, uint32_t type, int byteCount, int byteIfRaw)
+void  rfbStatRecordEncodingSent(rfbClient * cl, uint32_t type, int byteCount, int byteIfRaw)
 {
     rfbStatList *ptr;
 
@@ -234,7 +236,7 @@ void  rfbStatRecordEncodingSent(rfbClientPtr cl, uint32_t type, int byteCount, i
     }
 }
 
-void  rfbStatRecordEncodingRcvd(rfbClientPtr cl, uint32_t type, int byteCount, int byteIfRaw)
+void  rfbStatRecordEncodingRcvd(rfbClient * cl, uint32_t type, int byteCount, int byteIfRaw)
 { rfbStatList *ptr;
 
   ptr = rfbStatLookupEncoding(cl, type);
@@ -245,7 +247,7 @@ void  rfbStatRecordEncodingRcvd(rfbClientPtr cl, uint32_t type, int byteCount, i
     }
 }
 
-void  rfbStatRecordMessageSent( rfbClientPtr cl, uint32_t type, int byteCount, int byteIfRaw)
+void  rfbStatRecordMessageSent( rfbClient * cl, uint32_t type, int byteCount, int byteIfRaw)
 { rfbStatList *ptr;
 
   ptr= rfbStatLookupMessage(cl, type);
@@ -255,7 +257,7 @@ void  rfbStatRecordMessageSent( rfbClientPtr cl, uint32_t type, int byteCount, i
     ptr->bytesSentIfRaw += byteIfRaw;
 } }
 
-void  rfbStatRecordMessageRcvd(rfbClientPtr cl, uint32_t type, int byteCount, int byteIfRaw)
+void  rfbStatRecordMessageRcvd(rfbClient * cl, uint32_t type, int byteCount, int byteIfRaw)
 {
     rfbStatList *ptr;
 
@@ -269,7 +271,7 @@ void  rfbStatRecordMessageRcvd(rfbClientPtr cl, uint32_t type, int byteCount, in
 }
 
 
-int rfbStatGetSentBytes(rfbClientPtr cl)
+int rfbStatGetSentBytes(rfbClient * cl)
 {
     rfbStatList *ptr=NULL;
     int bytes=0;
@@ -281,7 +283,7 @@ int rfbStatGetSentBytes(rfbClientPtr cl)
     return bytes;
 }
 
-int rfbStatGetSentBytesIfRaw(rfbClientPtr cl)
+int rfbStatGetSentBytesIfRaw(rfbClient * cl)
 {
     rfbStatList *ptr=NULL;
     int bytes=0;
@@ -293,7 +295,7 @@ int rfbStatGetSentBytesIfRaw(rfbClientPtr cl)
     return bytes;
 }
 
-int rfbStatGetRcvdBytes(rfbClientPtr cl)
+int rfbStatGetRcvdBytes(rfbClient * cl)
 {
     rfbStatList *ptr=NULL;
     int bytes=0;
@@ -305,7 +307,7 @@ int rfbStatGetRcvdBytes(rfbClientPtr cl)
     return bytes;
 }
 
-int rfbStatGetRcvdBytesIfRaw(rfbClientPtr cl)
+int rfbStatGetRcvdBytesIfRaw(rfbClient * cl)
 {
     rfbStatList *ptr=NULL;
     int bytes=0;
@@ -317,7 +319,7 @@ int rfbStatGetRcvdBytesIfRaw(rfbClientPtr cl)
     return bytes;
 }
 
-int rfbStatGetMessageCountSent(rfbClientPtr cl, uint32_t type)
+int rfbStatGetMessageCountSent(rfbClient * cl, uint32_t type)
 {
   rfbStatList *ptr=NULL;
     if (cl==NULL) return 0;
@@ -325,7 +327,7 @@ int rfbStatGetMessageCountSent(rfbClientPtr cl, uint32_t type)
       if (ptr->type==type) return ptr->sentCount;
   return 0;
 }
-int rfbStatGetMessageCountRcvd(rfbClientPtr cl, uint32_t type)
+int rfbStatGetMessageCountRcvd(rfbClient * cl, uint32_t type)
 {
   rfbStatList *ptr=NULL;
     if (cl==NULL) return 0;
@@ -334,7 +336,7 @@ int rfbStatGetMessageCountRcvd(rfbClientPtr cl, uint32_t type)
   return 0;
 }
 
-int rfbStatGetEncodingCountSent(rfbClientPtr cl, uint32_t type)
+int rfbStatGetEncodingCountSent(rfbClient * cl, uint32_t type)
 {
   rfbStatList *ptr=NULL;
     if (cl==NULL) return 0;
@@ -342,7 +344,7 @@ int rfbStatGetEncodingCountSent(rfbClientPtr cl, uint32_t type)
       if (ptr->type==type) return ptr->sentCount;
   return 0;
 }
-int rfbStatGetEncodingCountRcvd(rfbClientPtr cl, uint32_t type)
+int rfbStatGetEncodingCountRcvd(rfbClient * cl, uint32_t type)
 {
   rfbStatList *ptr=NULL;
     if (cl==NULL) return 0;
@@ -354,7 +356,7 @@ int rfbStatGetEncodingCountRcvd(rfbClientPtr cl, uint32_t type)
 
 
 
-void rfbResetStats( rfbClientPtr cl )
+void rfbResetStats( rfbClient * cl )
 { if ( cl )
   {  rfbStatList *ptr;
 
@@ -371,7 +373,7 @@ void rfbResetStats( rfbClientPtr cl )
 } } }
 
 
-void rfbPrintStats(rfbClientPtr cl)
+void rfbPrintStats(rfbClient * cl)
 {
     rfbStatList *ptr=NULL;
     char encBuf[64];

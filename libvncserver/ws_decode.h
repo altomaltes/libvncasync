@@ -4,7 +4,7 @@
 #define INCL_EXTRA_HTON_FUNCTIONS
 
 #include <stdint.h>
-#include <rfb/rfb.h>
+#include <rfb/rfbproto.h>
 
 #if defined(__APPLE__)
 
@@ -49,7 +49,7 @@
 struct ws_ctx_s;
 typedef struct ws_ctx_s ws_ctx_t;
 
-typedef int (*wsEncodeFunc)(rfbClientPtr cl, const char *src, int len, char **dst);
+typedef int (*wsEncodeFunc)(rfbClient * cl, const char *src, int len, char **dst);
 typedef int (*wsDecodeFunc)(ws_ctx_t *wsctx, char *dst, int len);
 typedef int (*wsReadFunc  )(void *ctx, char *dst, size_t len);
 
@@ -112,48 +112,44 @@ __attribute__ ((__packed__))
   } u;
 } ws_header_t;
 
-typedef struct ws_header_data_s {
-  ws_header_t *data;
-  /** bytes read */
-  int nRead;
-  /** mask value */
-  ws_mask_t mask;
-  /** length of frame header including payload len, but without mask */
-  int headerLen;
-  /** length of the payload data */
-  uint64_t payloadLen;
-  /** opcode */
-  unsigned char opcode;
-  /** fin bit */
-  unsigned char fin;
+typedef struct ws_header_data_s
+{ ws_header_t *data;
+
+  int nRead;            /** bytes read */
+  ws_mask_t mask;       /** mask value */
+  int headerLen;        /** length of frame header including payload len, but without mask */
+  uint64_t payloadLen;  /** length of the payload data */
+  unsigned char opcode; /** opcode */
+  unsigned char fin;    /** fin bit */
+
 } ws_header_data_t;
 
-struct ws_ctx_s {
-    char codeBufDecode[2048 + WSHLENMAX]; /* base64 + maximum frame header length */
-    char codeBufEncode[B64LEN(UPDATE_BUF_SIZE) + WSHLENMAX]; /* base64 + maximum frame header length */
-    char *writePos;
-    unsigned char *readPos;
-    int readlen;
-    int hybiDecodeState;
-    char carryBuf[3];                      /* For base64 carry-over */
-    int carrylen;
-    int base64;
-    ws_header_data_t header;
-    uint64_t nReadPayload;
-    unsigned char continuation_opcode;
-    wsEncodeFunc encode;
-    wsDecodeFunc decode;
-    ctxInfo_t ctxInfo;
+struct ws_ctx_s
+{ char codeBufDecode[2048 + WSHLENMAX]; /* base64 + maximum frame header length */
+  char codeBufEncode[B64LEN(UPDATE_BUF_SIZE) + WSHLENMAX]; /* base64 + maximum frame header length */
+  char *writePos;
+  unsigned char *readPos;
+  int readlen;
+  int hybiDecodeState;
+  char carryBuf[3];                      /* For base64 carry-over */
+  int carrylen;
+  int base64;
+  ws_header_data_t header;
+  uint64_t nReadPayload;
+  unsigned char continuation_opcode;
+  wsEncodeFunc encode;
+  wsDecodeFunc decode;
+  ctxInfo_t ctxInfo;
 };
 
 enum
-{   WS_OPCODE_CONTINUATION = 0x00,
-    WS_OPCODE_TEXT_FRAME = 0x01,
-    WS_OPCODE_BINARY_FRAME = 0x02,
-    WS_OPCODE_CLOSE = 0x08,
-    WS_OPCODE_PING = 0x09,
-    WS_OPCODE_PONG = 0x0A,
-    WS_OPCODE_INVALID = 0xFF
+{ WS_OPCODE_CONTINUATION= 0x00
+, WS_OPCODE_TEXT_FRAME  = 0x01
+, WS_OPCODE_BINARY_FRAME= 0x02
+, WS_OPCODE_CLOSE       = 0x08
+, WS_OPCODE_PING        = 0x09
+, WS_OPCODE_PONG        = 0x0A
+, WS_OPCODE_INVALID     = 0xFF
 };
 
 int webSocketsDecodeHybi(ws_ctx_t *wsctx, char *dst, int len);

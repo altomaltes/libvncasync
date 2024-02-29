@@ -266,7 +266,7 @@ typedef unsigned int UINT32;
 
 #define HAVE_LIBZ
 #define BPP 32
-#define EXTRA_ARGS , rfbClientPtr cl
+#define EXTRA_ARGS , rfbClient * cl
 
 #define O_RDONLY  1
 #define O_CREAT   2

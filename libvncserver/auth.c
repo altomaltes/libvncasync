@@ -27,10 +27,10 @@
  *  USA.
  */
 
-#include <rfb/rfb.h>
+#include <rfb/rfbproto.h>
 
 /* RFB 3.8 clients are well informed */
-void rfbClientSendString(rfbClientPtr cl, const char *reason);
+void rfbClientSendString(rfbClient * cl, const char *reason);
 
 
 /*
@@ -107,7 +107,7 @@ rfbUnregisterSecurityHandler(rfbSecurityHandler* handler)
  */
 
 static void
-rfbVncAuthSendChallenge(rfbClientPtr cl)
+rfbVncAuthSendChallenge(rfbClient * cl)
 {
 
     /* 4 byte header is alreay sent. Which is rfbSecTypeVncAuth
@@ -138,7 +138,7 @@ rfbVncAuthSendChallenge(rfbClientPtr cl)
  * RFB_INITIALISATION_SHARED state is not restricted to just the OS X client.
  */
 
-static void rfbVncAuthNone(rfbClientPtr cl)
+static void rfbVncAuthNone(rfbClient * cl)
 {
     /* The built-in Mac OS X VNC client behaves in a non-conforming fashion
      * when the server version is 3.7 or later AND the list of security types
@@ -197,7 +197,7 @@ static rfbSecurityHandler VncSecurityHandlerNone = {
 
 
 static void
-rfbSendSecurityTypeList(rfbClientPtr cl, int primaryType)
+rfbSendSecurityTypeList(rfbClient * cl, int primaryType)
 {
     /* The size of the message is the count of security types +1,
      * since the first byte is the number of types. */
@@ -254,7 +254,7 @@ rfbSendSecurityTypeList(rfbClientPtr cl, int primaryType)
  * Tell the client what security type will be used (protocol 3.3).
  */
 static void
-rfbSendSecurityType(rfbClientPtr cl, int32_t securityType)
+rfbSendSecurityType(rfbClient * cl, int32_t securityType)
 {
     uint32_t value32;
 
@@ -292,7 +292,7 @@ rfbSendSecurityType(rfbClientPtr cl, int32_t securityType)
  * possible "security types" (protocol 3.7).
  */
 
-void rfbAuthNewClient(rfbClientPtr cl)
+void rfbAuthNewClient(rfbClient * cl)
 { int32_t securityType = rfbSecTypeInvalid;
 
   if (!cl->screen->authPasswdData || cl->reverseConnection)  /* chk if this condition is valid or not. */
@@ -320,7 +320,7 @@ void rfbAuthNewClient(rfbClientPtr cl)
  */
 
 void
-rfbProcessClientSecurityType(rfbClientPtr cl)
+rfbProcessClientSecurityType(rfbClient * cl)
 {  rfbSecurityHandler* handler;
 
     unsigned char * chosenType= getStreamBytes( cl, 1 );if ( !chosenType ) return;
@@ -346,7 +346,7 @@ rfbProcessClientSecurityType(rfbClientPtr cl)
  */
 
 void
-rfbAuthProcessClientMessage(rfbClientPtr cl)
+rfbAuthProcessClientMessage(rfbClient * cl)
 {
    // int n;
     uint32_t authResult;

@@ -22,7 +22,9 @@
  *  USA.
  */
 
-#include "rfb/rfb.h"
+#include <string.h>
+#include <stdio.h>
+#include "rfb/rfbproto.h"
 #include "rfb/rfbregion.h"
 #include "private.h"
 
@@ -33,7 +35,7 @@ void rfbScaledScreenUpdate(rfbScreenInfoPtr screen, int x1, int y1, int x2, int 
  */
 
 rfbBool
-rfbSendCursorShape(rfbClientPtr cl)
+rfbSendCursorShape(rfbClient * cl)
 {
     rfbCursorPtr pCursor;
     rfbFramebufferUpdateRectHeader rect;
@@ -178,7 +180,7 @@ rfbSendCursorShape(rfbClientPtr cl)
  */
 
 rfbBool
-rfbSendCursorPos(rfbClientPtr cl)
+rfbSendCursorPos(rfbClient * cl)
 {
   rfbFramebufferUpdateRectHeader rect;
 
@@ -462,7 +464,7 @@ void rfbMakeRichCursorFromXCursor(rfbScreenInfoPtr rfbScreen,rfbCursorPtr cursor
 
 /* functions to draw/hide cursor directly in the frame buffer */
 
-void rfbHideCursor(rfbClientPtr cl)
+void rfbHideCursor(rfbClient * cl)
 {
    rfbScreenInfoPtr s=cl->screen;
    rfbCursorPtr c=s->cursor;
@@ -499,7 +501,7 @@ void rfbHideCursor(rfbClientPtr cl)
 
 }
 
-void rfbShowCursor(rfbClientPtr cl)
+void rfbShowCursor(rfbClient * cl)
 {
    rfbScreenInfoPtr s=cl->screen;
    rfbCursorPtr c=s->cursor;
@@ -662,7 +664,7 @@ void rfbShowCursor(rfbClientPtr cl)
  * region gets redrawn.
  */
 
-void rfbRedrawAfterHideCursor(rfbClientPtr cl,sraRegionPtr updateRegion)
+void rfbRedrawAfterHideCursor(rfbClient * cl,sraRegionPtr updateRegion)
 {
     rfbScreenInfoPtr s = cl->screen;
     rfbCursorPtr c = s->cursor;
@@ -709,7 +711,7 @@ static void rfbPrintXCursor(rfbCursorPtr cursor)
 void rfbSetCursor(rfbScreenInfoPtr rfbScreen,rfbCursorPtr c)
 {
   rfbClientIteratorPtr iterator;
-  rfbClientPtr cl;
+  rfbClient * cl;
 
   if(rfbScreen->cursor) {
     iterator=rfbGetClientIterator(rfbScreen);

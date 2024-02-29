@@ -28,31 +28,31 @@ struct rfbssl_ctx *rfbssl_init_global(char *key, char *cert)
     return NULL;
 }
 
-int rfbssl_init(rfbClientPtr cl)
+int rfbssl_init(rfbClient * cl)
 {
     return -1;
 }
 
-int rfbssl_write(rfbClientPtr cl, const char *buf, int bufsize)
+int rfbssl_write(rfbClient * cl, const char *buf, int bufsize)
 {
     return -1;
 }
 
-int rfbssl_peek(rfbClientPtr cl, char *buf, int bufsize)
+int rfbssl_peek(rfbClient * cl, char *buf, int bufsize)
 {
     return -1;
 }
 
-int rfbssl_read(rfbClientPtr cl, char *buf, int bufsize)
+int rfbssl_read(rfbClient * cl, char *buf, int bufsize)
 {
     return -1;
 }
 
-int rfbssl_pending(rfbClientPtr cl)
+int rfbssl_pending(rfbClient * cl)
 {
     return -1;
 }
 
-void rfbssl_destroy(rfbClientPtr cl)
+void rfbssl_destroy(rfbClient * cl)
 {
 }

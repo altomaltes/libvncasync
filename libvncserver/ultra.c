@@ -7,7 +7,9 @@
  * This is 'UltraZip' and is currently not implemented.
  */
 
-#include <rfb/rfb.h>
+#include <string.h>
+#include <rfb/rfbproto.h>
+
 #ifdef HAVE_LZO
 #include <lzo/lzo1x.h>
 #else
@@ -31,7 +33,7 @@
 #define MAX_WRKMEM ((LZO1X_1_MEM_COMPRESS) + (sizeof(lzo_align_t) - 1)) / sizeof(lzo_align_t)
 
 
-void rfbFreeUltraData( rfbClientPtr cl )
+void rfbFreeUltraData( rfbClient * cl )
 { if ( cl )
   { if ( cl->compStreamInitedLZO )
     { FREE( cl->lzoWrkMem );
@@ -39,7 +41,7 @@ void rfbFreeUltraData( rfbClientPtr cl )
 } } }
 
 
-static rfbBool rfbSendOneRectEncodingUltra( rfbClientPtr cl
+static rfbBool rfbSendOneRectEncodingUltra( rfbClient * cl
                                           , int x, int y
                                           , int w, int h )
 { rfbFramebufferUpdateRectHeader rect;
@@ -159,7 +161,7 @@ static rfbBool rfbSendOneRectEncodingUltra( rfbClientPtr cl
  */
 
 rfbBool
-rfbSendRectEncodingUltra(rfbClientPtr cl,
+rfbSendRectEncodingUltra(rfbClient * cl,
                         int x,
                         int y,
                         int w,
