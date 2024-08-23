@@ -142,7 +142,7 @@ AC_CHECK_LIB( [z], [deflate], [LIBS="-lz $LIBS" AC_DEFINE(HAVE_LIBZ, 1, [ Define
             , [-lm])
 
 PKG_CHECK_MODULES( LIBPNG, libpng  >= 1.0.0, HAVE_LIBPNG="yes",  HAVE_LIBPNG="no" )
-PKG_CHECK_MODULES(   JPEG, libjpeg >= 2.0.0, HAVE_LIBJPEG="yes", HAVE_LIBJPEG="no")
+PKG_CHECK_MODULES(   JPEG, libjpeg >= 1.5.0, HAVE_LIBJPEG="yes", HAVE_LIBJPEG="no")
 
 AC_DEFINE( [HAVE_LIBPNG],  [1], [PNG compressed image support]  )
 AC_DEFINE( [HAVE_LIBJPEG], [1], [jpeg compressed image support] )
