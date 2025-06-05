@@ -84,8 +84,8 @@ static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
   int nSubrects;
   int i;
 
-  char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
-                 + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+  char *fbptr= (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
+             + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
   int maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
                     * (cl->format.bitsPerPixel / 8));

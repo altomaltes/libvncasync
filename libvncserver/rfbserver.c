@@ -2959,8 +2959,8 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
         break;
 #endif
 #endif
-    }
-  }
+  }  }
+
   if (i)
   { sraRgnReleaseIterator(i);
     i = NULL;
@@ -3058,8 +3058,8 @@ rfbBool rfbSendRectEncodingRaw( rfbClient * cl
   int nlines;
   int bytesPerLine = w * (cl->format.bitsPerPixel / 8);
 
-  char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
-                 + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+  char *fbptr= (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
+             + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
   /* Flush the buffer to guarantee correct alignment for translateFn(). */
   if (cl->ublen > 0)

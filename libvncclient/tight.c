@@ -93,8 +93,7 @@ static rfbBool DecompressJpegRectBPP(rfbClient* client, int x, int y, int w, int
 
 /* Definitions */
 
-static rfbBool
-HandleTightBPP (rfbClient* client, int rx, int ry, int rw, int rh)
+static rfbBool HandleTightBPP( rfbClient* client, int rx, int ry, int rw, int rh )
 {
   CARDBPP fill_colour;
   uint8_t comp_ctl;
@@ -105,11 +104,12 @@ HandleTightBPP (rfbClient* client, int rx, int ry, int rw, int rh)
   int bufferSize, rowSize, numRows, portionLen, rowsProcessed, extraBytes;
   rfbBool readUncompressed = FALSE;
 
-  if (client->frameBuffer == NULL)
-    return FALSE;
+  if ( !client->frameBuffer )
+  { return FALSE;
+  }
 
-  if (rx + rw > client->width || ry + rh > client->height) {
-    rfbClientLog("Rect out of bounds: %dx%d at (%d, %d)\n", rx, ry, rw, rh);
+  if (rx + rw > client->width || ry + rh > client->height)
+  { rfbClientLog("Rect out of bounds: %dx%d at (%d, %d)\n", rx, ry, rw, rh);
     return FALSE;
   }
 
@@ -336,8 +336,7 @@ InitFilterCopyBPP (rfbClient* client, int rw, int rh)
   return BPP;
 }
 
-static void
-FilterCopyBPP (rfbClient* client, int srcx, int srcy, int numRows)
+static void FilterCopyBPP (rfbClient* client, int srcx, int srcy, int numRows)
 {
   CARDBPP *dst =
     (CARDBPP *)&client->frameBuffer[(srcy * client->width + srcx) * BPP / 8];
@@ -346,13 +345,13 @@ FilterCopyBPP (rfbClient* client, int srcx, int srcy, int numRows)
 #if BPP == 32
   int x;
 
-  if (client->cutZeros) {
-    for (y = 0; y < numRows; y++) {
-      for (x = 0; x < client->rectWidth; x++) {
-	dst[y*client->width+x] =
-	  RGB24_TO_PIXEL32(client->buffer[(y*client->rectWidth+x)*3],
-			   client->buffer[(y*client->rectWidth+x)*3+1],
-			   client->buffer[(y*client->rectWidth+x)*3+2]);
+  if (client->cutZeros)
+  { for (y = 0; y < numRows; y++)
+    { for (x = 0; x < client->rectWidth; x++)
+      {	dst[y*client->width+x] =
+       	  RGB24_TO_PIXEL32(client->buffer[(y*client->rectWidth+x)*3],
+			       client->buffer[(y*client->rectWidth+x)*3+1],
+   			   client->buffer[(y*client->rectWidth+x)*3+2]);
       }
     }
     return;
@@ -422,11 +421,11 @@ FilterGradient24 (rfbClient* client, int srcx, int srcy, int numRows)
 
 #endif
 
-static void
-FilterGradientBPP (rfbClient* client, int srcx, int srcy, int numRows)
+static void FilterGradientBPP (rfbClient* client, int srcx, int srcy, int numRows)
 {
   CARDBPP *dst =
     (CARDBPP *)&client->frameBuffer[(srcy * client->width + srcx) * BPP / 8];
+
   int x, y, c;
   CARDBPP *src = (CARDBPP *)client->buffer;
   uint16_t *thatRow = (uint16_t *)client->tightPrevRow;
@@ -516,12 +515,11 @@ InitFilterPaletteBPP (rfbClient* client, int rw, int rh)
   return (client->rectColors == 2) ? 1 : 8;
 }
 
-static void
-FilterPaletteBPP (rfbClient* client, int srcx, int srcy, int numRows)
+static void FilterPaletteBPP (rfbClient* client, int srcx, int srcy, int numRows)
 {
   int x, y, b, w;
-  CARDBPP *dst =
-    (CARDBPP *)&client->frameBuffer[(srcy * client->width + srcx) * BPP / 8];
+  CARDBPP *dst = (CARDBPP *)&client->frameBuffer[(srcy * client->width + srcx) * BPP / 8];
+
   uint8_t *src = (uint8_t *)client->buffer;
   CARDBPP *palette = (CARDBPP *)client->tightPalette;
 
