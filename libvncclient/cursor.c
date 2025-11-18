@@ -59,7 +59,7 @@ rfbBool HandleCursorShape( rfbClient* client
   /* Allocate memory for pixel data and temporary mask data. */
   FREE( client->rcSource);
 
-  client->rcSource = malloc(width * height * bytesPerPixel);
+  client->rcSource = calloc(width * height , bytesPerPixel);
   if (client->rcSource == NULL)
     return FALSE;
 
@@ -130,7 +130,7 @@ rfbBool HandleCursorShape( rfbClient* client
     return FALSE;
   }
 
-  client->rcMask = malloc(width * height);
+  client->rcMask = calloc(width , height);
 
   if (client->rcMask == NULL)
   { FREE( client->rcSource );

@@ -105,7 +105,7 @@ static rfbBool MallocFrameBuffer(rfbClient* client)
     return FALSE;
   }
 
-  client->frameBuffer=malloc( (size_t)allocSize );
+  client->frameBuffer=calloc( (size_t)allocSize, 1 );
 
   if (client->frameBuffer == NULL)
     rfbClientErr("CRITICAL: frameBuffer allocation failed, requested size too large or not enough memory?\n");

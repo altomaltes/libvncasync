@@ -268,7 +268,7 @@ rfbBool ConnectToRFBServer( rfbClient* client
 { if (client->serverPort==-1)  /* serverHost is a file recorded by vncrec. */
   { const char* magic="vncLog0.0";
     char buffer[10];
-    rfbVNCRec* rec = (rfbVNCRec*)malloc(sizeof(rfbVNCRec));
+    rfbVNCRec* rec = (rfbVNCRec*)calloc(sizeof(rfbVNCRec),1);
     client->vncRec = rec;
 
     rec->file = fopen(client->serverHost,"rb");
@@ -726,7 +726,7 @@ HandleARDAuth(rfbClient *client)
     }
 
     keylen = 256*len[0]+len[1];
-    mod = (uint8_t*)malloc(keylen*4);
+    mod = (uint8_t*)calloc(keylen*4, 1 );
     if (!mod)
     { rfbClientLog("malloc out of memory\n");
       break;
@@ -862,7 +862,7 @@ HandleARDAuth(rfbClient *client)
    SetClientAuthSchemes.
 */
 
-void SetClientAuthSchemes(rfbClient* client,const uint32_t *authSchemes, int size)
+void SetClientAuthSchemes( rfbClient * client,const uint32_t *authSchemes, int size)
 { int i;
 
   FREE(client->clientAuthSchemes);
@@ -873,12 +873,11 @@ void SetClientAuthSchemes(rfbClient* client,const uint32_t *authSchemes, int siz
          calculate the size here */
       for (size=0; authSchemes[size]; size++) ;
     }
-    client->clientAuthSchemes = (uint32_t*)malloc(sizeof(uint32_t)*(size+1));
+    client->clientAuthSchemes = (uint32_t*)calloc(sizeof(uint32_t)*(size+1), 1 );
     for (i=0; i<size; i++)
       client->clientAuthSchemes[i] = authSchemes[i];
     client->clientAuthSchemes[size] = 0;
-  }
-}
+} }
 
 /*
    InitialiseRFBConnection.
@@ -1124,7 +1123,7 @@ InitialiseRFBConnection(rfbClient* client)
     return FALSE;
   }
 
-  client->desktopName= malloc(client->si.nameLength + 1);
+  client->desktopName= calloc(client->si.nameLength + 1, 1 );
 
   if ( !client->desktopName )
   { rfbClientLog("Error allocating memory for desktop name, %lu bytes\n",
@@ -1743,7 +1742,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
         /* rect.r.w=byte count, rect.r.h=# of encodings */
         if (rect.encoding == rfbEncodingSupportedEncodings)
         { char *buffer;
-          buffer = malloc(rect.r.w);
+          buffer = calloc(rect.r.w, 1 );
           if (!ReadFromRFBServer(client, buffer, rect.r.w))
           { // fr   ee(buffer);
             return FALSE;
@@ -1758,7 +1757,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
         /* rect.r.w=byte count */
         if (rect.encoding == rfbEncodingServerIdentity)
         { char *buffer;
-          buffer = malloc(rect.r.w+1);
+          buffer = calloc(rect.r.w+1, 1 );
 
           if (!ReadFromRFBServer(client, buffer, rect.r.w))
           { // fr  ee(buffer);
@@ -2111,7 +2110,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
         return FALSE;
       }
 
-      buffer = malloc(msg.sct.length+1);
+      buffer = calloc(msg.sct.length+1, 1 );
 
       if (!ReadFromRFBServer(client, buffer, msg.sct.length))
       { FREE( buffer );
@@ -2144,14 +2143,16 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           rfbClientLog("Received TextChat Close\n");
           if (client->HandleTextChat!=NULL)
             client->HandleTextChat(client, (int)rfbTextChatClose, NULL);
-          break;
+        break;
+
         case rfbTextChatFinished:
           rfbClientLog("Received TextChat Finished\n");
           if (client->HandleTextChat!=NULL)
             client->HandleTextChat(client, (int)rfbTextChatFinished, NULL);
-          break;
+        break;
+
         default:
-          buffer=malloc(msg.tc.length+1);
+          buffer= calloc(msg.tc.length+1, 1 );
           if (!ReadFromRFBServer(client, buffer, msg.tc.length))
           { FREE( buffer );
             return FALSE;

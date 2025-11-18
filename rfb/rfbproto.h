@@ -2044,10 +2044,10 @@ typedef struct _rfbClient
     wsCtx     *wsctx;
     char *wspath;                          /* Requests path component */
 
-    /**
-     * clientFramebufferUpdateRequestHook is called when a client requests a frame
-     * buffer update.
-     */
+ /**
+   * clientFramebufferUpdateRequestHook is called when a client requests a frame
+   * buffer update.
+   */
     ClientFramebufferUpdateRequestHookPtr clientFramebufferUpdateRequestHook;
 
     rfbBool useExtDesktopSize;

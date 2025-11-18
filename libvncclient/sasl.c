@@ -49,7 +49,7 @@
  * NB, keep in sync with similar method in qemud/remote.c
  */
 static char *vnc_connection_addr_to_string(char *host, int port)
-{ char * buf = (char *)malloc(strlen(host) + 7);
+{ char * buf = (char *)calloc(strlen(host) + 7, 1 );
   sprintf(buf, "%s;%hu", host, port);
   return buf;
 }
@@ -113,7 +113,7 @@ static int password_callback_adapt(sasl_conn_t *conn,
 
    if (! password) return SASL_FAIL;
 
-   sasl_secret_t *lsec = (sasl_secret_t *)malloc(sizeof(sasl_secret_t) + strlen(password));
+   sasl_secret_t *lsec = (sasl_secret_t *)calloc(sizeof(sasl_secret_t) + strlen(password), 1 );
    if (!lsec) {
        rfbClientLog("Could not allocate sasl_secret_t\n");
        return SASL_FAIL;
@@ -354,7 +354,7 @@ rfbBool HandleSASLAuth( rfbClient *client )
     /* NB, distinction of NULL vs "" is *critical* in SASL */
 
     if ( serverinlen )
-    { serverin = malloc(serverinlen);
+    { serverin = calloc(serverinlen, 1);
       if (!ReadFromRFBServer(client, serverin, serverinlen)) goto error;
       serverin[serverinlen-1] = '\0';
       serverinlen--;
@@ -424,7 +424,7 @@ rfbBool HandleSASLAuth( rfbClient *client )
 
     /* NB, distinction of NULL vs "" is *critical* in SASL */
         if (serverinlen) {
-            serverin = malloc(serverinlen);
+            serverin = calloc(serverinlen, 1 );
             if (!ReadFromRFBServer(client, serverin, serverinlen)) goto error;
             serverin[serverinlen-1] = '\0';
             serverinlen--;
