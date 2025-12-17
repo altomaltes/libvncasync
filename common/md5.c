@@ -176,12 +176,13 @@ void *resblock;
   return 0;
 }
 
-/* Compute MD5 message digest for LEN bytes beginning at BUFFER.  The
-   result is always in little endian byte order, so that a byte-wise
-   output yields to the wanted ASCII representation of the message
-   digest.  */
-void *
-md5_buffer (buffer, len, resblock)
+/**
+ * Compute MD5 message digest for LEN bytes beginning at BUFFER.  The
+ *  result is always in little endian byte order, so that a byte-wise
+ *  output yields to the wanted ASCII representation of the message
+ *  digest.
+ */
+void * md5_buffer (buffer, len, resblock)
 const char *buffer;
 size_t len;
 void *resblock;
@@ -198,8 +199,7 @@ void *resblock;
 }
 
 
-void
-md5_process_bytes (buffer, len, ctx)
+void md5_process_bytes (buffer, len, ctx)
 const void *buffer;
 size_t len;
 struct md5_ctx *ctx;

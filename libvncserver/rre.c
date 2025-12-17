@@ -149,26 +149,25 @@ rfbBool rfbSendRectEncodingRRE( rfbClient * cl
       if (cl->ublen == UPDATE_BUF_SIZE)
       {  if (!rfbSendUpdateBuf(cl))
             return FALSE;
-      }
-   }
+   }  }
 
    return TRUE;
 }
 
 
 
-/*
-   subrectEncode() encodes the given multicoloured rectangle as a background
-   colour overwritten by single-coloured rectangles.  It returns the number
-   of subrectangles in the encoded buffer, or -1 if subrect encoding won't
-   fit in the buffer.  It puts the encoded rectangles in cl->afterEncBuf.  The
-   single-colour rectangle partition is not optimal, but does find the biggest
-   horizontal or vertical rectangle top-left anchored to each consecutive
-   coordinate position.
-
-   The coding scheme is simply [<bgcolour><subrect><subrect>...] where each
-   <subrect> is [<colour><x><y><w><h>].
-*/
+/**
+ *  subrectEncode() encodes the given multicoloured rectangle as a background
+ *  colour overwritten by single-coloured rectangles.  It returns the number
+ *  of subrectangles in the encoded buffer, or -1 if subrect encoding won't
+ *  fit in the buffer.  It puts the encoded rectangles in cl->afterEncBuf.  The
+ *  single-colour rectangle partition is not optimal, but does find the biggest
+ *  horizontal or vertical rectangle top-left anchored to each consecutive
+ *  coordinate position.
+ *
+ *  The coding scheme is simply [<bgcolour><subrect><subrect>...] where each
+ *  <subrect> is [<colour><x><y><w><h>].
+ */
 
 #define DEFINE_SUBRECT_ENCODE(bpp)                                            \
 static int                                                                    \
@@ -289,8 +288,7 @@ getBgColour(char *data, int size, int bpp)
       else
       {  rfbLog("getBgColour: bpp %d?\n",bpp);
          return 0;
-      }
-   }
+   }  }
 
    for (i=0; i<NUMCLRS; i++)
    {  counts[i] = 0;
@@ -306,8 +304,7 @@ getBgColour(char *data, int size, int bpp)
       if (counts[k] > maxcount)
       {  maxcount = counts[k];
          maxclr = ((uint8_t *)data)[j];
-      }
-   }
+   }  }
 
    return maxclr;
 }

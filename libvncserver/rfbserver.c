@@ -484,8 +484,6 @@ int rfbSinkClientStream( rfbClient * cl
                        , size_t      sz )
 { cl->recvPtr= (char*)data, cl->bytesLeft= sz;
 
-  puts("DATA SINKER");
-
   while( cl->bytesLeft > 0 )
   { rfbProcessClientMessage( cl );
   }
@@ -493,7 +491,11 @@ int rfbSinkClientStream( rfbClient * cl
   return( cl->bytesLeft  );
 }
 
-int rfbPushClientStream( rfbClient * cl, const void * data, size_t sz )  // JACS, client data sinker
+/**
+ * JACS, client data sinker
+ */
+int rfbPushClientStream( rfbClient * cl
+                       , const void * data, size_t sz )
 { if ( cl )
   { if ( cl->screen )
     { if ( cl->screen->streamPusher )
