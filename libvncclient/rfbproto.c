@@ -78,7 +78,7 @@ rfbDefaultClientLog(const char *format, ...)
   time_t log_clock;
 
   if(!rfbEnableClientLogging)
-    return;
+  { return; }
 
   va_start(args, format);
 
@@ -110,7 +110,7 @@ void rfbClientSetClientData(rfbClient* client, void* tag, void* data)
 { rfbClientData* clientData = client->clientData;
 
   while(clientData && clientData->tag != tag)
-    clientData = clientData->next;
+  { clientData = clientData->next; }
   if(clientData == NULL)
   { clientData = calloc(sizeof(rfbClientData), 1);
     clientData->next = client->clientData;
@@ -126,7 +126,7 @@ void* rfbClientGetClientData(rfbClient* client, void* tag)
 
   while(clientData)
   { if(clientData->tag == tag)
-      return clientData->data;
+    { return clientData->data; }
     clientData = clientData->next;
   }
 
@@ -159,20 +159,21 @@ static rfbBool HandleTRLE32(     rfbClient* client, int rx, int ry, int rw, int 
 static rfbBool HandleZlib8(rfbClient* client, int rx, int ry, int rw, int rh);
 static rfbBool HandleZlib16(rfbClient* client, int rx, int ry, int rw, int rh);
 static rfbBool HandleZlib32(rfbClient* client, int rx, int ry, int rw, int rh);
-#ifdef HAVE_LIBJPEG
-static rfbBool HandleTight8(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTight16(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleTight32(rfbClient* client, int rx, int ry, int rw, int rh);
 
-static long ReadCompactLen (rfbClient* client);
+#ifdef HAVE_LIBJPEG
+  static rfbBool HandleTight8  ( rfbClient* , int rx, int ry, int rw, int rh);
+  static rfbBool HandleTight16 ( rfbClient* , int rx, int ry, int rw, int rh);
+  static rfbBool HandleTight32 ( rfbClient* , int rx, int ry, int rw, int rh);
+  static rfbLong ReadCompactLen( rfbClient* );
 #endif
-static rfbBool HandleZRLE8(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleZRLE15(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleZRLE16(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleZRLE24(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleZRLE24Up(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleZRLE24Down(rfbClient* client, int rx, int ry, int rw, int rh);
-static rfbBool HandleZRLE32(rfbClient* client, int rx, int ry, int rw, int rh);
+
+static rfbBool HandleZRLE8     ( rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleZRLE15    ( rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleZRLE16    ( rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleZRLE24    ( rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleZRLE24Up  ( rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleZRLE24Down( rfbClient* , int rx, int ry, int rw, int rh);
+static rfbBool HandleZRLE32    ( rfbClient* , int rx, int ry, int rw, int rh);
 #endif
 
 /*
@@ -339,7 +340,7 @@ rfbBool ConnectToRFBRepeater(rfbClient* client,const char *repeaterHost, int rep
   //  return FALSE;
 
   if ( !ReadFromRFBServer( client, pv, sz_rfbProtocolVersionMsg))
-    return FALSE;
+  { return FALSE; }
   pv[sz_rfbProtocolVersionMsg] = 0;
 
   /* UltraVNC repeater always report version 000.000 to identify itself */
@@ -352,10 +353,10 @@ rfbBool ConnectToRFBRepeater(rfbClient* client,const char *repeaterHost, int rep
 
   tmphostlen = snprintf(tmphost, sizeof(tmphost), "%s:%d", destHost, destPort);
   if(tmphostlen < 0 || tmphostlen >= (int)sizeof(tmphost))
-    return FALSE; /* snprintf error or output truncated */
+  { return FALSE; } /* snprintf error or output truncated */
 
   if ( !rfbPushClientStream( client, tmphost, tmphostlen + 1))
-    return FALSE;
+  { return FALSE; }
 
   return TRUE;
 }
@@ -367,7 +368,7 @@ static void ReadReason(rfbClient* client)
 { uint32_t reasonLen;
   char *reason;
 
-  if (!ReadFromRFBServer(client, (char *)&reasonLen, 4)) return;
+  if (!ReadFromRFBServer(client, (char *)&reasonLen, 4)) { return; }
   reasonLen = rfbClientSwap32IfLE(reasonLen);
 
   if(reasonLen > 1<<20)
@@ -387,7 +388,7 @@ rfbBool
 rfbHandleAuthResult(rfbClient* client)
 { uint32_t authResult=0;
 
-  if (!ReadFromRFBServer(client, (char *)&authResult, 4)) return FALSE;
+  if (!ReadFromRFBServer(client, (char *)&authResult, 4)) { return FALSE; }
 
   authResult = rfbClientSwap32IfLE(authResult);
 
@@ -426,7 +427,7 @@ ReadSupportedSecurityType(rfbClient* client, uint32_t *result, rfbBool subAuth)
   uint32_t authScheme;
   rfbClientProtocolExtension* e;
 
-  if (!ReadFromRFBServer(client, (char *)&count, 1)) return FALSE;
+  if (!ReadFromRFBServer(client, (char *)&count, 1)) { return FALSE; }
 
   if (count==0)
   { rfbClientLog("List of security types is ZERO, expecting an error to follow\n");
@@ -438,12 +439,12 @@ ReadSupportedSecurityType(rfbClient* client, uint32_t *result, rfbBool subAuth)
   authScheme=0;
   /* now, we have a list of available security types to read ( uint8_t[] ) */
   for (loop=0; loop<count; loop++)
-  { if (!ReadFromRFBServer(client, (char *)&tAuth[loop], 1)) return FALSE;
+  { if (!ReadFromRFBServer(client, (char *)&tAuth[loop], 1)) { return FALSE; }
     rfbClientLog("%d) Received security type %d\n", loop, tAuth[loop]);
-    if (flag) continue;
+    if (flag) { continue; }
     extAuthHandler=FALSE;
     for (e = rfbClientExtensions; e; e = e->next)
-    { if (!e->handleAuthentication) continue;
+    { if (!e->handleAuthentication) { continue; }
       uint32_t const* secType;
       for (secType = e->securityTypes; secType && *secType; secType++)
       { if (tAuth[loop]==*secType)
@@ -479,14 +480,14 @@ ReadSupportedSecurityType(rfbClient* client, uint32_t *result, rfbBool subAuth)
       if (flag)
       { rfbClientLog("Selecting security type %d (%d/%d in the list)\n", authScheme, loop, count);
 
-        if (!rfbPushClientStream(client, (char *)&tAuth[loop], 1)) return FALSE; /* send back a single byte indicating which security type to use */
+        if (!rfbPushClientStream(client, (char *)&tAuth[loop], 1)) { return FALSE; } /* send back a single byte indicating which security type to use */
       }
     }
   }
   if (authScheme==0)
   { memset(buf1, 0, sizeof(buf1));
     for (loop=0; loop<count; loop++)
-    { if (strlen(buf1)>=sizeof(buf1)-1) break;
+    { if (strlen(buf1)>=sizeof(buf1)-1) { break; }
       snprintf(buf2, sizeof(buf2), (loop>0 ? ", %d" : "%d"), (int)tAuth[loop]);
       strncat(buf1, buf2, sizeof(buf1)-strlen(buf1)-1);
     }
@@ -503,11 +504,11 @@ static rfbBool HandleVncAuth(rfbClient *client)
   char *passwd=NULL;
   int i;
 
-  if (!ReadFromRFBServer(client, (char *)challenge, CHALLENGESIZE)) return FALSE;
+  if (!ReadFromRFBServer(client, (char *)challenge, CHALLENGESIZE)) { return FALSE; }
 
   if (client->serverPort!=-1)   /* if not playing a vncrec file */
   { if (client->GetPassword)
-      passwd = client->GetPassword(client);
+    { passwd = client->GetPassword(client); }
 
     if ((!passwd) || (strlen(passwd) == 0))
     { rfbClientLog("Reading password failed\n");
@@ -526,11 +527,11 @@ static rfbBool HandleVncAuth(rfbClient *client)
 
     FREE(passwd);
 
-    if (!rfbPushClientStream(client, (char *)challenge, CHALLENGESIZE)) return FALSE;
+    if (!rfbPushClientStream(client, (char *)challenge, CHALLENGESIZE)) { return FALSE; }
   }
 
   /* Handle the SecurityResult message */
-  if (!rfbHandleAuthResult(client)) return FALSE;
+  if (!rfbHandleAuthResult(client)) { return FALSE; }
 
   return TRUE;
 }
@@ -585,7 +586,7 @@ HandlePlainAuth(rfbClient *client)
   FreeUserCredential(cred);
 
   /* Handle the SecurityResult message */
-  if (!rfbHandleAuthResult(client)) return FALSE;
+  if (!rfbHandleAuthResult(client)) { return FALSE; }
 
   return TRUE;
 }
@@ -598,7 +599,7 @@ static uint64_t
 rfbMulM64(uint64_t x, uint64_t y, uint64_t m)
 { uint64_t r;
   for(r=0; x>0; x>>=1)
-  { if (x&1) r=rfbAddM64(r,y,m);
+  { if (x&1) { r=rfbAddM64(r,y,m); }
     y=rfbAddM64(y,y,m);
   }
   return r;
@@ -608,7 +609,7 @@ static uint64_t
 rfbPowM64(uint64_t b, uint64_t e, uint64_t m)
 { uint64_t r;
   for(r=1; e>0; e>>=1)
-  { if(e&1) r=rfbMulM64(r,b,m);
+  { if(e&1) { r=rfbMulM64(r,b,m); }
     b=rfbMulM64(b,b,m);
   }
   return r;
@@ -620,9 +621,9 @@ HandleMSLogonAuth(rfbClient *client)
   uint8_t username[256], password[64];
   rfbCredential *cred;
 
-  if (!ReadFromRFBServer(client, (char *)&gen, 8)) return FALSE;
-  if (!ReadFromRFBServer(client, (char *)&mod, 8)) return FALSE;
-  if (!ReadFromRFBServer(client, (char *)&resp, 8)) return FALSE;
+  if (!ReadFromRFBServer(client, (char *)&gen, 8)) { return FALSE; }
+  if (!ReadFromRFBServer(client, (char *)&mod, 8)) { return FALSE; }
+  if (!ReadFromRFBServer(client, (char *)&resp, 8)) { return FALSE; }
   gen = rfbClientSwap64IfLE(gen);
   mod = rfbClientSwap64IfLE(mod);
   resp = rfbClientSwap64IfLE(resp);
@@ -657,12 +658,12 @@ HandleMSLogonAuth(rfbClient *client)
   rfbClientEncryptBytes2(username, sizeof(username), (unsigned char *)&key);
   rfbClientEncryptBytes2(password, sizeof(password), (unsigned char *)&key);
 
-  if (!rfbPushClientStream( client, (char *)&pub, 8)) return FALSE;
-  if (!rfbPushClientStream( client, (char *)username, sizeof(username))) return FALSE;
-  if (!rfbPushClientStream( client, (char *)password, sizeof(password))) return FALSE;
+  if (!rfbPushClientStream( client, (char *)&pub, 8)) { return FALSE; }
+  if (!rfbPushClientStream( client, (char *)username, sizeof(username))) { return FALSE; }
+  if (!rfbPushClientStream( client, (char *)password, sizeof(password))) { return FALSE; }
 
   /* Handle the SecurityResult message */
-  if (!rfbHandleAuthResult(client)) return FALSE;
+  if (!rfbHandleAuthResult(client)) { return FALSE; }
 
   return TRUE;
 }
@@ -680,9 +681,9 @@ rfbMpiToBytes(const gcry_mpi_t value, uint8_t *result, size_t size)
     return FALSE;
   }
   for (i=size-1; i>(int)size-1-(int)len; --i)
-    result[i] = result[i-size+len];
+  { result[i] = result[i-size+len]; }
   for (; i>=0; --i)
-    result[i] = 0;
+  { result[i] = 0; }
   return TRUE;
 }
 
@@ -711,9 +712,9 @@ HandleARDAuth(rfbClient *client)
 
   while (1)
   { if (!ReadFromRFBServer(client, (char *)gen, 2))
-      break;
+    { break; }
     if (!ReadFromRFBServer(client, (char *)len, 2))
-      break;
+    { break; }
 
     if (!client->GetCredential)
     { rfbClientLog("GetCredential callback is not set.\n");
@@ -736,9 +737,9 @@ HandleARDAuth(rfbClient *client)
     key = pub+keylen;
 
     if (!ReadFromRFBServer(client, (char *)mod, keylen))
-      break;
+    { break; }
     if (!ReadFromRFBServer(client, (char *)resp, keylen))
-      break;
+    { break; }
 
     error = gcry_mpi_scan(&genmpi, GCRYMPI_FMT_USG, gen, 2, NULL);
     if (gcry_err_code(error) != GPG_ERR_NO_ERROR)
@@ -778,9 +779,9 @@ HandleARDAuth(rfbClient *client)
     gcry_mpi_powm(keympi, respmpi, privmpi, modmpi);
 
     if (!rfbMpiToBytes(pubmpi, pub, keylen))
-      break;
+    { break; }
     if (!rfbMpiToBytes(keympi, key, keylen))
-      break;
+    { break; }
 
     error = gcry_md_open(&md5, GCRY_MD_MD5, 0);
     if (gcry_err_code(error) != GPG_ERR_NO_ERROR)
@@ -798,9 +799,9 @@ HandleARDAuth(rfbClient *client)
     passwordLen = strlen(cred->userCredential.password)+1;
     usernameLen = strlen(cred->userCredential.username)+1;
     if (passwordLen > sizeof(userpass)/2)
-      passwordLen = sizeof(userpass)/2;
+    { passwordLen = sizeof(userpass)/2; }
     if (usernameLen > sizeof(userpass)/2)
-      usernameLen = sizeof(userpass)/2;
+    { usernameLen = sizeof(userpass)/2; }
 
     gcry_randomize(userpass, sizeof(userpass), GCRY_STRONG_RANDOM);
     memcpy(userpass, cred->userCredential.username, usernameLen);
@@ -823,37 +824,37 @@ HandleARDAuth(rfbClient *client)
     }
 
     if (!rfbPushClientStream(client, (char *)ciphertext, sizeof(ciphertext)))
-      break;
+    { break; }
     if (!rfbPushClientStream(client, (char *)pub, keylen))
-      break;
+    { break; }
 
     /* Handle the SecurityResult message */
     if (!rfbHandleAuthResult(client))
-      break;
+    { break; }
 
     result = TRUE;
     break;
   }
 
   if (cred)
-    FreeUserCredential(cred);
+  { FreeUserCredential(cred); }
   FREE( mod );
   if (genmpi)
-    gcry_mpi_release(genmpi);
+  { gcry_mpi_release(genmpi); }
   if (modmpi)
-    gcry_mpi_release(modmpi);
+  { gcry_mpi_release(modmpi); }
   if (respmpi)
-    gcry_mpi_release(respmpi);
+  { gcry_mpi_release(respmpi); }
   if (privmpi)
-    gcry_mpi_release(privmpi);
+  { gcry_mpi_release(privmpi); }
   if (pubmpi)
-    gcry_mpi_release(pubmpi);
+  { gcry_mpi_release(pubmpi); }
   if (keympi)
-    gcry_mpi_release(keympi);
+  { gcry_mpi_release(keympi); }
   if (md5)
-    gcry_md_close(md5);
+  { gcry_md_close(md5); }
   if (aes)
-    gcry_cipher_close(aes);
+  { gcry_cipher_close(aes); }
   return result;
 }
 #endif
@@ -875,9 +876,10 @@ void SetClientAuthSchemes( rfbClient * client,const uint32_t *authSchemes, int s
     }
     client->clientAuthSchemes = (uint32_t*)calloc(sizeof(uint32_t)*(size+1), 1 );
     for (i=0; i<size; i++)
-      client->clientAuthSchemes[i] = authSchemes[i];
+    { client->clientAuthSchemes[i] = authSchemes[i]; }
     client->clientAuthSchemes[size] = 0;
-} }
+  }
+}
 
 /*
    InitialiseRFBConnection.
@@ -897,7 +899,7 @@ InitialiseRFBConnection(rfbClient* client)
   if (client->listenSpecified)
     //  errorMessageOnReadFailure = FALSE;
 
-    if (!ReadFromRFBServer(client, pv, sz_rfbProtocolVersionMsg)) return FALSE;
+    if (!ReadFromRFBServer(client, pv, sz_rfbProtocolVersionMsg)) { return FALSE; }
   pv[sz_rfbProtocolVersionMsg]=0;
 
 // errorMessageOnReadFailure = TRUE;
@@ -916,7 +918,7 @@ InitialiseRFBConnection(rfbClient* client)
 
   /* fall back to viewer supported version */
   if ((major==rfbProtocolMajorVersion) && (minor>rfbProtocolMinorVersion))
-    client->minor = rfbProtocolMinorVersion;
+  { client->minor = rfbProtocolMinorVersion; }
 
   /* UltraVNC uses minor codes 4 and 6 for the server */
   if (major==3 && (minor==4 || minor==6))
@@ -949,15 +951,15 @@ InitialiseRFBConnection(rfbClient* client)
 
   sprintf(pv,rfbProtocolVersionFormat,client->major,client->minor);
 
-  if (!rfbPushClientStream(client, pv, sz_rfbProtocolVersionMsg)) return FALSE;
+  if (!rfbPushClientStream(client, pv, sz_rfbProtocolVersionMsg)) { return FALSE; }
 
 
   /* 3.7 and onwards sends a # of security types first */
   if (client->major==3 && client->minor > 6)
-  { if (!ReadSupportedSecurityType(client, &authScheme, FALSE)) return FALSE;
+  { if (!ReadSupportedSecurityType(client, &authScheme, FALSE)) { return FALSE; }
   }
   else
-  { if (!ReadFromRFBServer(client, (char *)&authScheme, 4)) return FALSE;
+  { if (!ReadFromRFBServer(client, (char *)&authScheme, 4)) { return FALSE; }
     authScheme = rfbClientSwap32IfLE(authScheme);
   }
 
@@ -976,22 +978,22 @@ InitialiseRFBConnection(rfbClient* client)
 
       /* 3.8 and upwards sends a Security Result for rfbNoAuth */
       if ((client->major==3 && client->minor > 7) || client->major>3)
-        if (!rfbHandleAuthResult(client)) return FALSE;
+        if (!rfbHandleAuthResult(client)) { return FALSE; }
 
       break;
 
     case rfbVncAuth:
-      if (!HandleVncAuth(client)) return FALSE;
+      if (!HandleVncAuth(client)) { return FALSE; }
       break;
 
 #ifdef HAVE_SASL
     case rfbSASL:
-      if (!HandleSASLAuth(client)) return FALSE;
+      if (!HandleSASLAuth(client)) { return FALSE; }
       break;
 #endif /* HAVE_SASL */
 
     case rfbMSLogon:
-      if (!HandleMSLogonAuth(client)) return FALSE;
+      if (!HandleMSLogonAuth(client)) { return FALSE; }
       break;
 
     case rfbARD:
@@ -999,7 +1001,7 @@ InitialiseRFBConnection(rfbClient* client)
       rfbClientLog("GCrypt support was not compiled in\n");
       return FALSE;
 #else
-      if (!HandleARDAuth(client)) return FALSE;
+      if (!HandleARDAuth(client)) { return FALSE; }
 #endif
       break;
 
@@ -1009,8 +1011,8 @@ InitialiseRFBConnection(rfbClient* client)
 
 #ifdef HAVE_TLS
     case rfbTLS:
-      if (!HandleAnonTLSAuth(client)) return FALSE;
-      if (!ReadSupportedSecurityType(client, &subAuthScheme, TRUE)) return FALSE;
+      if (!HandleAnonTLSAuth(client)) { return FALSE; }
+      if (!ReadSupportedSecurityType(client, &subAuthScheme, TRUE)) { return FALSE; }
       client->subAuthScheme = subAuthScheme;
 
       switch (subAuthScheme)
@@ -1022,16 +1024,16 @@ InitialiseRFBConnection(rfbClient* client)
           rfbClientLog("No sub authentication needed\n");
           /* 3.8 and upwards sends a Security Result for rfbNoAuth */
           if ((client->major==3 && client->minor > 7) || client->major>3)
-            if (!rfbHandleAuthResult(client)) return FALSE;
+            if (!rfbHandleAuthResult(client)) { return FALSE; }
           break;
 
         case rfbVncAuth:
-          if (!HandleVncAuth(client)) return FALSE;
+          if (!HandleVncAuth(client)) { return FALSE; }
           break;
 
 #ifdef HAVE_SASL
         case rfbSASL:
-          if (!HandleSASLAuth(client)) return FALSE;
+          if (!HandleSASLAuth(client)) { return FALSE; }
           break;
 #endif /* HAVE_SASL */
 
@@ -1045,7 +1047,7 @@ InitialiseRFBConnection(rfbClient* client)
 
 
     case rfbVeNCrypt:
-      if (!HandleVeNCryptAuth(client)) return FALSE;
+      if (!HandleVeNCryptAuth(client)) { return FALSE; }
 
       switch (client->subAuthScheme)
       {
@@ -1053,23 +1055,23 @@ InitialiseRFBConnection(rfbClient* client)
         case rfbVeNCryptTLSNone:
         case rfbVeNCryptX509None:
           rfbClientLog("No sub authentication needed\n");
-          if (!rfbHandleAuthResult(client)) return FALSE;
+          if (!rfbHandleAuthResult(client)) { return FALSE; }
           break;
 
         case rfbVeNCryptTLSVNC:
         case rfbVeNCryptX509VNC:
-          if (!HandleVncAuth(client)) return FALSE;
+          if (!HandleVncAuth(client)) { return FALSE; }
           break;
 
         case rfbVeNCryptTLSPlain:
         case rfbVeNCryptX509Plain:
-          if (!HandlePlainAuth(client)) return FALSE;
+          if (!HandlePlainAuth(client)) { return FALSE; }
           break;
 
 #ifdef HAVE_SASL
         case rfbVeNCryptX509SASL:
         case rfbVeNCryptTLSSASL:
-          if (!HandleSASLAuth(client)) return FALSE;
+          if (!HandleSASLAuth(client)) { return FALSE; }
           break;
 #endif /* HAVE_SASL */
 
@@ -1088,16 +1090,16 @@ InitialiseRFBConnection(rfbClient* client)
       rfbClientProtocolExtension* e;
       for (e = rfbClientExtensions; e; e = e->next)
       { uint32_t const* secType;
-        if (!e->handleAuthentication) continue;
+        if (!e->handleAuthentication) { continue; }
         for (secType = e->securityTypes; secType && *secType; secType++)
         { if (authScheme==*secType)
-          { if (!e->handleAuthentication(client, authScheme)) return FALSE;
-            if (!rfbHandleAuthResult(client)) return FALSE;
+          { if (!e->handleAuthentication(client, authScheme)) { return FALSE; }
+            if (!rfbHandleAuthResult(client)) { return FALSE; }
             authHandled=TRUE;
           }
         }
       }
-      if (authHandled) break;
+      if (authHandled) { break; }
     }
     rfbClientLog("Unknown authentication scheme from VNC server: %d\n",
                  (int)authScheme);
@@ -1106,9 +1108,9 @@ InitialiseRFBConnection(rfbClient* client)
 
   ci.shared = (client->appData.shareDesktop ? 1 : 0);
 
-  if (!rfbPushClientStream(client,  (char *)&ci, sz_rfbClientInitMsg)) return FALSE;
+  if (!rfbPushClientStream(client,  (char *)&ci, sz_rfbClientInitMsg)) { return FALSE; }
 
-  if (!ReadFromRFBServer(client, (char *)&client->si, sz_rfbServerInitMsg)) return FALSE;
+  if (!ReadFromRFBServer(client, (char *)&client->si, sz_rfbServerInitMsg)) { return FALSE; }
 
   client->si.framebufferWidth = rfbClientSwap16IfLE( client->si.framebufferWidth  );
   client->si.framebufferHeight= rfbClientSwap16IfLE( client->si.framebufferHeight );
@@ -1127,11 +1129,11 @@ InitialiseRFBConnection(rfbClient* client)
 
   if ( !client->desktopName )
   { rfbClientLog("Error allocating memory for desktop name, %lu bytes\n",
-                 (unsigned long)client->si.nameLength);
+                 (dword)client->si.nameLength);
     return FALSE;
   }
 
-  if (!ReadFromRFBServer(client, client->desktopName, client->si.nameLength)) return FALSE;
+  if (!ReadFromRFBServer(client, client->desktopName, client->si.nameLength)) { return FALSE; }
 
   client->desktopName[client->si.nameLength] = 0;
 
@@ -1164,7 +1166,7 @@ SetFormatAndEncodings(rfbClient* client)
   rfbBool requestLastRectEncoding = FALSE;
   rfbClientProtocolExtension* e;
 
-  if (!SupportsClient2Server(client, rfbSetPixelFormat)) return TRUE;
+  if (!SupportsClient2Server(client, rfbSetPixelFormat)) { return TRUE; }
 
   spf.type = rfbSetPixelFormat;
   spf.pad1 = 0;
@@ -1175,10 +1177,10 @@ SetFormatAndEncodings(rfbClient* client)
   spf.format.blueMax = rfbClientSwap16IfLE(spf.format.blueMax);
 
   if (!rfbPushClientStream(client, (char *)&spf, sz_rfbSetPixelFormatMsg))
-    return FALSE;
+  { return FALSE; }
 
 
-  if (!SupportsClient2Server(client, rfbSetEncodings)) return TRUE;
+  if (!SupportsClient2Server(client, rfbSetEncodings)) { return TRUE; }
 
   se->type = rfbSetEncodings;
   se->pad = 0;
@@ -1209,9 +1211,9 @@ SetFormatAndEncodings(rfbClient* client)
       { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingTight);
         requestLastRectEncoding = TRUE;
         if (client->appData.compressLevel >= 0 && client->appData.compressLevel <= 9)
-          requestCompressLevel = TRUE;
+        { requestCompressLevel = TRUE; }
         if (client->appData.enableJPEG)
-          requestQualityLevel = TRUE;
+        { requestQualityLevel = TRUE; }
 #endif
 #endif
       }
@@ -1222,12 +1224,12 @@ SetFormatAndEncodings(rfbClient* client)
       else if (strncasecmp(encStr,"zlib",encStrLen) == 0)
       { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingZlib);
         if (client->appData.compressLevel >= 0 && client->appData.compressLevel <= 9)
-          requestCompressLevel = TRUE;
+        { requestCompressLevel = TRUE; }
       }
       else if (strncasecmp(encStr,"zlibhex",encStrLen) == 0)
       { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingZlibHex);
         if (client->appData.compressLevel >= 0 && client->appData.compressLevel <= 9)
-          requestCompressLevel = TRUE;
+        { requestCompressLevel = TRUE; }
       }
       else if (strncasecmp(encStr,"trle",encStrLen) == 0)
       { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingTRLE);
@@ -1266,7 +1268,7 @@ SetFormatAndEncodings(rfbClient* client)
 
     if (se->nEncodings < MAX_ENCODINGS && requestQualityLevel)
     { if (client->appData.qualityLevel < 0 || client->appData.qualityLevel > 9)
-        client->appData.qualityLevel = 5;
+      { client->appData.qualityLevel = 5; }
       encs[se->nEncodings++] = rfbClientSwap32IfLE(client->appData.qualityLevel +
                                rfbEncodingQualityLevel0);
     }
@@ -1317,7 +1319,7 @@ SetFormatAndEncodings(rfbClient* client)
 
     if (client->appData.enableJPEG)
     { if (client->appData.qualityLevel < 0 || client->appData.qualityLevel > 9)
-        client->appData.qualityLevel = 5;
+      { client->appData.qualityLevel = 5; }
       encs[se->nEncodings++] = rfbClientSwap32IfLE(client->appData.qualityLevel +
                                rfbEncodingQualityLevel0);
     }
@@ -1328,36 +1330,36 @@ SetFormatAndEncodings(rfbClient* client)
   /* Remote Cursor Support (local to viewer) */
   if (client->appData.useRemoteCursor)
   { if (se->nEncodings < MAX_ENCODINGS)
-      encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingXCursor);
+    { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingXCursor); }
     if (se->nEncodings < MAX_ENCODINGS)
-      encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingRichCursor);
+    { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingRichCursor); }
     if (se->nEncodings < MAX_ENCODINGS)
-      encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingPointerPos);
+    { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingPointerPos); }
   }
 
   /* Keyboard State Encodings */
   if (se->nEncodings < MAX_ENCODINGS)
-    encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingKeyboardLedState);
+  { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingKeyboardLedState); }
 
   /* New Frame Buffer Size */
   if (se->nEncodings < MAX_ENCODINGS && client->canHandleNewFBSize)
-    encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingNewFBSize);
+  { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingNewFBSize); }
 
   /* Last Rect */
   if (se->nEncodings < MAX_ENCODINGS && requestLastRectEncoding)
-    encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingLastRect);
+  { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingLastRect); }
 
   /* Server Capabilities */
   if (se->nEncodings < MAX_ENCODINGS)
-    encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingSupportedMessages);
+  { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingSupportedMessages); }
   if (se->nEncodings < MAX_ENCODINGS)
-    encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingSupportedEncodings);
+  { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingSupportedEncodings); }
   if (se->nEncodings < MAX_ENCODINGS)
-    encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingServerIdentity);
+  { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingServerIdentity); }
 
   /* xvp */
   if (se->nEncodings < MAX_ENCODINGS)
-    encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingXvp);
+  { encs[se->nEncodings++] = rfbClientSwap32IfLE(rfbEncodingXvp); }
 
   /* client extensions */
   for(e = rfbClientExtensions; e; e = e->next)
@@ -1365,14 +1367,14 @@ SetFormatAndEncodings(rfbClient* client)
     { int* enc;
       for(enc = e->encodings; *enc; enc++)
         if(se->nEncodings < MAX_ENCODINGS)
-          encs[se->nEncodings++] = rfbClientSwap32IfLE(*enc);
+        { encs[se->nEncodings++] = rfbClientSwap32IfLE(*enc); }
     }
 
   len = sz_rfbSetEncodingsMsg + se->nEncodings * 4;
 
   se->nEncodings = rfbClientSwap16IfLE(se->nEncodings);
 
-  if (!rfbPushClientStream(client, buf, len)) return FALSE;
+  if (!rfbPushClientStream(client, buf, len)) { return FALSE; }
 
   return TRUE;
 }
@@ -1398,7 +1400,7 @@ rfbBool
 SendFramebufferUpdateRequest(rfbClient* client, int x, int y, int w, int h, rfbBool incremental)
 { rfbFramebufferUpdateRequestMsg fur;
 
-  if (!SupportsClient2Server(client, rfbFramebufferUpdateRequest)) return TRUE;
+  if (!SupportsClient2Server(client, rfbFramebufferUpdateRequest)) { return TRUE; }
 
   fur.type = rfbFramebufferUpdateRequest;
   fur.incremental = incremental ? 1 : 0;
@@ -1408,7 +1410,7 @@ SendFramebufferUpdateRequest(rfbClient* client, int x, int y, int w, int h, rfbB
   fur.h = rfbClientSwap16IfLE(h);
 
   if (!rfbPushClientStream(client, (char *)&fur, sz_rfbFramebufferUpdateRequestMsg))
-    return FALSE;
+  { return FALSE; }
 
   return TRUE;
 }
@@ -1427,13 +1429,13 @@ rfbBool SendScaleSetting(rfbClient* client,int scaleSetting)
   if (SupportsClient2Server(client, rfbSetScale))
   { ssm.type = rfbSetScale;
     if (!rfbPushClientStream(client, (char *)&ssm, sz_rfbSetScaleMsg))
-      return FALSE;
+    { return FALSE; }
   }
 
   if (SupportsClient2Server(client, rfbPalmVNCSetScaleFactor))
   { ssm.type = rfbPalmVNCSetScaleFactor;
     if (!rfbPushClientStream(client, (char *)&ssm, sz_rfbSetScaleMsg))
-      return FALSE;
+    { return FALSE; }
   }
 
   return TRUE;
@@ -1449,7 +1451,7 @@ rfbBool TextChatSend(rfbClient* client, char *text)
 { rfbTextChatMsg chat;
   int count = strlen(text);
 
-  if (!SupportsClient2Server(client, rfbTextChat)) return TRUE;
+  if (!SupportsClient2Server(client, rfbTextChat)) { return TRUE; }
   chat.type = rfbTextChat;
   chat.pad1 = 0;
   chat.pad2 = 0;
@@ -1457,11 +1459,11 @@ rfbBool TextChatSend(rfbClient* client, char *text)
   chat.length = rfbClientSwap32IfLE(chat.length);
 
   if (!rfbPushClientStream(client, (char *)&chat, sz_rfbTextChatMsg))
-    return FALSE;
+  { return FALSE; }
 
   if (count>0)
   { if (!rfbPushClientStream(client, text, count))
-      return FALSE;
+    { return FALSE; }
   }
   return TRUE;
 }
@@ -1469,7 +1471,7 @@ rfbBool TextChatSend(rfbClient* client, char *text)
 rfbBool TextChatOpen(rfbClient* client)
 { rfbTextChatMsg chat;
 
-  if (!SupportsClient2Server(client, rfbTextChat)) return TRUE;
+  if (!SupportsClient2Server(client, rfbTextChat)) { return TRUE; }
   chat.type = rfbTextChat;
   chat.pad1 = 0;
   chat.pad2 = 0;
@@ -1479,7 +1481,7 @@ rfbBool TextChatOpen(rfbClient* client)
 
 rfbBool TextChatClose(rfbClient* client)
 { rfbTextChatMsg chat;
-  if (!SupportsClient2Server(client, rfbTextChat)) return TRUE;
+  if (!SupportsClient2Server(client, rfbTextChat)) { return TRUE; }
   chat.type = rfbTextChat;
   chat.pad1 = 0;
   chat.pad2 = 0;
@@ -1489,7 +1491,7 @@ rfbBool TextChatClose(rfbClient* client)
 
 rfbBool TextChatFinish(rfbClient* client)
 { rfbTextChatMsg chat;
-  if (!SupportsClient2Server(client, rfbTextChat)) return TRUE;
+  if (!SupportsClient2Server(client, rfbTextChat)) { return TRUE; }
   chat.type = rfbTextChat;
   chat.pad1 = 0;
   chat.pad2 = 0;
@@ -1505,7 +1507,7 @@ rfbBool TextChatFinish(rfbClient* client)
 rfbBool PermitServerInput(rfbClient* client, int enabled)
 { rfbSetServerInputMsg msg;
 
-  if (!SupportsClient2Server(client, rfbSetServerInput)) return TRUE;
+  if (!SupportsClient2Server(client, rfbSetServerInput)) { return TRUE; }
   /* enabled==1, then server input from local keyboard is disabled */
   msg.type = rfbSetServerInput;
   msg.status = (enabled ? 1 : 0);
@@ -1531,14 +1533,14 @@ rfbBool PermitServerInput(rfbClient* client, int enabled)
 rfbBool SendXvpMsg(rfbClient* client, uint8_t version, uint8_t code)
 { rfbXvpMsg xvp;
 
-  if (!SupportsClient2Server(client, rfbXvp)) return TRUE;
+  if (!SupportsClient2Server(client, rfbXvp)) { return TRUE; }
   xvp.type = rfbXvp;
   xvp.pad = 0;
   xvp.version = version;
   xvp.code = code;
 
   if (!rfbPushClientStream(client, (char *)&xvp, sz_rfbXvpMsg))
-    return FALSE;
+  { return FALSE; }
 
   return TRUE;
 }
@@ -1551,12 +1553,12 @@ rfbBool SendXvpMsg(rfbClient* client, uint8_t version, uint8_t code)
 rfbBool SendPointerEvent(rfbClient* client,int x, int y, int buttonMask)
 { rfbPointerEventMsg pe;
 
-  if (!SupportsClient2Server(client, rfbPointerEvent)) return TRUE;
+  if (!SupportsClient2Server(client, rfbPointerEvent)) { return TRUE; }
 
   pe.type = rfbPointerEvent;
   pe.buttonMask = buttonMask;
-  if (x < 0) x = 0;
-  if (y < 0) y = 0;
+  if (x < 0) { x = 0; }
+  if (y < 0) { y = 0; }
 
   pe.x = rfbClientSwap16IfLE(x);
   pe.y = rfbClientSwap16IfLE(y);
@@ -1572,7 +1574,7 @@ rfbBool
 SendKeyEvent(rfbClient* client, uint32_t key, rfbBool down)
 { rfbKeyEventMsg ke;
 
-  if (!SupportsClient2Server(client, rfbKeyEvent)) return TRUE;
+  if (!SupportsClient2Server(client, rfbKeyEvent)) { return TRUE; }
 
   memset(&ke, 0, sizeof(ke));
   ke.type = rfbKeyEvent;
@@ -1590,7 +1592,7 @@ rfbBool
 SendClientCutText(rfbClient* client, char *str, int len)
 { rfbClientCutTextMsg cct;
 
-  if (!SupportsClient2Server(client, rfbClientCutText)) return TRUE;
+  if (!SupportsClient2Server(client, rfbClientCutText)) { return TRUE; }
 
   memset(&cct, 0, sizeof(cct));
   cct.type = rfbClientCutText;
@@ -1609,9 +1611,9 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
 { rfbServerToClientMsg msg;
 
   if (client->serverPort==-1)
-    client->vncRec->readTimestamp = TRUE;
+  { client->vncRec->readTimestamp = TRUE; }
   if (!ReadFromRFBServer(client, (char *)&msg, 1))
-    return FALSE;
+  { return FALSE; }
 
   switch (msg.type)
   {
@@ -1652,17 +1654,17 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
 
       if (!ReadFromRFBServer(client, ((char *)&msg.fu) + 1,
                              sz_rfbFramebufferUpdateMsg - 1))
-        return FALSE;
+      { return FALSE; }
 
       msg.fu.nRects = rfbClientSwap16IfLE(msg.fu.nRects);
 
       for (i = 0; i < msg.fu.nRects; i++)
       { if (!ReadFromRFBServer(client, (char *)&rect, sz_rfbFramebufferUpdateRectHeader))
-          return FALSE;
+        { return FALSE; }
 
         rect.encoding = rfbClientSwap32IfLE(rect.encoding);
         if (rect.encoding == rfbEncodingLastRect)
-          break;
+        { break; }
 
         rect.r.x = rfbClientSwap16IfLE(rect.r.x);
         rect.r.y = rfbClientSwap16IfLE(rect.r.y);
@@ -1693,7 +1695,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
         { /* OK! We have received a keyboard state message!!! */
           client->KeyboardLedStateEnabled = 1;
           if (client->HandleKeyboardLedState!=NULL)
-            client->HandleKeyboardLedState(client, rect.r.x, 0);
+          { client->HandleKeyboardLedState(client, rect.r.x, 0); }
           /* stash it for the future */
           client->CurrentKeyboardLedState = rect.r.x;
           continue;
@@ -1706,7 +1708,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           client->updateRect.w = client->width;
           client->updateRect.h = client->height;
           if (!client->MallocFrameBuffer(client))
-            return FALSE;
+          { return FALSE; }
           SendFramebufferUpdateRequest(client, 0, 0, rect.r.w, rect.r.h, FALSE);
           rfbClientLog("Got new framebuffer size: %dx%d\n", rect.r.w, rect.r.h);
           continue;
@@ -1716,7 +1718,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
         if (rect.encoding == rfbEncodingSupportedMessages)
         { int loop;
           if (!ReadFromRFBServer(client, (char *)&client->supportedMessages, sz_rfbSupportedMessages))
-            return FALSE;
+          { return FALSE; }
 
           /* msgs is two sets of bit flags of supported messages client2server[] and server2client[] */
           /* currently ignored by this library */
@@ -1808,10 +1810,10 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
 
             while (linesToRead && h > 0)
             { if (linesToRead > h)
-                linesToRead = h;
+              { linesToRead = h; }
 
               if (!ReadFromRFBServer(client, client->buffer,bytesPerLine * linesToRead))
-                return FALSE;
+              { return FALSE; }
 
               client->GotBitmap(client, (uint8_t *)client->buffer,
                                 rect.r.x, y, rect.r.w,linesToRead);
@@ -1827,7 +1829,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { rfbCopyRect cr;
 
             if (!ReadFromRFBServer(client, (char *)&cr, sz_rfbCopyRect))
-              return FALSE;
+            { return FALSE; }
 
             cr.srcX = rfbClientSwap16IfLE(cr.srcX);
             cr.srcY = rfbClientSwap16IfLE(cr.srcY);
@@ -1847,13 +1849,13 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           case rfbEncodingRRE:
           { switch (client->format.bitsPerPixel)
             { case 8:
-                if (!HandleRRE8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))     return FALSE;
+                if (!HandleRRE8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))     { return FALSE; }
                 break;
               case 16:
-                if (!HandleRRE16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))      return FALSE;
+                if (!HandleRRE16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))      { return FALSE; }
                 break;
               case 32:
-                if (!HandleRRE32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))      return FALSE;
+                if (!HandleRRE32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))      { return FALSE; }
                 break;
             }
             break;
@@ -1863,15 +1865,15 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { switch (client->format.bitsPerPixel)
             { case 8:
                 if (!HandleCoRRE8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 16:
                 if (!HandleCoRRE16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 32:
                 if (!HandleCoRRE32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
             }
             break;
@@ -1881,15 +1883,15 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { switch (client->format.bitsPerPixel)
             { case 8:
                 if (!HandleHextile8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 16:
                 if (!HandleHextile16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 32:
                 if (!HandleHextile32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
             }
             break;
@@ -1899,15 +1901,15 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { switch (client->format.bitsPerPixel)
             { case 8:
                 if (!HandleUltra8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 16:
                 if (!HandleUltra16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 32:
                 if (!HandleUltra32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
             }
             break;
@@ -1916,15 +1918,15 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { switch (client->format.bitsPerPixel)
             { case 8:
                 if (!HandleUltraZip8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 16:
                 if (!HandleUltraZip16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 32:
                 if (!HandleUltraZip32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
             }
             break;
@@ -1934,16 +1936,16 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { switch (client->format.bitsPerPixel)
             { case 8:
                 if (!HandleTRLE8(client, rect.r.x, rect.r.y, rect.r.w, rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 16:
                 if (client->si.format.greenMax > 0x1F)
                 { if (!HandleTRLE16(client, rect.r.x, rect.r.y, rect.r.w, rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 else
                 { if (!HandleTRLE15(client, rect.r.x, rect.r.y, rect.r.w, rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 break;
               case 32:
@@ -1954,20 +1956,20 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
                 if ((client->format.bigEndian && (maxColor & 0xff) == 0) ||
                     (!client->format.bigEndian && (maxColor & 0xff000000) == 0))
                 { if (!HandleTRLE24(client, rect.r.x, rect.r.y, rect.r.w, rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 else if (!client->format.bigEndian && (maxColor & 0xff) == 0)
                 { if (!HandleTRLE24Up(client, rect.r.x, rect.r.y, rect.r.w, rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 else if (client->format.bigEndian && (maxColor & 0xff000000) == 0)
                 { if (!HandleTRLE24Down(client, rect.r.x, rect.r.y, rect.r.w,
                                         rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 else if (!HandleTRLE32(client, rect.r.x, rect.r.y, rect.r.w,
                                        rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               }
             }
@@ -1979,15 +1981,15 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { switch (client->format.bitsPerPixel)
             { case 8:
                 if (!HandleZlib8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 16:
                 if (!HandleZlib16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 32:
                 if (!HandleZlib32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
             }
             break;
@@ -1998,15 +2000,15 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { switch (client->format.bitsPerPixel)
             { case 8:
                 if (!HandleTight8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 16:
                 if (!HandleTight16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 32:
                 if (!HandleTight32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
             }
             break;
@@ -2020,16 +2022,16 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           { switch (client->format.bitsPerPixel)
             { case 8:
                 if (!HandleZRLE8(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               case 16:
                 if (client->si.format.greenMax > 0x1F)
                 { if (!HandleZRLE16(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 else
                 { if (!HandleZRLE15(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 break;
               case 32:
@@ -2039,18 +2041,18 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
                 if ((client->format.bigEndian && (maxColor&0xff)==0) ||
                     (!client->format.bigEndian && (maxColor&0xff000000)==0))
                 { if (!HandleZRLE24(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 else if (!client->format.bigEndian && (maxColor&0xff)==0)
                 { if (!HandleZRLE24Up(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 else if (client->format.bigEndian && (maxColor&0xff000000)==0)
                 { if (!HandleZRLE24Down(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                    return FALSE;
+                  { return FALSE; }
                 }
                 else if (!HandleZRLE32(client, rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-                  return FALSE;
+                { return FALSE; }
                 break;
               }
             }
@@ -2065,7 +2067,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
 
             for(e = rfbClientExtensions; !handled && e; e = e->next)
               if(e->handleEncoding && e->handleEncoding(client, &rect))
-                handled = TRUE;
+              { handled = TRUE; }
 
             if(!handled)
             { rfbClientLog("Unknown rect encoding %d\n",
@@ -2082,10 +2084,10 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
       }
 
       if (!SendIncrementalFramebufferUpdateRequest(client))
-        return FALSE;
+      { return FALSE; }
 
       if (client->FinishedFrameBufferUpdate)
-        client->FinishedFrameBufferUpdate(client);
+      { client->FinishedFrameBufferUpdate(client); }
 
       break;
     }
@@ -2101,7 +2103,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
 
       if (!ReadFromRFBServer(client, ((char *)&msg) + 1,
                              sz_rfbServerCutTextMsg - 1))
-        return FALSE;
+      { return FALSE; }
 
       msg.sct.length = rfbClientSwap32IfLE(msg.sct.length);
 
@@ -2120,7 +2122,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
       buffer[msg.sct.length] = 0;
 
       if (client->GotXCutText)
-        client->GotXCutText(client, buffer, msg.sct.length);
+      { client->GotXCutText(client, buffer, msg.sct.length); }
 
       FREE( buffer );
 
@@ -2131,25 +2133,25 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
     { char *buffer=NULL;
       if (!ReadFromRFBServer(client, ((char *)&msg) + 1,
                              sz_rfbTextChatMsg- 1))
-        return FALSE;
+      { return FALSE; }
       msg.tc.length = rfbClientSwap32IfLE(msg.sct.length);
       switch(msg.tc.length)
       { case rfbTextChatOpen:
           rfbClientLog("Received TextChat Open\n");
           if (client->HandleTextChat!=NULL)
-            client->HandleTextChat(client, (int)rfbTextChatOpen, NULL);
+          { client->HandleTextChat(client, (int)rfbTextChatOpen, NULL); }
           break;
         case rfbTextChatClose:
           rfbClientLog("Received TextChat Close\n");
           if (client->HandleTextChat!=NULL)
-            client->HandleTextChat(client, (int)rfbTextChatClose, NULL);
-        break;
+          { client->HandleTextChat(client, (int)rfbTextChatClose, NULL); }
+          break;
 
         case rfbTextChatFinished:
           rfbClientLog("Received TextChat Finished\n");
           if (client->HandleTextChat!=NULL)
-            client->HandleTextChat(client, (int)rfbTextChatFinished, NULL);
-        break;
+          { client->HandleTextChat(client, (int)rfbTextChatFinished, NULL); }
+          break;
 
         default:
           buffer= calloc(msg.tc.length+1, 1 );
@@ -2161,7 +2163,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
           buffer[msg.tc.length]=0;
           rfbClientLog("Received TextChat \"%s\"\n", buffer);
           if (client->HandleTextChat!=NULL)
-            client->HandleTextChat(client, (int)msg.tc.length, buffer);
+          { client->HandleTextChat(client, (int)msg.tc.length, buffer); }
           FREE( buffer );
           break;
       }
@@ -2171,7 +2173,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
     case rfbXvp:
     { if (!ReadFromRFBServer(client, ((char *)&msg) + 1,
                              sz_rfbXvpMsg -1))
-        return FALSE;
+      { return FALSE; }
 
       SetClient2Server(client, rfbXvp);
       /* technically, we only care what we can *send* to the server
@@ -2180,7 +2182,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
       SetServer2Client(client, rfbXvp);
 
       if(client->HandleXvpMsg)
-        client->HandleXvpMsg(client, msg.xvp.version, msg.xvp.code);
+      { client->HandleXvpMsg(client, msg.xvp.version, msg.xvp.code); }
 
       break;
     }
@@ -2188,14 +2190,14 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
     case rfbResizeFrameBuffer:
     { if (!ReadFromRFBServer(client, ((char *)&msg) + 1,
                              sz_rfbResizeFrameBufferMsg -1))
-        return FALSE;
+      { return FALSE; }
       client->width = rfbClientSwap16IfLE(msg.rsfb.framebufferWidth);
       client->height = rfbClientSwap16IfLE(msg.rsfb.framebufferHeigth);
       client->updateRect.x = client->updateRect.y = 0;
       client->updateRect.w = client->width;
       client->updateRect.h = client->height;
       if (!client->MallocFrameBuffer(client))
-        return FALSE;
+      { return FALSE; }
 
       SendFramebufferUpdateRequest(client, 0, 0, client->width, client->height, FALSE);
       rfbClientLog("Got new framebuffer size: %dx%d\n", client->width, client->height);
@@ -2205,14 +2207,14 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
     case rfbPalmVNCReSizeFrameBuffer:
     { if (!ReadFromRFBServer(client, ((char *)&msg) + 1,
                              sz_rfbPalmVNCReSizeFrameBufferMsg -1))
-        return FALSE;
+      { return FALSE; }
       client->width = rfbClientSwap16IfLE(  msg.prsfb.buffer_w );
       client->height = rfbClientSwap16IfLE( msg.prsfb.buffer_h );
       client->updateRect.x = client->updateRect.y = 0;
       client->updateRect.w = client->width;
       client->updateRect.h = client->height;
       if (!client->MallocFrameBuffer(client))
-        return FALSE;
+      { return FALSE; }
       SendFramebufferUpdateRequest(client, 0, 0, client->width, client->height, FALSE);
       rfbClientLog("Got new framebuffer size: %dx%d\n", client->width, client->height);
       break;
@@ -2226,7 +2228,7 @@ rfbBool HandleRFBServerMessage( rfbClient* client )
                ; !handled && e
            ; e = e->nex t)
         if(e->handleMessage && e->handleMessage(client, &msg))
-          handled = TRUE;
+        { handled = TRUE; }
 
       if(!handled)
       { char buffer[256];

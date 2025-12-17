@@ -338,6 +338,6 @@ testColours##bpp(uint##bpp##_t *data, int size, rfbBool *mono, rfbBool *solid,  
     }                                                                           \
 }
 
-DEFINE_SEND_HEXTILES(8)
-DEFINE_SEND_HEXTILES(16)
-DEFINE_SEND_HEXTILES(32)
+DEFINE_SEND_HEXTILES(  8 )
+DEFINE_SEND_HEXTILES( 16 )
+DEFINE_SEND_HEXTILES( 32 )

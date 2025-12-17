@@ -212,10 +212,11 @@ sraSpanListEmpty(const sraSpanList *list)
 { return (list->front._next == &(list->back));
 }
 
-static unsigned long
+static rfbDword
 sraSpanListCount(const sraSpanList *list)
 { sraSpan *curr = list->front._next;
-  unsigned long count = 0;
+
+  rfbDword count = 0;
   while (curr != &(list->back))
   { if (curr->subspan)
     { count += sraSpanListCount(curr->subspan);
@@ -636,7 +637,9 @@ sraRegion *sraRgnBBox(const sraRegion *src)
 }
 
 rfbBool
-sraRgnPopRect(sraRegion *rgn, sraRect *rect, unsigned long flags)
+sraRgnPopRect( sraRegion *rgn
+             , sraRect   *rect
+             , rfbDword flags)
 { sraSpan *vcurr, *hcurr;
   sraSpan *vend, *hend;
   rfbBool right2left = (flags & 2) == 2;
@@ -689,9 +692,9 @@ sraRgnPopRect(sraRegion *rgn, sraRect *rect, unsigned long flags)
   return 0;
 }
 
-unsigned long
+rfbDword
 sraRgnCountRects(const sraRegion *rgn)
-{ unsigned long count = sraSpanListCount((sraSpanList*)rgn);
+{ rfbDword count = sraSpanListCount((sraSpanList*)rgn);
   return count;
 }
 

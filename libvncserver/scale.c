@@ -44,10 +44,10 @@
 #endif
 
 #ifdef DEBUGPROTO
-#undef DEBUGPROTO
-#define DEBUGPROTO(x) x
+  #undef DEBUGPROTO
+  #define DEBUGPROTO(x) x
 #else
-#define DEBUGPROTO(x)
+  #define DEBUGPROTO(x)
 #endif
 
 /****************************/
@@ -56,11 +56,9 @@
 #define FLOOR(x) ( (double) ((int) (x)) )
 
 #ifdef WIN32
-#define InlineX __inline
+  #define InlineX __inline
 #else
-
-#  define InlineX inline
-
+  #define InlineX inline
 #endif
 
 
@@ -71,7 +69,10 @@ static InlineX int pad4(int value)
 }
 
 int ScaleX(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int x)
-{ if ((from==to) || (from==NULL) || (to==NULL)) return x;
+{ if ((from==to)
+  || (from==NULL)
+  || (to==NULL)) return x;
+
   return ((int)(((double) x / (double)from->width) * (double)to->width ));
 }
 
@@ -179,14 +180,14 @@ void rfbScaledScreenUpdateRect(rfbScreenInfoPtr screen, rfbScreenInfoPtr ptr, in
 
   if (screen->serverFormat.trueColour)   /* Blend neighbouring pixels together */
   { unsigned char *srcptr2;
-    unsigned long pixel_value, red, green, blue;
+    rfbLong pixel_value, red, green, blue;
 
     unsigned int redShift  = screen->serverFormat.redShift;
     unsigned int greenShift= screen->serverFormat.greenShift;
     unsigned int blueShift = screen->serverFormat.blueShift;
-    unsigned long redMax   = screen->serverFormat.redMax;
-    unsigned long greenMax = screen->serverFormat.greenMax;
-    unsigned long blueMax  = screen->serverFormat.blueMax;
+    dword redMax   = screen->serverFormat.redMax;
+    dword greenMax = screen->serverFormat.greenMax;
+    dword blueMax  = screen->serverFormat.blueMax;
 
      /* for each *destination* pixel... */
     for (y = 0; y < h1; y++)
@@ -390,21 +391,21 @@ int rfbSendNewScaleSize(rfbClient * cl)
             rfbLogPerror("rfbNewClient: write");
             rfbCloseClient(cl);
             return FALSE;
-        }
-    }
+    }   }
     else
-    { rfbResizeFrameBufferMsg        rmsg;
-      rmsg.type = rfbResizeFrameBuffer;
-      rmsg.pad1=0;
-      rmsg.framebufferWidth  = Swap16IfLE(cl->scaledScreen->width);
-      rmsg.framebufferHeigth = Swap16IfLE(cl->scaledScreen->height);
+    { rfbResizeFrameBufferMsg rmsg;
+        rmsg.type= rfbResizeFrameBuffer;
+        rmsg.pad1=0;
+        rmsg.framebufferWidth  = Swap16IfLE(cl->scaledScreen->width);
+        rmsg.framebufferHeigth = Swap16IfLE(cl->scaledScreen->height);
+
       rfbLog("Sending a response to a UltraVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->width, cl->scaledScreen->height);
       if (rfbPushClientStream( cl,  (char *)&rmsg, sz_rfbResizeFrameBufferMsg) < 0) {
             rfbLogPerror("rfbNewClient: write");
             rfbCloseClient(cl);
             return FALSE;
-        }
-    }
+    }  }
+
     return TRUE;
 }
 /****************************/

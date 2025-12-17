@@ -2348,20 +2348,20 @@ rfbBool rfbEnableExtension(rfbClient * cl, rfbProtocolExtension* extension,	void
 rfbBool rfbDisableExtension(rfbClient * cl, rfbProtocolExtension* extension);
 void* rfbGetExtensionClientData(rfbClient * cl, rfbProtocolExtension* extension);
 
-extern void rfbInitServer(     rfbScreenInfoPtr );
-extern void rfbShutdownServer( rfbScreenInfoPtr ,rfbBool disconnectClients);
-extern void rfbNewFramebuffer( rfbScreenInfoPtr ,char *framebuffer,
+extern void rfbInitServer    ( rfbScreenInfoPtr );
+extern void rfbShutdownServer( rfbScreenInfoPtr , rfbBool disconnectClients);
+extern void rfbNewFramebuffer( rfbScreenInfoPtr , char *framebuffer,
  int width,int height, int bitsPerSample,int samplesPerPixel,
  int bytesPerPixel);
 
-extern void rfbScreenCleanup(rfbScreenInfoPtr screenInfo);
-extern void rfbSetServerVersionIdentity(rfbScreenInfoPtr screen, char *fmt, ...);
+extern void rfbScreenCleanup           ( rfbScreenInfoPtr );
+extern void rfbSetServerVersionIdentity( rfbScreenInfoPtr , char *fmt, ...);
 
 /* functions to accept/refuse a client that has been put on hold
    by a NewClientHookPtr function. Must not be called in other
    situations. */
-extern void rfbStartOnHoldClient(rfbClient * cl);
-extern void rfbRefuseOnHoldClient(rfbClient * cl);
+extern void rfbStartOnHoldClient ( rfbClient * );
+extern void rfbRefuseOnHoldClient( rfbClient * );
 
 /* call one of these two functions to service the vnc clients.
  usec are the microseconds the select on the fds waits.
@@ -2369,9 +2369,9 @@ extern void rfbRefuseOnHoldClient(rfbClient * cl);
  server doesn't get a high load just by listening.
  rfbProcessEvents() returns TRUE if an update was pending. */
 
-extern void rfbRunEventLoop(rfbScreenInfoPtr screenInfo, long usec, rfbBool runInBackground);
-extern rfbBool rfbProcessEvents(rfbScreenInfoPtr screenInfo,long usec);
-extern rfbBool rfbIsActive(rfbScreenInfoPtr screenInfo);
+extern void    rfbRunEventLoop ( rfbScreenInfoPtr , rfbLong usec, rfbBool runInBackground);
+extern rfbBool rfbProcessEvents( rfbScreenInfoPtr , rfbLong usec);
+extern rfbBool rfbIsActive     ( rfbScreenInfoPtr );
 
 /* TightVNC file transfer extension */
 void rfbRegisterTightVNCFileTransferExtension();

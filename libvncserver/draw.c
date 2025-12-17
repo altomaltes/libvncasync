@@ -63,5 +63,4 @@ void rfbDrawLine(rfbScreenInfoPtr s,int x1,int y1,int x2,int y2,rfbPixel col)
       y2=i;
     }
     rfbMarkRectAsModified(s,x1,y1,x2+1,y2+1);
-  }
-}
+} }

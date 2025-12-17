@@ -35,7 +35,9 @@
  * Original idea taken from vino.
  */
 
- typedef signed char rfbBool;
+ typedef   signed char rfbBool;
+ typedef   signed int  rfbLong;
+ typedef unsigned int  rfbDword;
 
 #ifdef  BUILDING_VNCASYNC      /* Isolate library from caller */
 

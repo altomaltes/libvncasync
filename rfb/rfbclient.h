@@ -400,7 +400,7 @@ typedef struct _rfbClient
         int listen6Port;
 
         /* Output Window ID. When set, client application enables libvncclient to perform direct rendering in its window */
-        unsigned long outputWindow;
+        rfbDword outputWindow;
 
 	/** Hooks for optional protection WriteToTLS() by mutex */
 	LockWriteToTLSProc LockWriteToTLS;

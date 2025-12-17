@@ -119,6 +119,9 @@ struct rfbClientIterator
   rfbBool closedToo;
 };
 
+/**
+ *
+ */
 void rfbClientListInit(rfbScreenInfoPtr rfbScreen)
 { if( sizeof(rfbBool)!=1 )
   { fprintf(stderr,"rfbBool's size is not 1 (%d)!\n",(int)sizeof(rfbBool));  /* a sanity check */
@@ -137,6 +140,9 @@ rfbClientIteratorPtr rfbGetClientIterator(rfbScreenInfoPtr rfbScreen)
   return i;
 }
 
+/**
+ *
+ */
 rfbClientIteratorPtr rfbGetClientIteratorWithClosed(rfbScreenInfoPtr rfbScreen)
 { rfbClientIteratorPtr i =
     (rfbClientIteratorPtr)calloc(sizeof(struct rfbClientIterator),1);
@@ -146,11 +152,17 @@ rfbClientIteratorPtr rfbGetClientIteratorWithClosed(rfbScreenInfoPtr rfbScreen)
   return i;
 }
 
+/**
+ *
+ */
 rfbClient * rfbClientIteratorHead(rfbClientIteratorPtr i)
 { i->next = i->screen->clientHead;
   return i->next;
 }
 
+/**
+ *
+ */
 rfbClient * rfbClientIteratorNext(rfbClientIteratorPtr i)
 { if(i->next == 0)
   { i->next = i->screen->clientHead;
@@ -164,12 +176,14 @@ rfbClient * rfbClientIteratorNext(rfbClientIteratorPtr i)
   return i->next;
 }
 
+/**
+ *
+ */
 void rfbReleaseClientIterator(rfbClientIteratorPtr iterator)
 { if ( iterator )
   { if(iterator->next) rfbDecrClientRef(iterator->next);
     FREE( iterator );
-  }
-}
+} }
 
 
 /*
@@ -184,33 +198,6 @@ void rfbReleaseClientIterator(rfbClientIteratorPtr iterator)
 //    rfbNewClient(rfbScreen,sock);
 //}
 
-
-/*
-   rfbReverseConnection is called to make an outward
-   connection to a "listening" RFB client.
-*/
-
-/*rfbClient *
-  rfbReverseConnection(rfbScreenInfoPtr rfbScreen,
-                     char *host,
-                     int port)
-  {
-    int sock;
-    rfbClient * cl;
-
-    if ((sock = rfbConnect(rfbScreen, host, port)) < 0)
-        return (rfbClient *)NULL;
-
-    cl = rfbNewClient(rfbScreen, sock);
-
-    if (cl) {
-        cl->reverseConnection = TRUE;
-    }
-
-    return cl;
-  }
-
-*/
 
 void
 rfbSetProtocolVersion(rfbScreenInfoPtr rfbScreen, int major_, int minor_)
@@ -259,7 +246,7 @@ rfbClient * rfbNewStreamClient( rfbScreenInfoPtr rfbScreen
     }
 
     rfbReleaseClientIterator(iterator);
-    rfbLog("  %lu other clients\n", (unsigned long) otherClientsCount);
+    rfbLog("  %lu other clients\n", (rfbDword) otherClientsCount);
 
     cl->state = RFB_PROTOCOL_VERSION;
 
@@ -306,8 +293,8 @@ rfbClient * rfbNewStreamClient( rfbScreenInfoPtr rfbScreen
                ; i < 4
            ; i++ )
       { cl->zsActive[i] = FALSE;
-      }
-    }
+    } }
+
 #endif
 #endif
 
@@ -460,7 +447,7 @@ void rfbClientConnectionGone( rfbClient * cl )
  *  rfbProcessClientMessage is called when there is data to read from a client.
  */
 void rfbProcessClientMessage( rfbClient * cl )
-{ switch (cl->state)
+{ switch ( cl->state )
   { case RFB_PROTOCOL_VERSION:      rfbProcessClientProtocolVersion( cl ); return;
     case RFB_SECURITY_TYPE:         rfbProcessClientSecurityType   ( cl ); return;
     case RFB_AUTHENTICATION:        rfbAuthProcessClientMessage    ( cl ); return;
@@ -489,8 +476,15 @@ void rfbCloseClient( rfbClient * cl )  // JACS, client data sinker
 }
 
 
-int rfbSinkClientStream( rfbClient * cl, void * data, size_t sz )  // JACS, client data sinker
+/**
+ * JACS, client data sinker
+ */
+int rfbSinkClientStream( rfbClient * cl
+                       , void      * data
+                       , size_t      sz )
 { cl->recvPtr= (char*)data, cl->bytesLeft= sz;
+
+  puts("DATA SINKER");
 
   while( cl->bytesLeft > 0 )
   { rfbProcessClientMessage( cl );
@@ -511,7 +505,8 @@ int rfbPushClientStream( rfbClient * cl, const void * data, size_t sz )  // JACS
 
 
 static void rfbProcessClientProtocolVersion(rfbClient * cl)
-{ int major_, minor_;
+{ int major_
+    , minor_;
 
   rfbProtocolVersionMsg * pv= getStreamBytes( cl, sz_rfbProtocolVersionMsg );
 
@@ -1312,7 +1307,7 @@ rfbBool rfbSendFileTransferChunk(rfbClient * cl)
   int n;
 #ifdef HAVE_LIBZ
   unsigned char compBuf[sz_rfbBlockSize + 1024];
-  unsigned long nMaxCompSize = sizeof(compBuf);
+  rfbDword nMaxCompSize = sizeof(compBuf);
   int nRetC = 0;
 #endif
 
@@ -1408,9 +1403,10 @@ rfbBool rfbProcessFileTransfer(rfbClient * cl, uint8_t contentType, uint8_t cont
   uint32_t * sizeHtmp=NULL;
 //    int n=0;
   char timespec[64];
+
 #ifdef HAVE_LIBZ
   unsigned char compBuff[sz_rfbBlockSize];
-  unsigned long nRawBytes = sz_rfbBlockSize;
+  rfbDword nRawBytes = sz_rfbBlockSize;
   int nRet = 0;
 #endif
 
@@ -1701,18 +1697,16 @@ rfbBool rfbProcessFileTransfer(rfbClient * cl, uint8_t contentType, uint8_t cont
           else
           { rfbLog("rfbProcessFileTransfer() File Transfer Permission DENIED by default!\n");
             return rfbSendFileTransferMessage(cl, rfbFileTransferAccess, 0, -1, 0, "");  /* DEFAULT: DENY (for security) */
-          }
-        }
-      }
+      } } }
       break;
 
 
-    case rfbCommand:
-      /*
-        rfbLog("rfbProcessFileTransfer() rfbCommand:\n");
-      */
-      if ((buffer = rfbProcessFileTransferReadBuffer(cl, length))==NULL) return FALSE;
-      switch (contentParam)
+    case rfbCommand:      /*        rfbLog("rfbProcessFileTransfer() rfbCommand:\n");      */
+      if ((buffer = rfbProcessFileTransferReadBuffer(cl, length))==NULL)
+      { return FALSE;
+      }
+
+      switch ( contentParam )
       { case rfbCDirCreate:  /* Client requests the creation of a directory */
           if (!rfbFilenameTranslate2UNIX(cl, buffer, filename1, sizeof(filename1)))
             goto fail;
@@ -1722,7 +1716,8 @@ rfbBool rfbProcessFileTransfer(rfbClient * cl, uint8_t contentType, uint8_t cont
           */
           retval = rfbSendFileTransferMessage(cl, rfbCommandReturn, rfbADirCreate, retval, length, buffer);
           //     if (buffer!=NULL) fr ee(buffer); JACS, now not needed
-          return retval;
+        return retval;
+
         case rfbCFileDelete: /* Client requests the deletion of a file */
           if (!rfbFilenameTranslate2UNIX(cl, buffer, filename1, sizeof(filename1)))
             goto fail;
@@ -1735,7 +1730,8 @@ rfbBool rfbProcessFileTransfer(rfbClient * cl, uint8_t contentType, uint8_t cont
           else retval=-1;
           retval = rfbSendFileTransferMessage(cl, rfbCommandReturn, rfbAFileDelete, retval, length, buffer);
           // if (buffer!=NULL) fr ee(buffer); JACS, now not needed
-          return retval;
+        return retval;
+
         case rfbCFileRename: /* Client requests the Renaming of a file/directory */
           p = strrchr(buffer, '*');
           if (p != NULL)
@@ -1770,15 +1766,12 @@ fail:
   return FALSE;
 }
 
-/*
-   rfbProcessClientNormalMessage is called when the client has sent a normal
-   protocol message.
-*/
-
+/**
+ *   rfbProcessClientNormalMessage is called when the client has sent a normal
+ * protocol message.
+ */
 static void rfbProcessClientNormalMessage( rfbClient * cl )
-{ //  char * ptr; // JACS
-  //  int n=0;
-  char *str;
+{ char *str;
   int i;
   uint32_t enc= 0;
   uint32_t lastPreferredEncoding = -1;
@@ -2335,14 +2328,6 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
         return;
       }
 
-      /* Allow zero-length client cut text. */
-//  str = (char *)calloc(msg->cct.length ? msg->cct.length : 1, 1);/
-//  if (str == NULL) {
-      //  rfbLogPerror("rfbProcessClientNormalMessage: not enough memory");
-      //rfbCloseClient(cl);
-//    return;
-      //}
-
       str= getStreamBytes( cl, msg->cct.length );
       if ( !str ) return;
 
@@ -2406,7 +2391,7 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
       { if(cl->screen->xvpHook && !cl->screen->xvpHook(cl, msg->xvp.version, msg->xvp.code))
           rfbSendXvp(cl, 1, rfbXvp_Fail);
       }
-      return;
+    return;
 
     case rfbSetDesktopSize:
       if ( !getStreamBytes( cl, sz_rfbSetDesktopSizeMsg-1 ) )
@@ -2448,8 +2433,8 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
         while ((clp = rfbClientIteratorNext(iterator)) != NULL)
         { if (clp != cl)
             clp->requestedDesktopSizeChange = rfbExtDesktopSize_OtherClientRequestedChange;
-        }
-      }
+      } }
+
       else /* Force ExtendedDesktopSize message to be sent with result code in case of error.    (In case of success, it is delayed until the new framebuffer is created) */
       { cl->newFBSizePending = TRUE;
       }

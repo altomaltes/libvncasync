@@ -31,10 +31,10 @@ extern rfbBool sraRgnSubtract( sraRegion *dst, const sraRegion *src );
 
 extern void sraRgnOffset(sraRegion *dst, int dx, int dy);
 
-extern rfbBool sraRgnPopRect(sraRegion *region, sraRect *rect, unsigned long flags);
+extern rfbBool sraRgnPopRect(sraRegion *region, sraRect *rect, rfbDword flags);
 
-extern unsigned long sraRgnCountRects(const sraRegion *rgn);
-extern rfbBool sraRgnEmpty(const sraRegion *rgn);
+extern rfbDword sraRgnCountRects(const sraRegion *rgn);
+extern rfbBool  sraRgnEmpty(const sraRegion *rgn);
 
 extern sraRegion *sraRgnBBox(const sraRegion *src);
 

@@ -2653,15 +2653,16 @@ __lzo_gnuc_extension__ typedef unsigned long long lzo_ullong_t__;
 #endif
 #endif
 #if !defined(lzo_int16e_t)
+
 #if (LZO_SIZEOF_LONG == 2)
-#  define lzo_int16e_t              long
-#  define lzo_uint16e_t             unsigned long
+  #  define lzo_int16e_t              long
+  #  define lzo_uint16e_t             unsigned long
 #elif (LZO_SIZEOF_INT == 2)
-#  define lzo_int16e_t              int
-#  define lzo_uint16e_t             unsigned int
+  #  define lzo_int16e_t              int
+  #  define lzo_uint16e_t             unsigned int
 #elif (LZO_SIZEOF_SHORT == 2)
-#  define lzo_int16e_t              short int
-#  define lzo_uint16e_t             unsigned short int
+  #  define lzo_int16e_t              short int
+  #  define lzo_uint16e_t             unsigned short int
 #elif 1 && !(LZO_CFG_TYPE_NO_MODE_HI) && (LZO_CC_CLANG || (LZO_CC_GNUC >= 0x025f00ul) || LZO_CC_LLVM)
    typedef int lzo_int16e_hi_t__ __attribute__((__mode__(__HI__)));
    typedef unsigned int lzo_uint16e_hi_t__ __attribute__((__mode__(__HI__)));

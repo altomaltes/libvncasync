@@ -34,7 +34,7 @@ struct rfbssl_ctx
 static void rfbssl_error(void)
 {
   char buf[1024];
-  unsigned long e = ERR_get_error();
+  rfbLong e = ERR_get_error();
   rfbErr("%s (%ld)\n", ERR_error_string(e, buf), e);
 }
 

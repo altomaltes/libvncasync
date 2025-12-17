@@ -840,60 +840,60 @@ SOFTWARE.
   #define XK_kana_comma                                  0x4a4
   #define XK_kana_conjunctive                            0x4a5
   #define XK_kana_middledot                              0x4a5  /* deprecated */
-  #define XK_kana_WO                                     0x4a6
-  #define XK_kana_a                                      0x4a7
-  #define XK_kana_i                                      0x4a8
-  #define XK_kana_u                                      0x4a9
-  #define XK_kana_e                                      0x4aa
-  #define XK_kana_o                                      0x4ab
-  #define XK_kana_ya                                     0x4ac
-#define XK_kana_yu                                     0x4ad
-#define XK_kana_yo                                     0x4ae
-#define XK_kana_tsu                                    0x4af
-#define XK_kana_tu                                     0x4af  /* deprecated */
-#define XK_prolongedsound                              0x4b0
-#define XK_kana_A                                      0x4b1
-#define XK_kana_I                                      0x4b2
-#define XK_kana_U                                      0x4b3
-#define XK_kana_E                                      0x4b4
-#define XK_kana_O                                      0x4b5
-#define XK_kana_KA                                     0x4b6
-#define XK_kana_KI                                     0x4b7
-#define XK_kana_KU                                     0x4b8
-#define XK_kana_KE                                     0x4b9
-#define XK_kana_KO                                     0x4ba
-#define XK_kana_SA                                     0x4bb
-#define XK_kana_SHI                                    0x4bc
-#define XK_kana_SU                                     0x4bd
-#define XK_kana_SE                                     0x4be
-#define XK_kana_SO                                     0x4bf
-#define XK_kana_TA                                     0x4c0
-#define XK_kana_CHI                                    0x4c1
-#define XK_kana_TI                                     0x4c1  /* deprecated */
+  #define XK_kana_WO        0x4a6
+  #define XK_kana_a         0x4a7
+  #define XK_kana_i         0x4a8
+  #define XK_kana_u         0x4a9
+  #define XK_kana_e         0x4aa
+  #define XK_kana_o         0x4ab
+  #define XK_kana_ya        0x4ac
+  #define XK_kana_yu        0x4ad
+  #define XK_kana_yo        0x4ae
+  #define XK_kana_tsu                                    0x4af
+  #define XK_kana_tu        0x4af  /* deprecated */
+  #define XK_prolongedsound                              0x4b0
+  #define XK_kana_A         0x4b1
+  #define XK_kana_I         0x4b2
+  #define XK_kana_U         0x4b3
+  #define XK_kana_E         0x4b4
+  #define XK_kana_O         0x4b5
+  #define XK_kana_KA        0x4b6
+  #define XK_kana_KI        0x4b7
+  #define XK_kana_KU        0x4b8
+  #define XK_kana_KE        0x4b9
+  #define XK_kana_KO        0x4ba
+  #define XK_kana_SA        0x4bb
+  #define XK_kana_SHI         0x4bc
+  #define XK_kana_SU        0x4bd
+  #define XK_kana_SE          0x4be
+  #define XK_kana_SO          0x4bf
+  #define XK_kana_TA        0x4c0
+  #define XK_kana_CHI                                    0x4c1
+#define XK_kana_TI        0x4c1  /* deprecated */
 #define XK_kana_TSU                                    0x4c2
-#define XK_kana_TU                                     0x4c2  /* deprecated */
-#define XK_kana_TE                                     0x4c3
-#define XK_kana_TO                                     0x4c4
-#define XK_kana_NA                                     0x4c5
-#define XK_kana_NI                                     0x4c6
-#define XK_kana_NU                                     0x4c7
-#define XK_kana_NE                                     0x4c8
-#define XK_kana_NO                                     0x4c9
-#define XK_kana_HA                                     0x4ca
-  #define XK_kana_HI                                     0x4cb
-  #define XK_kana_FU                                     0x4cc
-  #define XK_kana_HU                                     0x4cc  /* deprecated */
-  #define XK_kana_HE                                     0x4cd
-  #define XK_kana_HO                                     0x4ce
-  #define XK_kana_MA                                     0x4cf
-  #define XK_kana_MI                                     0x4d0
-  #define XK_kana_MU                                     0x4d1
-  #define XK_kana_ME                                     0x4d2
-  #define XK_kana_MO                                     0x4d3
-  #define XK_kana_YA                                     0x4d4
-  #define XK_kana_YU                                     0x4d5
-  #define XK_kana_YO                                     0x4d6
-  #define XK_kana_RA                                     0x4d7
+#define XK_kana_TU        0x4c2  /* deprecated */
+#define XK_kana_TE        0x4c3
+#define XK_kana_TO        0x4c4
+#define XK_kana_NA        0x4c5
+#define XK_kana_NI        0x4c6
+#define XK_kana_NU        0x4c7
+#define XK_kana_NE        0x4c8
+#define XK_kana_NO        0x4c9
+#define XK_kana_HA        0x4ca
+  #define XK_kana_HI        0x4cb
+  #define XK_kana_FU        0x4cc
+  #define XK_kana_HU        0x4cc  /* deprecated */
+  #define XK_kana_HE        0x4cd
+  #define XK_kana_HO        0x4ce
+  #define XK_kana_MA        0x4cf
+  #define XK_kana_MI        0x4d0
+  #define XK_kana_MU        0x4d1
+  #define XK_kana_ME        0x4d2
+  #define XK_kana_MO        0x4d3
+  #define XK_kana_YA        0x4d4
+  #define XK_kana_YU          0x4d5
+  #define XK_kana_YO          0x4d6
+  #define XK_kana_RA          0x4d7
   #define XK_kana_RI          0x4d8
   #define XK_kana_RU          0x4d9
   #define XK_kana_RE          0x4da
@@ -1355,17 +1355,17 @@ SOFTWARE.
 #define XK_leftcaret                                   0xba3
 #define XK_rightcaret                                  0xba6
 #define XK_downcaret                                   0xba8
-#define XK_upcaret                                     0xba9
-#define XK_overbar                                     0xbc0
+#define XK_upcaret        0xba9
+#define XK_overbar        0xbc0
 #define XK_downtack                                    0xbc2
-#define XK_upshoe                                      0xbc3
+#define XK_upshoe         0xbc3
 #define XK_downstile                                   0xbc4
 #define XK_underbar                                    0xbc6
-#define XK_jot                                         0xbca
-#define XK_quad                                        0xbcc
-#define XK_uptack                                      0xbce
-#define XK_circle                                      0xbcf
-#define XK_upstile                                     0xbd3
+#define XK_jot            0xbca
+#define XK_quad           0xbcc
+#define XK_uptack         0xbce
+#define XK_circle         0xbcf
+#define XK_upstile        0xbd3
 #define XK_downshoe                                    0xbd6
 #define XK_rightshoe                                   0xbd8
 #define XK_leftshoe                                    0xbda
