@@ -363,11 +363,12 @@ int main( int argc,char** argv )
 #ifndef BACKGROUND_LOOP_TEST
 #ifdef USE_OWN_LOOP
   { int i;
-    for(i=0; rfbIsActive(rfbScreen); i++)
+    for( i=0
+       ; rfbIsActive( rfbScreen )
+       ; i++)
     { fprintf(stderr,"%d\r",i);
       rfbProcessEvents(rfbScreen,100000);
-    }
-  }
+  } }
 #else
   /* this is the blocking event loop, i.e. it never returns */
   /* 40000 are the microseconds to wait on select(), i.e. 0.04 seconds */

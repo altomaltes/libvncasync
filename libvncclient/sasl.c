@@ -317,8 +317,8 @@ restart:
     goto error;
   }
 
-  rfbClientLog("Server start negotiation with mech %s. Data %d bytes %p '%s'\n",
-               mechname, clientoutlen, clientout, clientout);
+  rfbClientLog( "Server start negotiation with mech %s. Data %d bytes %p '%s'\n"
+              , mechname, clientoutlen, clientout, clientout);
 
   if (clientoutlen > SASL_MAX_DATA_LEN)
   { rfbClientLog("SASL negotiation data too long: %d bytes\n",
@@ -334,7 +334,7 @@ restart:
   /* NB, distinction of NULL vs "" is *critical* in SASL */
   if (clientout)
   { uint32_t colsw = rfbClientSwap32IfLE(clientoutlen + 1);
-    if (!WriteToRFBServer(client, (char *)&colsw, 4)) { goto error; }
+    if (!WriteToRFBServer(client, (char *)&colsw   ,                4)) { goto error; }
     if (!WriteToRFBServer(client, (char *)clientout, clientoutlen + 1)) { goto error; }
   }
   else
@@ -375,13 +375,15 @@ restart:
      in this loop to verify the server isn't lying about something. Mutual auth */
   for (;;)
   { restep:
-    err = sasl_client_step(saslconn,
-                           serverin,
-                           serverinlen,
+    err= sasl_client_step( saslconn
+                         , serverin
+                         , serverinlen,
                            &interact,
                            &clientout,
                            &clientoutlen);
-    if (err != SASL_OK && err != SASL_CONTINUE && err != SASL_INTERACT)
+    if (err != SASL_OK
+     && err != SASL_CONTINUE
+     && err != SASL_INTERACT)
     { rfbClientLog("Failed SASL step: %d (%s)\n",
                    err, sasl_errdetail(saslconn));
       goto error;

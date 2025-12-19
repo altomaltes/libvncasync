@@ -958,14 +958,15 @@ rfbBool rfbUpdateClients( rfbScreenInfoPtr screen )
 }
 
 
-rfbBool rfbProcessEvents(rfbScreenInfoPtr screen,long usec)
+rfbBool rfbProcessEvents( rfbScreenInfoPtr screen
+                        , rfbLong usec)
 { rfbClientIteratorPtr i;
   rfbClient * cl
-  , * clPrev;
+          , * clPrev;
   rfbBool result=FALSE;
 
-  if(usec<0)
-  { usec=screen->deferUpdateTime*1000;
+  if( usec < 0 )
+  { usec= screen->deferUpdateTime * 1000;
   }
 
   i = rfbGetClientIteratorWithClosed(screen);

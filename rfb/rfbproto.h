@@ -2349,8 +2349,8 @@ rfbBool rfbDisableExtension(rfbClient * cl, rfbProtocolExtension* extension);
 void* rfbGetExtensionClientData(rfbClient * cl, rfbProtocolExtension* extension);
 
 extern void rfbInitServer    ( rfbScreenInfoPtr );
-extern void rfbShutdownServer( rfbScreenInfoPtr , rfbBool disconnectClients);
-extern void rfbNewFramebuffer( rfbScreenInfoPtr , char *framebuffer,
+extern void rfbShutdownServer( rfbScreenInfoPtr, rfbBool disconnectClients);
+extern void rfbNewFramebuffer( rfbScreenInfoPtr, char *framebuffer,
  int width,int height, int bitsPerSample,int samplesPerPixel,
  int bytesPerPixel);
 
