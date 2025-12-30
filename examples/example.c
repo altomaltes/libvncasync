@@ -75,8 +75,9 @@ static enum rfbNewClientAction newclient( rfbClient * cl )
   return RFB_CLIENT_ACCEPT;
 }
 
-/* switch to new framebuffer contents */
-
+/**
+ * switch to new framebuffer contents
+ */
 static void newframebuffer( rfbScreenInfoPtr screen, int width, int height )
 { unsigned char *oldfb, *newfb;
 
@@ -91,8 +92,9 @@ static void newframebuffer( rfbScreenInfoPtr screen, int width, int height )
   /*** FIXME: Re-install cursor. ***/
 }
 
-/* aux function to draw a line */
-
+/**
+ * aux function to draw a line
+ */
 static void drawline(unsigned char* buffer,int rowstride,int bpp,int x1,int y1,int x2,int y2)
 { int i,j;
   i=x1-x2;

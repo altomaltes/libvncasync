@@ -72,8 +72,8 @@ typedef void   (* VncPopKeyFun ) ( int attr, rfbKeySym key, struct _rfbClient * 
   */
 typedef
   rfbBool(*rfbPasswordCheckProcPtr)( struct _rfbClient *, const char * resp, int len );
-  rfbBool rfbCheckPasswordByList(    struct _rfbClient *, const char * resp, int len );
-  rfbBool rfbCheckPasswordSingle(    struct _rfbClient *, const char * resp, int len );
+  rfbBool rfbCheckPasswordByList   ( struct _rfbClient *, const char * resp, int len );
+  rfbBool rfbCheckPasswordSingle   ( struct _rfbClient *, const char * resp, int len );
 
 
 

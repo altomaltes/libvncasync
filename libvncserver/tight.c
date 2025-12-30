@@ -426,18 +426,20 @@ rfbBool SendRectEncodingTight( rfbClient * cl
         /* Send solid-color rectangle. */
 
         if (!rfbSendTightHeader(cl, x_best, y_best, w_best, h_best))
-        { return FALSE; }
+        { return FALSE;
+        }
 
-        fbptr= (cl->scaledScreen->frameBuffer
-                + (cl->scaledScreen->paddedWidthInBytes * y_best)
-                + (x_best * (cl->scaledScreen->bitsPerPixel / 8)));
+        fbptr= ( cl->scaledScreen->frameBuffer
+             + ( cl->scaledScreen->paddedWidthInBytes * y_best)
+             + ( x_best * (cl->scaledScreen->bitsPerPixel / 8)));
 
         (*cl->translateFn)(cl->translateLookupTable, &cl->screen->serverFormat,
                            &cl->format, fbptr, tightBeforeBuf,
                            cl->scaledScreen->paddedWidthInBytes, 1, 1);
 
         if (!SendSolidRect(cl))
-        { return FALSE; }
+        { return FALSE;
+        }
 
         /* Send remaining rectangles (at right and bottom). */
 
@@ -715,8 +717,8 @@ static rfbBool SendSubrect( rfbClient * cl
   { return FALSE; }
 
   fbptr= ( cl->scaledScreen->frameBuffer
-           + ( cl->scaledScreen->paddedWidthInBytes * y)
-           + ( x * (cl->scaledScreen->bitsPerPixel / 8)));
+       + ( cl->scaledScreen->paddedWidthInBytes * y)
+       + ( x * (cl->scaledScreen->bitsPerPixel / 8)));
 
   if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1)
   { return SendJpegRect(cl, x, y, w, h, qualityLevel); }
@@ -734,7 +736,7 @@ static rfbBool SendSubrect( rfbClient * cl
 
   /* This is so we can avoid translating the pixels when compressing
      with JPEG, since it is unnecessary */
-  if ( cl->format.bitsPerPixel     == cl->screen->serverFormat.bitsPerPixel
+  if ( cl->format.bitsPerPixel    == cl->screen->serverFormat.bitsPerPixel
        && cl->format.redMax       == cl->screen->serverFormat.redMax
        && cl->format.greenMax     == cl->screen->serverFormat.greenMax
        && cl->format.blueMax      == cl->screen->serverFormat.blueMax
@@ -1675,8 +1677,8 @@ SendJpegRect(rfbClient * cl, int x, int y, int w, int h, int quality)
 
   if (cl->ublen + TIGHT_MIN_TO_COMPRESS + 1 > UPDATE_BUF_SIZE)
   { if (!rfbSendUpdateBuf(cl))
-    { return FALSE; }
-  }
+    { return FALSE;
+  } }
 
   cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
   rfbStatRecordEncodingSentAdd(cl, cl->tightEncoding, 1);
@@ -1720,8 +1722,7 @@ static void PrepareRowForImg24( rfbClient * cl
     *dst++ = (uint8_t)(pix >> cl->screen->serverFormat.redShift);
     *dst++ = (uint8_t)(pix >> cl->screen->serverFormat.greenShift);
     *dst++ = (uint8_t)(pix >> cl->screen->serverFormat.blueShift);
-  }
-}
+} }
 
 #define DEFINE_JPEG_GET_ROW_FUNCTION(bpp)                                   \
                                                                             \

@@ -48,8 +48,10 @@ static rfbBool rfbSendOneRectEncodingUltra( rfbClient * cl
   rfbZlibHeader hdr;
   int deflateResult;
   int i;
-  char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
-    	   + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+
+  char *fbptr= (cl->scaledScreen->frameBuffer
+             + (cl->scaledScreen->paddedWidthInBytes * y)
+    	        + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
   int maxRawSize;
   lzo_uint maxCompSize;

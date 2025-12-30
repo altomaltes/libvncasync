@@ -62,11 +62,11 @@ static void selPaintLine(rfbSelectData* m,int line,rfbBool invert)
     y2=m->y2;
   rfbFillRect(m->screen,m->x1,y1,m->x2,y2,invert?m->colour:m->backColour);
   if(m->displayStart+line<m->listSize)
-    rfbDrawStringWithClip(m->screen,m->font,m->x1+m->xhot,y2-1+m->yhot,
-                          m->list[m->displayStart+line],
-                          m->x1,y1,m->x2,y2,
-                          invert?m->backColour:m->colour,
-                          invert?m->backColour:m->colour);
+    rfbDrawStringWithClip( m->screen,m->font,m->x1+m->xhot,y2-1+m->yhot
+                         , m->list[m->displayStart+line]
+                         , m->x1,y1,m->x2,y2
+                         , invert ? m->backColour : m->colour
+                         , invert ? m->backColour : m->colour );
 }
 
 static void selSelect(rfbSelectData* m,int _index)
@@ -126,7 +126,9 @@ static void selSelect(rfbSelectData* m,int _index)
   /* todo: scrollbars */
 }
 
-static void selKbdAddEvent(rfbBool down,rfbKeySym keySym,rfbClient * cl)
+static void selKbdAddEvent( rfbBool down
+                          , rfbKeySym keySym
+                          , rfbClient * cl)
 { if(down)
   { if(keySym>' ' && keySym<0xff)
     { int i;
@@ -172,11 +174,7 @@ static void selKbdAddEvent(rfbBool down,rfbKeySym keySym,rfbClient * cl)
             selSelect(m,curSel-m->pageH);
           else
             selSelect(m,0);
-        }
-      }
-    }
-  }
-}
+} } } } }
 
 static void selPtrAddEvent(int buttonMask,int x,int y,rfbClient * cl)
 { rfbSelectData* m = (rfbSelectData*)cl->screen->screenData;
@@ -197,13 +195,18 @@ static void selPtrAddEvent(int buttonMask,int x,int y,rfbClient * cl)
       selPaintButtons(m,FALSE,FALSE);
   }
   else
-  { if(m->okInverted || m->cancelInverted)
-      selPaintButtons(m,FALSE,FALSE);
-    if(!m->lastButtons && buttonMask)
-    { if(x>=m->x1 && x<m->x2 && y>=m->y1 && y<m->y2)
+  { if( m->okInverted
+     || m->cancelInverted )
+    { selPaintButtons( m, FALSE, FALSE );
+
+      if(!m->lastButtons && buttonMask)
+      { if( x >= m->x1
+         && x <  m->x2
+         && y >= m->y1
+         && y <  m->y2 )
         selSelect(m,m->displayStart+(y-m->y1)/m->textH);
-    }
-  }
+  } } }
+
   m->lastButtons = buttonMask;
 
   /* todo: scrollbars */
@@ -278,10 +281,13 @@ int rfbSelectBox( rfbScreenInfoPtr rfbScreen,rfbFontDataPtr font
   rfbScreen->displayHook = NULL;
 
   /* backup screen */
-  for(j=0; j<y2-y1; j++)
-    memcpy(frameBufferBackup+j*(x2-x1)*bpp,
+  for( j=0
+     ; j<y2-y1
+     ; j++)
+  { memcpy(frameBufferBackup+j*(x2-x1)*bpp,
            rfbScreen->frameBuffer+j*rfbScreen->paddedWidthInBytes+x1*bpp,
            (x2-x1)*bpp);
+  }
 
   /* paint list and buttons */
   rfbFillRect(rfbScreen,x1,y1,x2,y2,colour);
@@ -293,10 +299,12 @@ int rfbSelectBox( rfbScreenInfoPtr rfbScreen,rfbFontDataPtr font
     rfbProcessEvents(rfbScreen,20000);
 
   /* copy back screen data */
-  for(j=0; j<y2-y1; j++)
-  { memcpy( rfbScreen->frameBuffer+j*rfbScreen->paddedWidthInBytes+x1*bpp
-            , frameBufferBackup+j*(x2-x1)*bpp
-            , (x2-x1)*bpp);
+  for( j=0
+     ; j<y2-y1
+     ; j++)
+  { memcpy( rfbScreen->frameBuffer+j*rfbScreen->paddedWidthInBytes + x1*bpp
+          , frameBufferBackup+j*(x2-x1)*bpp
+          , (x2-x1)*bpp);
   }
 
   FREE( frameBufferBackup );

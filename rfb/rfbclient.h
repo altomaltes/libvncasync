@@ -239,7 +239,7 @@ typedef struct _rfbClient
 	 struct
   { int x, y
       , w, h;
-	} updateRect;
+ 	} updateRect;
 
 	/** Note that the CoRRE encoding uses this buffer and assumes it is big enough
 	   to hold 255 * 255 * 32 bits -> 260100 bytes.  640*480 = 307200 bytes.

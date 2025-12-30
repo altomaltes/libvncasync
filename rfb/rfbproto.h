@@ -1620,16 +1620,12 @@ typedef struct _rfbScreenInfo
   int height;
   int depth;
   int bitsPerPixel;
- //   int sizeInBytes;
 
   rfbPixel blackPixel;
   rfbPixel whitePixel;
 
     /**  JACS, async stuff
       */
- // int (*streamPusher)( int sk, void */*StackFun */, void * userData
-   //                  , const void * src, size_t sz );
-
   VncPushFun streamPusher;
 
 
@@ -1643,32 +1639,21 @@ typedef struct _rfbScreenInfo
     /* additions by libvncserver */
 
   rfbPixelFormat serverFormat;
-  rfbColourMap colourMap; /**< set this if rfbServerFormat.trueColour==FALSE */
-  const char* desktopName;
-  char thisHost[255];
+  rfbColourMap   colourMap; /**< set this if rfbServerFormat.trueColour==FALSE */
+  const char*    desktopName;
+  char           thisHost[255];
 
-//  rfbBool autoPort;
-//  rfbBool inetdInitDone;
-
-//  struct _rfbClient* udpClient;
   rfbBool udpSockConnected;
 
   int maxClientWait;
 
-    /* http stuff */
- //   rfbBool httpInitDone;
-//    rfbBool httpEnableProxyConnect;
-
   rfbPasswordCheckProcPtr passwordCheck;
   void* authPasswdData;
 
-
   int authPasswdFirstViewOnly; /** If rfbAuthPasswdData is given a list, this is the first view only password. */
 
-
-  int maxRectsPerUpdate;     /** send only this many rectangles in one update */
-    /** this is the amount of milliseconds to wait at least before sending
-     * an update. */
+  int maxRectsPerUpdate;       /** send only this many rectangles in one update */
+                               /** this is the amount of milliseconds to wait at least before sending an update. */
   int deferUpdateTime;
 #ifdef TODELETE
     char* screen;
@@ -1679,17 +1664,16 @@ typedef struct _rfbScreenInfo
   struct _rfbClient * clientHead;
   struct _rfbClient * pointerClient;  /**< "Mutex" for pointer events */
 
-
     /* cursor */
   int cursorX, cursorY,underCursorBufferLen;
   char* underCursorBuffer;
   rfbBool dontConvertRichCursorToXCursor;
   struct rfbCursor* cursor;
 
-    /**
-     * the frameBuffer has to be supplied by the serving process.
-     * The buffer will not be freed by
-     */
+/**
+ * the frameBuffer has to be supplied by the serving process.
+ * The buffer will not be freed by
+ */
   char* frameBuffer;
 
   rfbKbdAddEventProcPtr          kbdAddEvent;
@@ -1707,10 +1691,10 @@ typedef struct _rfbScreenInfo
   rfbSetTextChat                 setTextChat;
 
 
-  rfbNewClientHookPtr newClientHook;     /** newClientHook is called just after a new client is created */
-  rfbDisplayHookPtr displayHook;     /** displayHook is called just before a frame buffer update */
-  rfbGetKeyboardLedStateHookPtr getKeyboardLedStateHook;     /** These hooks are called to pass keyboard state back to the client */
-  rfbBool ignoreSIGPIPE;     /** if TRUE, an ignoring signal handler is installed for SIGPIPE */
+  rfbNewClientHookPtr           newClientHook;           /** newClientHook is called just after a new client is created */
+  rfbDisplayHookPtr             displayHook;             /** displayHook is called just before a frame buffer update */
+  rfbGetKeyboardLedStateHookPtr getKeyboardLedStateHook; /** These hooks are called to pass keyboard state back to the client */
+  rfbBool                       ignoreSIGPIPE;           /** if TRUE, an ignoring signal handler is installed for SIGPIPE */
 
     /** if not zero, only a slice of this height is processed every time
      * an update should be sent. This should make working on a slow

@@ -51,8 +51,8 @@ static rfbBool rfbSendSmallRectEncodingCoRRE(rfbClient * cl, int x, int y,
 */
 
 rfbBool rfbSendRectEncodingCoRRE( rfbClient * cl
-                                , int x, int y
-                                , int w, int h)
+                                  , int x, int y
+                                  , int w, int h)
 { if (h > cl->correMaxHeight)
   { return (rfbSendRectEncodingCoRRE(cl, x, y, w, cl->correMaxHeight) &&
             rfbSendRectEncodingCoRRE(cl, x, y + cl->correMaxHeight, w,
@@ -77,33 +77,34 @@ rfbBool rfbSendRectEncodingCoRRE( rfbClient * cl
 */
 
 static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
-                                            , int x, int y
-                                            , int w, int h )
+    , int x, int y
+    , int w, int h )
 { rfbFramebufferUpdateRectHeader rect;
   rfbRREHeader hdr;
   int nSubrects;
   int i;
 
-  char *fbptr= (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
+  char *fbptr= (cl->scaledScreen->frameBuffer
+             + (cl->scaledScreen->paddedWidthInBytes * y)
              + (x * (cl->scaledScreen->bitsPerPixel / 8)));
 
   int maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
-                    * (cl->format.bitsPerPixel / 8));
+                 * (cl->format.bitsPerPixel / 8));
 
   if (cl->beforeEncBufSize < maxRawSize)
   { cl->beforeEncBufSize = maxRawSize;
     if (cl->beforeEncBuf == NULL)
-      cl->beforeEncBuf = (char *)malloc(cl->beforeEncBufSize);
+    { cl->beforeEncBuf = (char *)malloc(cl->beforeEncBufSize); }
     else
-      cl->beforeEncBuf = (char *)realloc(cl->beforeEncBuf, cl->beforeEncBufSize);
+    { cl->beforeEncBuf = (char *)realloc(cl->beforeEncBuf, cl->beforeEncBufSize); }
   }
 
   if (cl->afterEncBufSize < maxRawSize)
   { cl->afterEncBufSize = maxRawSize;
     if (cl->afterEncBuf == NULL)
-      cl->afterEncBuf = (char *)malloc(cl->afterEncBufSize);
+    { cl->afterEncBuf = (char *)malloc(cl->afterEncBufSize); }
     else
-      cl->afterEncBuf = (char *)realloc(cl->afterEncBuf, cl->afterEncBufSize);
+    { cl->afterEncBuf = (char *)realloc(cl->afterEncBuf, cl->afterEncBufSize); }
   }
 
   (*cl->translateFn)(cl->translateLookupTable,&(cl->screen->serverFormat),
@@ -111,18 +112,10 @@ static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
                      cl->scaledScreen->paddedWidthInBytes, w, h);
 
   switch (cl->format.bitsPerPixel)
-  { case 8:
-      nSubrects = subrectEncode8(cl, (uint8_t *)cl->beforeEncBuf, w, h);
-      break;
-    case 16:
-      nSubrects = subrectEncode16(cl, (uint16_t *)cl->beforeEncBuf, w, h);
-      break;
-    case 32:
-      nSubrects = subrectEncode32(cl, (uint32_t *)cl->beforeEncBuf, w, h);
-      break;
-    default:
-      rfbLog("getBgColour: bpp %d?\n",cl->format.bitsPerPixel);
-      return FALSE;
+  { case  8: nSubrects = subrectEncode8(cl, (uint8_t *)cl->beforeEncBuf, w, h);      break;
+    case 16: nSubrects = subrectEncode16(cl, (uint16_t *)cl->beforeEncBuf, w, h);      break;
+    case 32: nSubrects = subrectEncode32(cl, (uint32_t *)cl->beforeEncBuf, w, h);      break;
+    default: rfbLog("getBgColour: bpp %d?\n",cl->format.bitsPerPixel);      return FALSE;
   }
 
   if (nSubrects < 0)
@@ -140,7 +133,7 @@ static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
   if (cl->ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbRREHeader
       > UPDATE_BUF_SIZE)
   { if (!rfbSendUpdateBuf(cl))
-      return FALSE;
+    { return FALSE; }
   }
 
   rect.r.x = Swap16IfLE(x);
@@ -174,7 +167,7 @@ static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
 
     if (cl->ublen == UPDATE_BUF_SIZE)
     { if (!rfbSendUpdateBuf(cl))
-        return FALSE;
+      { return FALSE; }
     }
   }
 

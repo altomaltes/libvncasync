@@ -1,8 +1,6 @@
-/*
+/**
  * scale.c - deal with server-side scaling.
- */
-
-/*
+ *
  *  Copyright (C) 2005 Rohit Kumar, Johannes E. Schindelin
  *  Copyright (C) 2002 RealVNC Ltd.
  *  OSXvnc Copyright (C) 2001 Dan McGuirk <mcguirk@incompleteness.net>.
@@ -69,9 +67,11 @@ static InlineX int pad4(int value)
 }
 
 int ScaleX(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int x)
-{ if ((from==to)
-  || (from==NULL)
-  || (to==NULL)) return x;
+{ if ((from== to)
+  ||  (from== NULL)
+  ||  (to  == NULL))
+  { return x;
+  }
 
   return ((int)(((double) x / (double)from->width) * (double)to->width ));
 }
@@ -81,7 +81,7 @@ int ScaleY(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int y)
   return ((int)(((double) y / (double)from->height) * (double)to->height ));
 }
 
-/* So, all of the encodings point to the ->screen->frameBuffer,
+/** So, all of the encodings point to the ->screen->frameBuffer,
  * We need to change this!
  */
 void rfbScaledCorrection(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int *x, int *y, int *w, int *h, const char *function)
@@ -253,26 +253,23 @@ void rfbScaledScreenUpdateRect(rfbScreenInfoPtr screen, rfbScreenInfoPtr ptr, in
   }
 }
 
-    /* ok, now the task is to update each and every scaled version of the framebuffer
-     * and we only have to do this for this specific changed rectangle!
-     */
+/**
+ *   ok, now the task is to update each and every scaled version of the framebuffer
+ * and we only have to do this for this specific changed rectangle!
+ */
 void rfbScaledScreenUpdate(rfbScreenInfoPtr screen, int x1, int y1, int x2, int y2)
 { rfbScreenInfoPtr ptr;
-    int count=0;
+  int count=0;
 
     /* We don't point to cl->screen as it is the original */
-    for ( ptr=screen->scaledScreenNext
-        ; ptr
-        ; ptr=ptr->scaledScreenNext )
-    {
-        /* Only update if it has active clients... */
-        if (ptr->scaledScreenRefCount>0)
-        {
-          rfbScaledScreenUpdateRect(screen, ptr, x1, y1, x2-x1, y2-y1);
+  for ( ptr= screen->scaledScreenNext
+      ; ptr
+      ; ptr=ptr->scaledScreenNext )
+  {  if (ptr->scaledScreenRefCount>0) /* Only update if it has active clients... */
+     {
+         rfbScaledScreenUpdateRect(screen, ptr, x1, y1, x2-x1, y2-y1);
           count++;
-        }
-    }
-}
+}  }  }
 
 /* Create a new scaled version of the framebuffer
  */
@@ -310,7 +307,9 @@ rfbScreenInfoPtr rfbScaledScreenAllocate( rfbClient * cl
     ptr->frameBuffer = calloc(ptr->paddedWidthInBytes , ptr->height);
 
     if ( ptr->frameBuffer )
-    { rfbScaledScreenUpdateRect(cl->screen, ptr, 0, 0, cl->screen->width, cl->screen->height); /* Reset to a known condition: scale the entire framebuffer */
+    { rfbScaledScreenUpdateRect(cl->screen, ptr                          /* Reset to a known condition: scale the entire framebuffer */
+                               , 0, 0
+                               , cl->screen->width, cl->screen->height);
             /* Now, insert into the chain */
       ptr->scaledScreenNext = cl->screen->scaledScreenNext;
       cl->screen->scaledScreenNext = ptr;
