@@ -478,6 +478,4 @@ static void PrintPixelFormat(rfbPixelFormat *pf)
     }
     else
     { rfbLog("  uses a colour map (not true colour).\n");
-    }
-  }
-}
+} } }

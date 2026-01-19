@@ -457,6 +457,7 @@ void rfbMakeRichCursorFromXCursor(rfbScreenInfoPtr rfbScreen,rfbCursorPtr cursor
 
   background=(uint32_t)cursor->backRed   << format->redShift|
              (uint32_t)cursor->backGreen << format->greenShift|(uint32_t)cursor->backBlue<<format->blueShift;
+
   foreground=(uint32_t)cursor->foreRed   << format->redShift|
              (uint32_t)cursor->foreGreen << format->greenShift|(uint32_t)cursor->foreBlue<<format->blueShift;
 

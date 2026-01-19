@@ -220,7 +220,7 @@ rfbBool rfbProcessArguments( rfbScreenInfoPtr rfbScreen
 }
 
 rfbBool rfbProcessSizeArguments( int * width, int* height, int * bpp
-                                 , int* argc, char *argv[])
+                               , int* argc, char *argv[])
 { int i,i1;
 
   if(!argc) return TRUE;

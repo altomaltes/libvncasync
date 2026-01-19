@@ -26,13 +26,15 @@
 #include <rfb/rfbproto.h>
 
 
-/*
+/**
  * rfbSetXCutText sets the cut buffer to be the given string.  We also clear
  * the primary selection.  Ideally we'd like to set it to the same thing, but I
  * can't work out how to do that without some kind of helper X client.
  */
 
-void rfbGotXCutText(rfbScreenInfoPtr rfbScreen, char *str, int len)
+void rfbGotXCutText( rfbScreenInfoPtr rfbScreen
+                   , char *str
+                   , int len)
 {
    rfbSendServerCutText(rfbScreen, str, len);
 }

@@ -126,9 +126,9 @@ static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
     return rfbSendRectEncodingRaw(cl, x, y, w, h);
   }
 
-  rfbStatRecordEncodingSent(cl,rfbEncodingCoRRE,
-                            sz_rfbFramebufferUpdateRectHeader + sz_rfbRREHeader + cl->afterEncBufLen,
-                            sz_rfbFramebufferUpdateRectHeader + w * h * (cl->format.bitsPerPixel / 8));
+  rfbStatRecordEncodingSent( cl,rfbEncodingCoRRE
+                           , sz_rfbFramebufferUpdateRectHeader + sz_rfbRREHeader + cl->afterEncBufLen
+                           , sz_rfbFramebufferUpdateRectHeader + w * h * (cl->format.bitsPerPixel / 8));
 
   if (cl->ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbRREHeader
       > UPDATE_BUF_SIZE)

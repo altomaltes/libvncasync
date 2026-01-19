@@ -264,11 +264,10 @@ void rfbScaledScreenUpdate(rfbScreenInfoPtr screen, int x1, int y1, int x2, int 
     /* We don't point to cl->screen as it is the original */
   for ( ptr= screen->scaledScreenNext
       ; ptr
-      ; ptr=ptr->scaledScreenNext )
+      ; ptr= ptr->scaledScreenNext )
   {  if (ptr->scaledScreenRefCount>0) /* Only update if it has active clients... */
-     {
-         rfbScaledScreenUpdateRect(screen, ptr, x1, y1, x2-x1, y2-y1);
-          count++;
+     {  rfbScaledScreenUpdateRect(screen, ptr, x1, y1, x2-x1, y2-y1);
+        count++;
 }  }  }
 
 /* Create a new scaled version of the framebuffer

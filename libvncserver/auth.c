@@ -266,17 +266,18 @@ rfbSendSecurityType(rfbClient * cl, int32_t securityType)
   { case rfbSecTypeNone:
       /* Dispatch client input to rfbProcessClientInitMessage. */
       cl->state = RFB_INITIALISATION;
-      break;
+    break;
+
     case rfbSecTypeVncAuth:
       /* Begin the standard VNC authentication procedure. */
       rfbVncAuthSendChallenge(cl);
-      break;
+    break;
+
     default:
       /* Impossible case (hopefully). */
       rfbLogPerror("rfbSendSecurityType: assertion failed");
       rfbCloseClient(cl);
-  }
-}
+} }
 
 
 
@@ -328,8 +329,7 @@ rfbProcessClientSecurityType(rfbClient * cl)
     { rfbLog("rfbProcessClientSecurityType: executing handler for type %d\n", *chosenType);
       handler->handler(cl);
       return;
-    }
-  }
+  } }
 
   rfbLog("rfbProcessClientSecurityType: wrong security type (%d) requested\n", *chosenType);
   rfbCloseClient(cl);
@@ -360,7 +360,9 @@ rfbAuthProcessClientMessage(rfbClient * cl)
     { rfbClientSendString(cl, "password check failed!");
     }
     else
-    { rfbCloseClient(cl); }
+    { rfbCloseClient(cl);
+    }
+
     return;
   }
 

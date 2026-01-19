@@ -31,8 +31,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+  #include <unistd.h>
 #endif
 
 #include "d3des.h"
@@ -41,16 +42,16 @@
 #include <math.h>
 
 #ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
+  #include <sys/stat.h>
 #endif
 
 #include <time.h>
 
 #ifdef _WIN32
-#define srandom srand
-#define random rand
+  #define srandom srand
+  #define random rand
 #else
-#include <sys/time.h>
+  #include <sys/time.h>
 #endif
 
 
