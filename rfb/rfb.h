@@ -68,20 +68,20 @@ typedef void * (* VncPushFun   ) ( int sk
 typedef void   (* VncPopPtrFun ) ( int    b, int x, int y , struct _rfbClient * cl );
 typedef void   (* VncPopKeyFun ) ( int attr, rfbKeySym key, struct _rfbClient * cl );
 
-/** to check against plain passwords
-  */
+/**
+ * to check against plain passwords
+ */
 typedef
   rfbBool(*rfbPasswordCheckProcPtr)( struct _rfbClient *, const char * resp, int len );
   rfbBool rfbCheckPasswordByList   ( struct _rfbClient *, const char * resp, int len );
   rfbBool rfbCheckPasswordSingle   ( struct _rfbClient *, const char * resp, int len );
 
-
-
-/* functions to make a vnc server
+/**
+ * functions to make a vnc server
  */
 void rfbMarkRectAsModified( struct _rfbScreenInfo *
-                          , int x1,int y1
-                          , int x2,int y2 );
+                          , int x1, int y1
+                          , int x2, int y2 );
 
 
 struct _rfbScreenInfo * rfbGetScreen( void * frameBuffer
@@ -126,7 +126,7 @@ rfbBool rfbUpdateClients( struct _rfbScreenInfo * ); // JACS
  To make a server, you just have to initialise a server structure using the
  function rfbGetScreen(), like
  @code
-   rfbScreenInfoPtr screen =
+   rfbScreenInfo * screen =
      rfbGetScreen(argc,argv,screenwidth,screenheight,8,3,bpp);
  @endcode
  where byte per pixel should be 1, 2 or 4. If performance doesn't matter,
@@ -231,9 +231,9 @@ rfbBool rfbUpdateClients( struct _rfbScreenInfo * ); // JACS
  the same format as the frameBuffer (i.e. if the server is 32 bit,
  a 10x4 cursor has 4x10x4 bytes).
 
- @section screen_client_difference What is the difference between rfbScreenInfoPtr and rfbClient *?
+ @section screen_client_difference What is the difference between rfbScreenInfo * and rfbClient *?
 
- The rfbScreenInfoPtr is a pointer to a rfbScreenInfo structure, which
+ The rfbScreenInfo * is a pointer to a rfbScreenInfo structure, which
  holds information about the server, like pixel format, io functions,
  frame buffer etc. The rfbClient * is a pointer to an rfbClientRec structure, which holds
  information about a client, like pixel format, socket of the

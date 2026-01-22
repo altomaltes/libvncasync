@@ -66,7 +66,7 @@ static InlineX int pad4(int value)
   return value + 4 - remainder;
 }
 
-int ScaleX(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int x)
+int ScaleX(rfbScreenInfo * from, rfbScreenInfo * to, int x)
 { if ((from== to)
   ||  (from== NULL)
   ||  (to  == NULL))
@@ -76,7 +76,7 @@ int ScaleX(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int x)
   return ((int)(((double) x / (double)from->width) * (double)to->width ));
 }
 
-int ScaleY(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int y)
+int ScaleY(rfbScreenInfo * from, rfbScreenInfo * to, int y)
 { if ((from==to) || (from==NULL) || (to==NULL)) return y;
   return ((int)(((double) y / (double)from->height) * (double)to->height ));
 }
@@ -84,7 +84,7 @@ int ScaleY(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int y)
 /** So, all of the encodings point to the ->screen->frameBuffer,
  * We need to change this!
  */
-void rfbScaledCorrection(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int *x, int *y, int *w, int *h, const char *function)
+void rfbScaledCorrection(rfbScreenInfo * from, rfbScreenInfo * to, int *x, int *y, int *w, int *h, const char *function)
 { double x1,y1,w1,h1, x2, y2, w2, h2;
   double scaleW = ((double) to->width) / ((double) from->width);
   double scaleH = ((double) to->height) / ((double) from->height);
@@ -132,7 +132,7 @@ void rfbScaledCorrection(rfbScreenInfoPtr from, rfbScreenInfoPtr to, int *x, int
   if (*y+*h > to->height) *h=to->height - *y;
 }
 
-void rfbScaledScreenUpdateRect(rfbScreenInfoPtr screen, rfbScreenInfoPtr ptr, int x0, int y0, int w0, int h0)
+void rfbScaledScreenUpdateRect(rfbScreenInfo * screen, rfbScreenInfo * ptr, int x0, int y0, int w0, int h0)
 { int x,y,w,v,z;
   int x1, y1, w1, h1;
   int bitsPerPixel, bytesPerPixel, bytesPerLine, areaX, areaY, area2;
@@ -257,8 +257,8 @@ void rfbScaledScreenUpdateRect(rfbScreenInfoPtr screen, rfbScreenInfoPtr ptr, in
  *   ok, now the task is to update each and every scaled version of the framebuffer
  * and we only have to do this for this specific changed rectangle!
  */
-void rfbScaledScreenUpdate(rfbScreenInfoPtr screen, int x1, int y1, int x2, int y2)
-{ rfbScreenInfoPtr ptr;
+void rfbScaledScreenUpdate(rfbScreenInfo * screen, int x1, int y1, int x2, int y2)
+{ rfbScreenInfo * ptr;
   int count=0;
 
     /* We don't point to cl->screen as it is the original */
@@ -273,9 +273,9 @@ void rfbScaledScreenUpdate(rfbScreenInfoPtr screen, int x1, int y1, int x2, int 
 /* Create a new scaled version of the framebuffer
  */
 
-rfbScreenInfoPtr rfbScaledScreenAllocate( rfbClient * cl
+rfbScreenInfo * rfbScaledScreenAllocate( rfbClient * cl
                                         , int width, int height )
-{ rfbScreenInfoPtr ptr;
+{ rfbScreenInfo * ptr;
   ptr = malloc(sizeof(rfbScreenInfo));
 
   if ( ptr )
@@ -324,8 +324,8 @@ rfbScreenInfoPtr rfbScaledScreenAllocate( rfbClient * cl
  * TODO: implement a refcount per scaled screen to prevent
  * unreferenced scaled screens from hanging around
  */
-rfbScreenInfoPtr rfbScalingFind(rfbClient * cl, int width, int height)
-{ rfbScreenInfoPtr ptr;
+rfbScreenInfo * rfbScalingFind(rfbClient * cl, int width, int height)
+{ rfbScreenInfo * ptr;
     /* include the original in the search (ie: fine 1:1 scaled version of the frameBuffer) */
   for (ptr=cl->screen; ptr!=NULL; ptr=ptr->scaledScreenNext)
   { if ((ptr->width==width) && (ptr->height==height))
@@ -336,7 +336,7 @@ rfbScreenInfoPtr rfbScalingFind(rfbClient * cl, int width, int height)
 
 /* Future needs "scale to 320x240, as that's the client's screen size */
 void rfbScalingSetup(rfbClient * cl, int width, int height)
-{ rfbScreenInfoPtr ptr;
+{ rfbScreenInfo * ptr;
 
   ptr = rfbScalingFind(cl,width,height);
   if (ptr==NULL)

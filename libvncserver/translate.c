@@ -452,7 +452,7 @@ rfbBool rfbSetClientColourMap(rfbClient * cl, int firstColour, int nColours)
 */
 
 void
-rfbSetClientColourMaps(rfbScreenInfoPtr rfbScreen, int firstColour, int nColours)
+rfbSetClientColourMaps(rfbScreenInfo * rfbScreen, int firstColour, int nColours)
 { rfbClientIteratorPtr i;
   rfbClient * cl;
 

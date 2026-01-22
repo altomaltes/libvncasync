@@ -222,7 +222,7 @@ static void rfbDefaultLog(const char *format, ...)
 rfbLogProc rfbLog=rfbDefaultLog;
 rfbLogProc rfbErr=rfbDefaultLog;
 
-void rfbScheduleCopyRegion( rfbScreenInfoPtr rfbScreen,sraRegionPtr copyRegion
+void rfbScheduleCopyRegion( rfbScreenInfo * rfbScreen,sraRegionPtr copyRegion
                             , int dx,int dy )
 { rfbClientIteratorPtr iterator;
   rfbClient * cl;
@@ -311,7 +311,7 @@ void rfbScheduleCopyRegion( rfbScreenInfoPtr rfbScreen,sraRegionPtr copyRegion
   rfbReleaseClientIterator(iterator);
 }
 
-void rfbDoCopyRegion( rfbScreenInfoPtr screen
+void rfbDoCopyRegion( rfbScreenInfo * screen
                       , sraRegionPtr copyRegion
                       , int dx,int dy )
 { sraRectangleIterator* i;
@@ -343,19 +343,19 @@ void rfbDoCopyRegion( rfbScreenInfoPtr screen
   rfbScheduleCopyRegion(screen,copyRegion,dx,dy);
 }
 
-void rfbDoCopyRect(rfbScreenInfoPtr screen,int x1,int y1,int x2,int y2,int dx,int dy)
+void rfbDoCopyRect(rfbScreenInfo * screen,int x1,int y1,int x2,int y2,int dx,int dy)
 { sraRegionPtr region = sraRgnCreateRect(x1,y1,x2,y2);
   rfbDoCopyRegion(screen,region,dx,dy);
   sraRgnDestroy(region);
 }
 
-void rfbScheduleCopyRect(rfbScreenInfoPtr screen,int x1,int y1,int x2,int y2,int dx,int dy)
+void rfbScheduleCopyRect(rfbScreenInfo * screen,int x1,int y1,int x2,int y2,int dx,int dy)
 { sraRegionPtr region = sraRgnCreateRect(x1,y1,x2,y2);
   rfbScheduleCopyRegion(screen,region,dx,dy);
   sraRgnDestroy(region);
 }
 
-void rfbMarkRegionAsModified( rfbScreenInfoPtr screen
+void rfbMarkRegionAsModified( rfbScreenInfo * screen
                               , sraRegionPtr modRegion )
 { rfbClientIteratorPtr iterator;
   rfbClient * cl;
@@ -370,11 +370,13 @@ void rfbMarkRegionAsModified( rfbScreenInfoPtr screen
   rfbReleaseClientIterator( iterator );
 }
 
-void rfbScaledScreenUpdate( rfbScreenInfoPtr screen, int x1, int y1, int x2, int y2);
+void rfbScaledScreenUpdate( rfbScreenInfo * screen
+                          , int x1, int y1
+                          , int x2, int y2);
 
 void rfbMarkRectAsModified( rfbScreenInfoPtr screen
-                          , int x1,int y1
-                          , int x2,int y2 )
+                          , int x1, int y1
+                          , int x2, int y2 )
 { sraRegionPtr region;
   int i;
 
@@ -383,9 +385,11 @@ void rfbMarkRectAsModified( rfbScreenInfoPtr screen
     x1=x2;
     x2=i;
   }
+
   if ( x1<0 )
   { x1=0;
   }
+
   if ( x2>screen->width) x2=screen->width;
   if ( x1==x2) return;
 
@@ -426,7 +430,7 @@ void rfbDefaultPtrAddEvent( int buttonMask
                           , rfbClient * cl )
 { rfbClientIteratorPtr iterator;
   rfbClient * other_client;
-  rfbScreenInfoPtr s = cl->screen;
+  rfbScreenInfo * s = cl->screen;
 
   if (x != s->cursorX || y != s->cursorY)
   { s->cursorX = x;
@@ -598,7 +602,7 @@ static int rfbDefaultSetDesktopSize(int width, int height, int numScreens, rfbEx
    function is called from rfbGetScreen() and rfbNewFramebuffer().
 */
 
-static void rfbInitServerFormat(rfbScreenInfoPtr screen, int bitsPerSample)
+static void rfbInitServerFormat(rfbScreenInfo * screen, int bitsPerSample)
 { rfbPixelFormat* format=&screen->serverFormat;
 
   format->bitsPerPixel = screen->bitsPerPixel;
@@ -656,7 +660,7 @@ int setVncEvents( struct _rfbScreenInfo * screen
   return( 1 );
 }
 
-int setVncAuth( rfbScreenInfoPtr screen
+int setVncAuth( rfbScreenInfo * screen
               , const char * name             // desktop name
               , const char * pass
               , rfbPasswordCheckProcPtr proc )
@@ -682,12 +686,12 @@ int  getVncHandler ( rfbClient * cl )
 
 
 
-rfbScreenInfoPtr rfbGetScreen( void * frameBuffer
+rfbScreenInfo * rfbGetScreen( void * frameBuffer
                              , int width, int height
                              , int bitsPerSample
                              , int  stride               // samplesPerPixel1 JACS, nos standard stride
                              , int bytesPerPixel )
-{ rfbScreenInfoPtr screen= calloc(sizeof(rfbScreenInfo),1);
+{ rfbScreenInfo * screen= calloc(sizeof(rfbScreenInfo),1);
 
   if ( width & 3 )
   { rfbErr("WARNING: Width (%d) is not a multiple of 4. VncViewer has problems with that.\n",width);
@@ -789,7 +793,7 @@ rfbScreenInfoPtr rfbGetScreen( void * frameBuffer
    the caller.
 */
 
-void rfbNewFramebuffer( rfbScreenInfoPtr screen, char *framebuffer
+void rfbNewFramebuffer( rfbScreenInfo * screen, char *framebuffer
                       , int width, int height
                       , int bitsPerSample, int samplesPerPixel
                       ,  int bytesPerPixel )
@@ -855,7 +859,7 @@ void rfbNewFramebuffer( rfbScreenInfoPtr screen, char *framebuffer
 
 /* hang up on all clients and free all reserved memory */
 
-void rfbScreenCleanup(rfbScreenInfoPtr screen)
+void rfbScreenCleanup(rfbScreenInfo * screen)
 { rfbClientIteratorPtr i=rfbGetClientIterator(screen);
   rfbClient * cl
   , * cl1= rfbClientIteratorNext(i);
@@ -881,7 +885,7 @@ void rfbScreenCleanup(rfbScreenInfoPtr screen)
 
   /* free all 'scaled' versions of this screen */
   while (screen->scaledScreenNext!=NULL)
-  { rfbScreenInfoPtr ptr;
+  { rfbScreenInfo * ptr;
     ptr = screen->scaledScreenNext;
     screen->scaledScreenNext = ptr->scaledScreenNext;
     FREE( ptr->frameBuffer );
@@ -892,7 +896,7 @@ void rfbScreenCleanup(rfbScreenInfoPtr screen)
   FREE( screen );
 }
 
-void rfbInitServer(rfbScreenInfoPtr screen)
+void rfbInitServer(rfbScreenInfo * screen)
 {
 #ifndef WIN32
   if ( screen->ignoreSIGPIPE )
@@ -900,7 +904,7 @@ void rfbInitServer(rfbScreenInfoPtr screen)
 #endif
 }
 
-void rfbShutdownServer(rfbScreenInfoPtr screen,rfbBool disconnectClients)
+void rfbShutdownServer(rfbScreenInfo * screen,rfbBool disconnectClients)
 { if(disconnectClients)
   { rfbClientIteratorPtr iter = rfbGetClientIterator(screen);
     rfbClient * nextCl
@@ -940,9 +944,9 @@ int  gettimeofday123( struct timeval*  tv,char *  dummy )
 
 #endif
 
-extern rfbClientIteratorPtr rfbGetClientIteratorWithClosed(rfbScreenInfoPtr rfbScreen);
+extern rfbClientIteratorPtr rfbGetClientIteratorWithClosed(rfbScreenInfo * rfbScreen);
 // JACS
-rfbBool rfbUpdateClients( rfbScreenInfoPtr screen )
+rfbBool rfbUpdateClients( rfbScreenInfo * screen )
 { rfbClient * clPrev;
   rfbClientIteratorPtr i= rfbGetClientIteratorWithClosed(screen);
   rfbClient * cl= rfbClientIteratorHead(i);
@@ -958,7 +962,7 @@ rfbBool rfbUpdateClients( rfbScreenInfoPtr screen )
 }
 
 
-rfbBool rfbProcessEvents( rfbScreenInfoPtr screen
+rfbBool rfbProcessEvents( rfbScreenInfo * screen
                         , rfbLong usec)
 { rfbClientIteratorPtr i;
   rfbClient * cl
@@ -985,7 +989,7 @@ rfbBool rfbProcessEvents( rfbScreenInfoPtr screen
 rfbBool rfbUpdateClient( rfbClient * cl )
 { struct timeval tv;
   rfbBool result=FALSE;
-  rfbScreenInfoPtr screen = cl->screen;
+  rfbScreenInfo * screen = cl->screen;
 
   if ( !cl->onHold
        && FB_UPDATE_PENDING(cl)
@@ -1036,13 +1040,13 @@ rfbBool rfbUpdateClient( rfbClient * cl )
   return result;
 }
 
-rfbBool rfbIsActive(rfbScreenInfoPtr screenInfo)
+rfbBool rfbIsActive(rfbScreenInfo * screenInfo)
 { return screenInfo->clientHead!=NULL;
 }
 
 /*
 
-  void rfbRunEventLoop(rfbScreenInfoPtr screen, long usec, rfbBool runInBackground)
+  void rfbRunEventLoop(rfbScreenInfo * screen, long usec, rfbBool runInBackground)
   { if(runInBackground)
   { rfbErr("Can't run in background, because I don't have PThreads!\n");
     return;

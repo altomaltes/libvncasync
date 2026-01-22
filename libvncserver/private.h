@@ -15,11 +15,11 @@ rfbClient * rfbClientIteratorHead(rfbClientIteratorPtr i);
 
 #ifdef HAVE_LIBZ
 #ifdef HAVE_LIBJPEG
-extern void rfbTightCleanup(rfbScreenInfoPtr screen);
+extern void rfbTightCleanup(rfbScreenInfo * screen);
 #endif
 
 /* from zlib.c */
-extern void rfbZlibCleanup(rfbScreenInfoPtr screen);
+extern void rfbZlibCleanup(rfbScreenInfo * screen);
 
 /* from zrle.c */
 void rfbFreeZrleData(rfbClient * cl);

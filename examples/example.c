@@ -78,7 +78,9 @@ static enum rfbNewClientAction newclient( rfbClient * cl )
 /**
  * switch to new framebuffer contents
  */
-static void newframebuffer( rfbScreenInfoPtr screen, int width, int height )
+static void newframebuffer( rfbScreenInfo * screen
+                          , int width
+                          , int height )
 { unsigned char *oldfb, *newfb;
 
   maxx = width;
@@ -192,8 +194,8 @@ static void doptr(int buttonMask,int x,int y,rfbClient * cl)
 /* Here the key events are handled */
 
 
-//extern void rfbDisconnectUDPSock(rfbScreenInfoPtr rfbScreen) {}
-//extern int rfbConnect(rfbScreenInfoPtr rfbScreen, char* host, int port) {}
+//extern void rfbDisconnectUDPSock(rfbScreenInfo * rfbScreen) {}
+//extern int rfbConnect(rfbScreenInfo * rfbScreen, char* host, int port) {}
 
 
 
@@ -234,6 +236,7 @@ static void dokey(rfbBool down,rfbKeySym key,rfbClient * cl)
     { initBuffer((unsigned char*)cl->screen->frameBuffer);
       rfbMarkRectAsModified(cl->screen,0,0,maxx,maxy);
     }
+
     else if (key == XK_Up)
     { if (maxx < 1024)
       { if (maxx < 800)
@@ -241,9 +244,8 @@ static void dokey(rfbBool down,rfbKeySym key,rfbClient * cl)
         }
         else
         { newframebuffer(cl->screen, 1024, 768);
-        }
-      }
-    }
+    } } }
+
     else if(key==XK_Down)
     { if (maxx > 640)
       { if (maxx > 800)
@@ -251,9 +253,8 @@ static void dokey(rfbBool down,rfbKeySym key,rfbClient * cl)
         }
         else
         { newframebuffer(cl->screen, 640, 480);
-        }
-      }
-    }
+    } } }
+
     else if(key>=' ' && key<0x100)
     { ClientData* cd=cl->clientData;
       int x1=cd->oldx,y1=cd->oldy,x2,y2;
@@ -282,7 +283,7 @@ static char exampleXCursor[]=
 
 /* Example for a rich cursor (full-colour) */
 
-static void MakeRichCursor(rfbScreenInfoPtr rfbScreen)
+static void MakeRichCursor(rfbScreenInfo * rfbScreen)
 { int i,j,w=32,h=32;
   rfbCursorPtr c = rfbScreen->cursor;
   char bitmap[]=
@@ -337,7 +338,7 @@ static void MakeRichCursor(rfbScreenInfoPtr rfbScreen)
 */
 
 int main( int argc,char** argv )
-{ rfbScreenInfoPtr rfbScreen = rfbGetScreen(&argc,argv,maxx,maxy,8,3,bpp);
+{ rfbScreenInfo * rfbScreen = rfbGetScreen(&argc,argv,maxx,maxy,8,3,bpp);
   if(!rfbScreen)
     return 0;
   rfbScreen->desktopName = "LibVNCServer Example";

@@ -115,14 +115,14 @@ void rfbDecrClientRef(rfbClient * cl) {}
 
 struct rfbClientIterator
 { rfbClient * next;
-  rfbScreenInfoPtr screen;
+  rfbScreenInfo * screen;
   rfbBool closedToo;
 };
 
 /**
  *
  */
-void rfbClientListInit(rfbScreenInfoPtr rfbScreen)
+void rfbClientListInit(rfbScreenInfo * rfbScreen)
 { if( sizeof(rfbBool)!=1 )
   { fprintf(stderr,"rfbBool's size is not 1 (%d)!\n",(int)sizeof(rfbBool));  /* a sanity check */
 
@@ -131,7 +131,7 @@ void rfbClientListInit(rfbScreenInfoPtr rfbScreen)
   rfbScreen->clientHead = NULL;
 }
 
-rfbClientIteratorPtr rfbGetClientIterator(rfbScreenInfoPtr rfbScreen)
+rfbClientIteratorPtr rfbGetClientIterator(rfbScreenInfo * rfbScreen)
 { rfbClientIteratorPtr i=
     (rfbClientIteratorPtr)calloc(sizeof(struct rfbClientIterator), 1 );
   i->next = NULL;
@@ -143,7 +143,7 @@ rfbClientIteratorPtr rfbGetClientIterator(rfbScreenInfoPtr rfbScreen)
 /**
  *
  */
-rfbClientIteratorPtr rfbGetClientIteratorWithClosed(rfbScreenInfoPtr rfbScreen)
+rfbClientIteratorPtr rfbGetClientIteratorWithClosed(rfbScreenInfo * rfbScreen)
 { rfbClientIteratorPtr i =
     (rfbClientIteratorPtr)calloc(sizeof(struct rfbClientIterator),1);
   i->next = NULL;
@@ -192,7 +192,7 @@ void rfbReleaseClientIterator(rfbClientIteratorPtr iterator)
 */
 
 //void
-//rfbNewClientConnection(rfbScreenInfoPtr rfbScreen,
+//rfbNewClientConnection(rfbScreenInfo * rfbScreen,
 //                       int sock)
 //{
 //    rfbNewClient(rfbScreen,sock);
@@ -200,7 +200,7 @@ void rfbReleaseClientIterator(rfbClientIteratorPtr iterator)
 
 
 void
-rfbSetProtocolVersion(rfbScreenInfoPtr rfbScreen, int major_, int minor_)
+rfbSetProtocolVersion(rfbScreenInfo * rfbScreen, int major_, int minor_)
 { /* Permit the server to set the version to report */
   /* TODO: sanity checking */
   if ((major_==3) && (minor_ > 2 && minor_ < 9))
@@ -215,7 +215,7 @@ rfbSetProtocolVersion(rfbScreenInfoPtr rfbScreen, int major_, int minor_)
  *  rfbNewClient is called when a new connection has been made by whatever
  *  means.
  */
-rfbClient * rfbNewStreamClient( rfbScreenInfoPtr rfbScreen
+rfbClient * rfbNewStreamClient( rfbScreenInfo * rfbScreen
                               , rfbClient * cl, int handler )
 { if ( cl )
   { size_t otherClientsCount = 0;
@@ -891,7 +891,7 @@ rfbSendSupportedEncodings(rfbClient * cl)
 }
 
 
-void rfbSetServerVersionIdentity(rfbScreenInfoPtr screen, char *fmt, ...)
+void rfbSetServerVersionIdentity(rfbScreenInfo * screen, char *fmt, ...)
 { char buffer[256];
   va_list ap;
 
@@ -3322,7 +3322,7 @@ rfbBool rfbSendSetColourMapEntries( rfbClient * cl
    rfbSendBell sends a Bell message to all the clients.
 */
 
-void rfbSendBell(rfbScreenInfoPtr rfbScreen)
+void rfbSendBell(rfbScreenInfo * rfbScreen)
 { rfbClientIteratorPtr i;
   rfbClient * cl;
   rfbBellMsg b;
@@ -3345,7 +3345,7 @@ void rfbSendBell(rfbScreenInfoPtr rfbScreen)
    rfbSendServerCutText sends a ServerCutText message to all the clients.
 */
 
-void rfbSendServerCutText(rfbScreenInfoPtr rfbScreen,char *str, int len)
+void rfbSendServerCutText(rfbScreenInfo * rfbScreen,char *str, int len)
 { rfbClient * cl;
   rfbServerCutTextMsg sct;
   rfbClientIteratorPtr iterator;
@@ -3390,7 +3390,7 @@ void rfbSendServerCutText(rfbScreenInfoPtr rfbScreen,char *str, int len)
 */
 
 void
-rfbProcessUDPInput(rfbScreenInfoPtr rfbScreen)
+rfbProcessUDPInput(rfbScreenInfo * rfbScreen)
 { /*
     int n;
     rfbClient * cl=rfbScreen->udpClient;

@@ -62,7 +62,7 @@ void rfbPurgeArguments( int* argc, int * position,int count,char *argv[])
   (*argc)-=count;
 }
 
-rfbBool rfbProcessArguments( rfbScreenInfoPtr rfbScreen
+rfbBool rfbProcessArguments( rfbScreenInfo * rfbScreen
                              , int* argc, char *argv[] )
 { int i,i1;
 

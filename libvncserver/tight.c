@@ -157,7 +157,7 @@ static TLS char *tightAfterBuf = NULL;
 
 static TLS tjhandle j = NULL;
 
-void rfbTightCleanup (rfbScreenInfoPtr screen)
+void rfbTightCleanup (rfbScreenInfo * screen)
 { if (tightBeforeBufSize)
   { free (tightBeforeBuf);
     tightBeforeBufSize = 0;

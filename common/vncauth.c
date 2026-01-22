@@ -23,10 +23,8 @@
 
 #include <rfb/rfbproto.h>
 
-
-
 #ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+  #include <sys/types.h>
 #endif
 
 #include <stdio.h>

@@ -61,7 +61,7 @@ static TLS int zlibAfterBufSize = 0;
 static TLS char *zlibAfterBuf = NULL;
 static TLS int zlibAfterBufLen = 0;
 
-void rfbZlibCleanup(rfbScreenInfoPtr screen)
+void rfbZlibCleanup(rfbScreenInfo * screen)
 { if (zlibBeforeBufSize)
   { FREE(zlibBeforeBuf);
     zlibBeforeBufSize=0;

@@ -28,7 +28,7 @@
 #include "rfb/rfbregion.h"
 #include "private.h"
 
-void rfbScaledScreenUpdate(rfbScreenInfoPtr screen, int x1, int y1, int x2, int y2);
+void rfbScaledScreenUpdate(rfbScreenInfo * screen, int x1, int y1, int x2, int y2);
 
 /*
    Send cursor shape either in X-style format or in client pixel format.
@@ -363,7 +363,7 @@ void rfbFreeCursor( rfbCursorPtr cursor )
 }
 
 /* background and foregroud colour have to be set beforehand */
-void rfbMakeXCursorFromRichCursor( rfbScreenInfoPtr rfbScreen
+void rfbMakeXCursorFromRichCursor( rfbScreenInfo * rfbScreen
                                    , rfbCursorPtr cursor )
 { rfbPixelFormat* format=&rfbScreen->serverFormat;
   int i,j,w=(cursor->width+7)/8,bpp=format->bitsPerPixel/8,
@@ -437,7 +437,7 @@ void rfbMakeXCursorFromRichCursor( rfbScreenInfoPtr rfbScreen
   }
 }
 
-void rfbMakeRichCursorFromXCursor(rfbScreenInfoPtr rfbScreen,rfbCursorPtr cursor)
+void rfbMakeRichCursorFromXCursor(rfbScreenInfo * rfbScreen,rfbCursorPtr cursor)
 { rfbPixelFormat* format=&rfbScreen->serverFormat;
   int i,j,w=(cursor->width+7)/8,bpp=format->bitsPerPixel/8;
   uint32_t background,foreground;
@@ -470,7 +470,7 @@ void rfbMakeRichCursorFromXCursor(rfbScreenInfoPtr rfbScreen,rfbCursorPtr cursor
 /* functions to draw/hide cursor directly in the frame buffer */
 
 void rfbHideCursor(rfbClient * cl)
-{ rfbScreenInfoPtr s=cl->screen;
+{ rfbScreenInfo * s=cl->screen;
   rfbCursorPtr c=s->cursor;
   int j,x1,x2,y1,y2,bpp=s->serverFormat.bitsPerPixel/8,
                     rowstride=s->paddedWidthInBytes;
@@ -508,7 +508,7 @@ void rfbHideCursor(rfbClient * cl)
 }
 
 void rfbShowCursor(rfbClient * cl)
-{ rfbScreenInfoPtr s=cl->screen;
+{ rfbScreenInfo * s=cl->screen;
   rfbCursorPtr c=s->cursor;
   int i,j,x1,x2,y1,y2,i1,j1,bpp=s->serverFormat.bitsPerPixel/8,
                             rowstride=s->paddedWidthInBytes,
@@ -677,7 +677,7 @@ void rfbShowCursor(rfbClient * cl)
 */
 
 void rfbRedrawAfterHideCursor(rfbClient * cl,sraRegionPtr updateRegion)
-{ rfbScreenInfoPtr s = cl->screen;
+{ rfbScreenInfo * s = cl->screen;
   rfbCursorPtr c = s->cursor;
 
   if(c)
@@ -721,7 +721,7 @@ static void rfbPrintXCursor(rfbCursorPtr cursor)
 
 #endif
 
-void rfbSetCursor(rfbScreenInfoPtr rfbScreen,rfbCursorPtr c)
+void rfbSetCursor(rfbScreenInfo * rfbScreen,rfbCursorPtr c)
 { rfbClientIteratorPtr iterator;
   rfbClient * cl;
 

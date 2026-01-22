@@ -32,7 +32,7 @@
  * can't work out how to do that without some kind of helper X client.
  */
 
-void rfbGotXCutText( rfbScreenInfoPtr rfbScreen
+void rfbGotXCutText( rfbScreenInfo * rfbScreen
                    , char *str
                    , int len)
 {

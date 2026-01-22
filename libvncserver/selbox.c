@@ -4,7 +4,7 @@
 #include <rfb/keysym.h>
 
 typedef struct
-{ rfbScreenInfoPtr screen;
+{ rfbScreenInfo * screen;
   rfbFontDataPtr font;
   char** list;
   int listSize;
@@ -26,7 +26,7 @@ static const char* okStr="OK";
 static const char* cancelStr="Cancel";
 
 static void selPaintButtons(rfbSelectData* m,rfbBool invertOk,rfbBool invertCancel)
-{ rfbScreenInfoPtr s = m->screen;
+{ rfbScreenInfo * s = m->screen;
   rfbPixel bcolour = m->backColour;
   rfbPixel colour = m->colour;
 
@@ -216,7 +216,7 @@ static rfbCursorPtr selGetCursorPtr(rfbClient * cl)
 { return NULL;
 }
 
-int rfbSelectBox( rfbScreenInfoPtr rfbScreen,rfbFontDataPtr font
+int rfbSelectBox( rfbScreenInfo * rfbScreen,rfbFontDataPtr font
                 , char** list
                 , int x1,int y1,int x2,int y2
                 , rfbPixel colour, rfbPixel backColour
@@ -309,7 +309,7 @@ int rfbSelectBox( rfbScreenInfoPtr rfbScreen,rfbFontDataPtr font
 
   FREE( frameBufferBackup );
 
-  rfbMarkRectAsModified(rfbScreen,x1,y1,x2,y2);
+  rfbMarkRectAsModified( rfbScreen,x1,y1,x2,y2);
   rfbScreen->screenData = screenDataBackup;
   rfbScreen->kbdAddEvent = kbdAddEventBackup;
   rfbScreen->ptrAddEvent = ptrAddEventBackup;
