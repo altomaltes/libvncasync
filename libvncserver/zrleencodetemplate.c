@@ -149,7 +149,7 @@ void ZRLE_ENCODE_TILE(PIXEL_T* data, int w, int h, zrleOutStream* os,
     { singlePixels++;
     }
     else
-    { while (*++ptr == pix) ;
+    { while (*++ptr == pix) {};
       runs++;
     }
     zrlePaletteHelperInsert(ph, pix);

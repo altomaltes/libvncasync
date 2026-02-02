@@ -801,11 +801,11 @@ DLLEXPORT int DLLCALL tjDecompress2(tjhandle handle, unsigned char *jpegBuf,
   if(pitch==0) { pitch=dinfo->output_width*tjPixelSize[pixelFormat]; }
 
 #ifndef JCS_EXTENSIONS
-  if(pixelFormat!=TJPF_GRAY &&
-      (RGB_RED!=tjRedOffset[pixelFormat] ||
-       RGB_GREEN!=tjGreenOffset[pixelFormat] ||
-       RGB_BLUE!=tjBlueOffset[pixelFormat] ||
-       RGB_PIXELSIZE!=tjPixelSize[pixelFormat]))
+  if( pixelFormat!=TJPF_GRAY
+   && ( RGB_RED      != tjRedOffset[pixelFormat  ]
+     || RGB_GREEN    != tjGreenOffset[pixelFormat]
+     || RGB_BLUE     != tjBlueOffset[pixelFormat ]
+     || RGB_PIXELSIZE!= tjPixelSize[pixelFormat  ]  ))
   { rgbBuf=(unsigned char *)malloc(width*height*3);
     if(!rgbBuf) { _throw("tjDecompress2(): Memory allocation failure"); }
     _pitch=pitch;

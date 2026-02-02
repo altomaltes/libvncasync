@@ -265,9 +265,11 @@ rfbClient * rfbNewStreamClient( rfbScreenInfo * rfbScreen
     cl->copyDX = 0;
     cl->copyDY = 0;
 
-    cl->modifiedRegion =  sraRgnCreateRect(0,0,rfbScreen->width,rfbScreen->height);
+    cl->modifiedRegion =  sraRgnCreateRect( 0,0
+                                          , rfbScreen->window.width
+                                          , rfbScreen->window.height);
     cl->requestedRegion= sraRgnCreate();
-    cl->format         = cl->screen->serverFormat;
+    cl->format         = cl->screen->window.serverFormat;
     cl->translateFn    = rfbTranslateNone;
     cl->translateLookupTable = NULL;
 
@@ -595,8 +597,9 @@ void rfbClientConnFailed( rfbClient * cl
    initialisation message.
 */
 
-static void rfbProcessClientInitMessage(rfbClient * cl)
-{ rfbClientInitMsg * ci;
+static void rfbProcessClientInitMessage( rfbClient * cl )
+{ rfbClientInitMsg * ci= NULL;
+
   union
   { char buf[256];
     rfbServerInitMsg si;
@@ -623,9 +626,9 @@ static void rfbProcessClientInitMessage(rfbClient * cl)
 
   memset(u.buf,0,sizeof(u.buf));
 
-  u.si.framebufferWidth = Swap16IfLE(cl->screen->width);
-  u.si.framebufferHeight= Swap16IfLE(cl->screen->height);
-  u.si.format           = cl->screen->serverFormat;
+  u.si.framebufferWidth = Swap16IfLE( cl->screen->window.width  );
+  u.si.framebufferHeight= Swap16IfLE( cl->screen->window.height );
+  u.si.format           = cl->screen->window.serverFormat;
   u.si.format.redMax    = Swap16IfLE(u.si.format.redMax);
   u.si.format.greenMax  = Swap16IfLE(u.si.format.greenMax);
   u.si.format.blueMax   = Swap16IfLE(u.si.format.blueMax);
@@ -680,9 +683,7 @@ static void rfbProcessClientInitMessage(rfbClient * cl)
         }
       }
       rfbReleaseClientIterator(iterator);
-    }
-  }
-}
+} } }
 
 /* The values come in based on the scaled screen, we need to convert them to
    values based on the man screen's coordinate system
@@ -697,20 +698,22 @@ static rfbBool rectSwapIfLEAndClip( uint16_t * x
   int w1=Swap16IfLE(*w);
   int h1=Swap16IfLE(*h);
 
-  rfbScaledCorrection(cl->scaledScreen, cl->screen, &x1, &y1, &w1, &h1, "rectSwapIfLEAndClip");
+  rfbScaledCorrection( &cl->scaledScreen->window
+                     , &cl->screen      ->window
+                     , &x1, &y1, &w1, &h1, "rectSwapIfLEAndClip");
   *x = x1;
   *y = y1;
   *w = w1;
   *h = h1;
 
-  if(*w>cl->screen->width-*x)
-    *w=cl->screen->width-*x;
+  if(*w>cl->screen->window.width-*x)
+     *w=cl->screen->window.width-*x;
 
-  if(*w>cl->screen->width-*x) /* possible underflow */
+  if(*w>cl->screen->window.width-*x) /* possible underflow */
     return FALSE;
-  if(*h>cl->screen->height-*y)
-    *h=cl->screen->height-*y;
-  if(*h>cl->screen->height-*y)
+  if(*h>cl->screen->window.height-*y)
+    *h=cl->screen->window.height-*y;
+  if(*h>cl->screen->window.height-*y)
     return FALSE;
 
   return TRUE;
@@ -1306,7 +1309,7 @@ rfbBool rfbSendFileTransferChunk(rfbClient * cl)
   int retval=0;
   // fd_set wfds;
   // struct timeval tv;
-  int n;
+  int n= 0;
 #ifdef HAVE_LIBZ
   unsigned char compBuf[sz_rfbBlockSize + 1024];
   rfbDword nMaxCompSize = sizeof(compBuf);
@@ -1409,7 +1412,7 @@ rfbBool rfbProcessFileTransfer(rfbClient * cl, uint8_t contentType, uint8_t cont
 #ifdef HAVE_LIBZ
   unsigned char compBuff[sz_rfbBlockSize];
   rfbDword nRawBytes = sz_rfbBlockSize;
-  int nRet = 0;
+  //int nRet = 0;
 #endif
 
   FILEXFER_ALLOWED_OR_CLOSE_AND_RETURN("", cl, FALSE);
@@ -1631,7 +1634,7 @@ rfbBool rfbProcessFileTransfer(rfbClient * cl, uint8_t contentType, uint8_t cont
         {
 #ifdef HAVE_LIBZ
           /* compressed packet */
-          nRet = uncompress(compBuff,&nRawBytes,(const unsigned char*)buffer, length);
+         /*nRet =*/ uncompress(compBuff,&nRawBytes,(const unsigned char*)buffer, length);
 //    if(nRet == Z_OK)
           //    retval=writeFile(cl->fileTransfer.fd, (char*)compBuff, nRawBytes);
           //else
@@ -2209,19 +2212,19 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
       { if ( msg->pe.buttonMask != cl->lastPtrButtons
           || cl->screen->deferPtrUpdateTime == 0)
         { cl->screen->ptrAddEvent( msg->pe.buttonMask
-                                 ,  ScaleX( cl->scaledScreen, cl->screen, Swap16IfLE( msg->pe.x ))
-                                 ,  ScaleY( cl->scaledScreen, cl->screen, Swap16IfLE( msg->pe.y ))
+                                 , ScaleX( &cl->scaledScreen->window, &cl->screen->window, Swap16IfLE( msg->pe.x ))
+                                 , ScaleY( &cl->scaledScreen->window, &cl->screen->window, Swap16IfLE( msg->pe.y ))
                                  , cl );
           cl->lastPtrButtons = msg->pe.buttonMask;
         }
 
         else
-        { cl->lastPtrX = ScaleX(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.x));
-          cl->lastPtrY = ScaleY(cl->scaledScreen, cl->screen, Swap16IfLE(msg->pe.y));
+        { cl->lastPtrX = ScaleX(&cl->scaledScreen->window, &cl->screen->window, Swap16IfLE(msg->pe.x));
+          cl->lastPtrY = ScaleY(&cl->scaledScreen->window, &cl->screen->window, Swap16IfLE(msg->pe.y));
           cl->lastPtrButtons = msg->pe.buttonMask;
       } }
 
-      return;
+    return;
 
     case rfbFileTransfer:
       if ( !getStreamBytes( cl, sz_rfbFileTransferMsg-1 ) )
@@ -2354,7 +2357,8 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
 
       rfbStatRecordMessageRcvd(cl, msg->type, sz_rfbSetScaleMsg, sz_rfbSetScaleMsg);
       rfbLog("rfbSetScale(%d)\n", msg->ssc.scale);
-      rfbScalingSetup(cl,cl->screen->width/msg->ssc.scale, cl->screen->height/msg->ssc.scale);
+      rfbScalingSetup( cl, cl->screen->window.width/msg->ssc.scale
+                         , cl->screen->window.height/msg->ssc.scale);
 
       rfbSendNewScaleSize(cl);
       return;
@@ -2372,7 +2376,7 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
 
       rfbStatRecordMessageRcvd(cl, msg->type, sz_rfbSetScaleMsg, sz_rfbSetScaleMsg);
       rfbLog("rfbSetScale(%d)\n", msg->ssc.scale);
-      rfbScalingSetup(cl,cl->screen->width/msg->ssc.scale, cl->screen->height/msg->ssc.scale);
+      rfbScalingSetup(cl,cl->screen->window.width/msg->ssc.scale, cl->screen->window.height/msg->ssc.scale);
 
       rfbSendNewScaleSize(cl);
       return;
@@ -2509,13 +2513,13 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
     cl->ublen = sz_rfbFramebufferUpdateMsg;
 
     if (cl->useExtDesktopSize)
-    { if (!rfbSendExtDesktopSize(cl, cl->scaledScreen->width, cl->scaledScreen->height))
+    { if (!rfbSendExtDesktopSize(cl, cl->scaledScreen->window.width, cl->scaledScreen->window.height))
       { if(cl->screen->displayFinishedHook)
           cl->screen->displayFinishedHook(cl, FALSE);
         return FALSE;
       }
     }
-    else if (!rfbSendNewFBSize(cl, cl->scaledScreen->width, cl->scaledScreen->height))
+    else if (!rfbSendNewFBSize(cl, cl->scaledScreen->window.width, cl->scaledScreen->window.height))
     { if(cl->screen->displayFinishedHook)
         cl->screen->displayFinishedHook(cl, FALSE);
       return FALSE;
@@ -2614,13 +2618,13 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
     { sraRegionPtr slice;
       if(y<rect.y1 || y>=rect.y2)
         y=rect.y1;
-      slice=sraRgnCreateRect(0,y,cl->screen->width,y+height);
+      slice=sraRgnCreateRect(0,y,cl->screen->window.width,y+height);
       sraRgnAnd(updateRegion,slice);
       sraRgnDestroy(slice);
     }
     sraRgnDestroy(bbox);
     y+=height;
-    if(y>=cl->screen->height)
+    if(y>=cl->screen->window.height)
       y=0;
     cl->progressiveSliceY=y;
   }
@@ -2706,7 +2710,11 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
       int rectsPerRow, rows;
       /* We need to count the number of rects in the scaled screen */
       if (cl->screen!=cl->scaledScreen)
-        rfbScaledCorrection(cl->screen, cl->scaledScreen, &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+      {  rfbScaledCorrection( &cl->screen->window
+                            , &cl->scaledScreen->window
+                            , &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+      }
+
       rectsPerRow = (w-1)/cl->correMaxWidth+1;
       rows = (h-1)/cl->correMaxHeight+1;
       nUpdateRegionRects += rectsPerRow*rows;
@@ -2724,7 +2732,12 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
       int h = rect.y2 - y;
       /* We need to count the number of rects in the scaled screen */
       if (cl->screen!=cl->scaledScreen)
-        rfbScaledCorrection(cl->screen, cl->scaledScreen, &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+      { rfbScaledCorrection( &cl->screen->window
+                           , &cl->scaledScreen->window
+                           , &x, &y, &w, &h
+                           , "rfbSendFramebufferUpdate" );
+      }
+
       nUpdateRegionRects += (((h-1) / (ULTRA_MAX_SIZE( w ) / w)) + 1);
     }
     sraRgnReleaseIterator(i);
@@ -2741,7 +2754,13 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
       int h = rect.y2 - y;
       /* We need to count the number of rects in the scaled screen */
       if (cl->screen!=cl->scaledScreen)
-        rfbScaledCorrection(cl->screen, cl->scaledScreen, &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+      { rfbScaledCorrection( &cl->screen->window
+                           , &cl->scaledScreen->window
+                           , &x, &y
+                           , &w, &h
+                           , "rfbSendFramebufferUpdate");
+      }
+
       nUpdateRegionRects += (((h-1) / (ZLIB_MAX_SIZE( w ) / w)) + 1);
     }
     sraRgnReleaseIterator(i);
@@ -2759,7 +2778,11 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
       int n;
       /* We need to count the number of rects in the scaled screen */
       if (cl->screen!=cl->scaledScreen)
-        rfbScaledCorrection(cl->screen, cl->scaledScreen, &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+      { rfbScaledCorrection( &cl->screen->window
+                           , &cl->scaledScreen->window
+                           , &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+      }
+
       n = rfbNumCodedRectsTight(cl, x, y, w, h);
       if (n == 0)
       { nUpdateRegionRects = 0xFFFF;
@@ -2784,7 +2807,10 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
       int n;
       /* We need to count the number of rects in the scaled screen */
       if (cl->screen!=cl->scaledScreen)
-        rfbScaledCorrection(cl->screen, cl->scaledScreen, &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+      { rfbScaledCorrection( &cl->screen->window
+                           , &cl->scaledScreen->window
+                           , &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+      }
       n = rfbNumCodedRectsTight(cl, x, y, w, h);
       if (n == 0)
       { nUpdateRegionRects = 0xFFFF;
@@ -2874,68 +2900,37 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
   }
 
   for( i= sraRgnGetIterator(updateRegion)
-          ; sraRgnIteratorNext(i,&rect);)
+     ;    sraRgnIteratorNext(i,&rect);)
   { int x = rect.x1;
     int y = rect.y1;
     int w = rect.x2 - x;
     int h = rect.y2 - y;
 
     /* We need to count the number of rects in the scaled screen */
-    if (cl->screen!=cl->scaledScreen)
-      rfbScaledCorrection(cl->screen, cl->scaledScreen, &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+    if ( cl->screen != cl->scaledScreen )
+    { rfbScaledCorrection( &cl->screen->window
+                         , &cl->scaledScreen->window
+                         , &x, &y, &w, &h, "rfbSendFramebufferUpdate");
+    }
 
     switch (cl->preferredEncoding)
     { case -1:
-      case rfbEncodingRaw:
-        if (!rfbSendRectEncodingRaw(cl, x, y, w, h))
-        { goto updateFailed;
-        }
-      break;
-
-      case rfbEncodingRRE:
-        if (!rfbSendRectEncodingRRE(cl, x, y, w, h))
-        { goto updateFailed;
-        }
-      break;
-
-      case rfbEncodingCoRRE:
-        if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h))
-        { goto updateFailed;
-        }
-      break;
-
-      case rfbEncodingHextile:
-        if (!rfbSendRectEncodingHextile(cl, x, y, w, h))
-          goto updateFailed;
-      break;
-
-      case rfbEncodingUltra:
-        if (!rfbSendRectEncodingUltra(cl, x, y, w, h))
-          goto updateFailed;
-      break;
+      case rfbEncodingRaw    : if (!rfbSendRectEncodingRaw    ( cl, x, y, w, h)) { goto updateFailed; } break;
+      case rfbEncodingRRE    : if (!rfbSendRectEncodingRRE    ( cl, x, y, w, h)) { goto updateFailed; } break;
+      case rfbEncodingCoRRE  : if (!rfbSendRectEncodingCoRRE  ( cl, x, y, w, h)) { goto updateFailed; } break;
+      case rfbEncodingHextile: if (!rfbSendRectEncodingHextile( cl, x, y, w, h)) { goto updateFailed; } break;
+      case rfbEncodingUltra  : if (!rfbSendRectEncodingUltra  ( cl, x, y, w, h)) { goto updateFailed; } break;
 
 #ifdef HAVE_LIBZ
-      case rfbEncodingZlib:
-        if (!rfbSendRectEncodingZlib(cl, x, y, w, h))
-          goto updateFailed;
-        break;
-      case rfbEncodingZRLE:
-      case rfbEncodingZYWRLE:
-        if (!rfbSendRectEncodingZRLE(cl, x, y, w, h))
-          goto updateFailed;
-        break;
+      case rfbEncodingZlib   : if (!rfbSendRectEncodingZlib   ( cl, x, y, w, h)) { goto updateFailed; } break;
+      case rfbEncodingZRLE   :
+      case rfbEncodingZYWRLE : if (!rfbSendRectEncodingZRLE   ( cl, x, y, w, h)) { goto updateFailed; } break;
 #endif
 
 #if defined(HAVE_LIBJPEG) && (defined(HAVE_LIBZ) || defined(HAVE_LIBPNG))
-      case rfbEncodingTight:
-        if (!rfbSendRectEncodingTight(cl, x, y, w, h))
-          goto updateFailed;
-        break;
+      case rfbEncodingTight:   if (!rfbSendRectEncodingTight   ( cl, x, y, w, h)) { goto updateFailed; } break;
 #ifdef HAVE_LIBPNG
-      case rfbEncodingTightPng:
-        if (!rfbSendRectEncodingTightPng(cl, x, y, w, h))
-          goto updateFailed;
-        break;
+      case rfbEncodingTightPng:if (!rfbSendRectEncodingTightPng( cl, x, y, w, h)) { goto updateFailed; } break;
 #endif
 #endif
   }  }
@@ -2945,8 +2940,8 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
     i = NULL;
   }
 
-  if ( nUpdateRegionRects == 0xFFFF &&
-       !rfbSendLastRectMarker(cl) )
+  if ( nUpdateRegionRects == 0xFFFF
+    && !rfbSendLastRectMarker(cl) )
     goto updateFailed;
 
   if (!rfbSendUpdateBuf(cl))
@@ -2969,16 +2964,15 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
 }
 
 
-/*
-   Send the copy region as a string of CopyRect encoded rectangles.
-   The only slightly tricky thing is that we should send the messages in
-   the correct order so that an earlier CopyRect will not corrupt the source
-   of a later one.
-*/
-
+/**
+ *  Send the copy region as a string of CopyRect encoded rectangles.
+ *  The only slightly tricky thing is that we should send the messages in
+ *  the correct order so that an earlier CopyRect will not corrupt the source
+ *  of a later one.
+ */
 rfbBool rfbSendCopyRegion( rfbClient * cl
-                           , sraRegionPtr reg
-                           , int dx,  int dy)
+                         , sraRegionPtr reg
+                         , int dx,  int dy)
 { int x, y, w, h;
   rfbFramebufferUpdateRectHeader rect;
   rfbCopyRect cr;
@@ -2989,8 +2983,8 @@ rfbBool rfbSendCopyRegion( rfbClient * cl
   i = sraRgnGetReverseIterator(reg,dx>0,dy>0);
 
   /* correct for the scale of the screen */
-  dx = ScaleX(cl->screen, cl->scaledScreen, dx);
-  dy = ScaleX(cl->screen, cl->scaledScreen, dy);
+  dx = ScaleX(&cl->screen->window, &cl->scaledScreen->window, dx);
+  dy = ScaleX(&cl->screen->window, &cl->scaledScreen->window, dy);
 
   while(sraRgnIteratorNext(i,&rect1))
   { x = rect1.x1;
@@ -2999,7 +2993,9 @@ rfbBool rfbSendCopyRegion( rfbClient * cl
     h = rect1.y2 - y;
 
     /* correct for scaling (if necessary) */
-    rfbScaledCorrection(cl->screen, cl->scaledScreen, &x, &y, &w, &h, "copyrect");
+    rfbScaledCorrection( &cl->screen->window
+                       , &cl->scaledScreen->window
+                       , &x, &y, &w, &h, "copyrect");
 
     rect.r.x = Swap16IfLE(x);
     rect.r.y = Swap16IfLE(y);
@@ -3019,7 +3015,7 @@ rfbBool rfbSendCopyRegion( rfbClient * cl
 
     rfbStatRecordEncodingSent( cl, rfbEncodingCopyRect
                                , sz_rfbFramebufferUpdateRectHeader + sz_rfbCopyRect
-                               , w * h  * (cl->scaledScreen->bitsPerPixel / 8));
+                               , w * h  * (cl->scaledScreen->window.bitsPerPixel / 8));
   }
   sraRgnReleaseIterator(i);
 
@@ -3037,8 +3033,8 @@ rfbBool rfbSendRectEncodingRaw( rfbClient * cl
   int nlines;
   int bytesPerLine = w * (cl->format.bitsPerPixel / 8);
 
-  char *fbptr= (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
-             + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+  char *fbptr= (cl->scaledScreen->window.frameBuffer + (cl->scaledScreen->window.paddedWidthInBytes * y)
+             + (x * (cl->scaledScreen->window.bitsPerPixel / 8)));
 
   /* Flush the buffer to guarantee correct alignment for translateFn(). */
   if (cl->ublen > 0)
@@ -3066,9 +3062,9 @@ rfbBool rfbSendRectEncodingRaw( rfbClient * cl
       nlines = h;
 
     (*cl->translateFn)(cl->translateLookupTable
-                      , &(cl->screen->serverFormat)
+                      , &(cl->screen->window.serverFormat)
                       , & cl->format, fbptr, &cl->updateBuf[cl->ublen]
-                      ,   cl->scaledScreen->paddedWidthInBytes, w, nlines);
+                      ,   cl->scaledScreen->window.paddedWidthInBytes, w, nlines);
 
     cl->ublen += nlines * bytesPerLine;
     h -= nlines;
@@ -3081,7 +3077,7 @@ rfbBool rfbSendRectEncodingRaw( rfbClient * cl
     if (!rfbSendUpdateBuf(cl))
       return FALSE;
 
-    fbptr += (cl->scaledScreen->paddedWidthInBytes * nlines);
+    fbptr += (cl->scaledScreen->window.paddedWidthInBytes * nlines);
 
     nlines = (UPDATE_BUF_SIZE - cl->ublen) / bytesPerLine;
     if (nlines == 0)

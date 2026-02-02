@@ -31,13 +31,13 @@
 
 
 #define GET_IMAGE_INTO_BUF(tx,ty,tw,th,buf)                              \
-{  char *fbptr = (cl->scaledScreen->frameBuffer                          \
-     + (cl->scaledScreen->paddedWidthInBytes * ty)                         \
-                 + (tx * (cl->scaledScreen->bitsPerPixel / 8)));         \
+{  char *fbptr = (cl->scaledScreen->window.frameBuffer                          \
+     + (cl->scaledScreen->window.paddedWidthInBytes * ty)                         \
+                 + (tx * (cl->scaledScreen->window.bitsPerPixel / 8)));         \
                                                                          \
-  (*cl->translateFn)(cl->translateLookupTable, &cl->screen->serverFormat,\
+  (*cl->translateFn)(cl->translateLookupTable, &cl->screen->window.serverFormat,\
                      &cl->format, fbptr, (char*)buf,                     \
-                     cl->scaledScreen->paddedWidthInBytes, tw, th); }
+                     cl->scaledScreen->window.paddedWidthInBytes, tw, th); }
 
 #define EXTRA_ARGS , rfbClient * cl
 
@@ -122,31 +122,35 @@ rfbBool rfbSendRectEncodingZRLE(rfbClient * cl, int x, int y, int w, int h)
   { if (cl->tightQualityLevel < 0)
     { cl->zywrleLevel = 1;
     }
+
     else if (cl->tightQualityLevel < 3)
     { cl->zywrleLevel = 3;
     }
+
     else if (cl->tightQualityLevel < 6)
     { cl->zywrleLevel = 2;
     }
+
     else
     { cl->zywrleLevel = 1;
-    }
-  }
+  } }
+
   else
-  { cl->zywrleLevel = 0; }
+  { cl->zywrleLevel = 0;
+  }
 
   if (!cl->zrleData)
-  { cl->zrleData = zrleOutStreamNew(); }
+  { cl->zrleData = zrleOutStreamNew();
+  }
+
   zos = cl->zrleData;
   zos->in.ptr = zos->in.start;
   zos->out.ptr = zos->out.start;
 
   switch (cl->format.bitsPerPixel)
-  {
-
-    case 8:
+  { case 8:
       zrleEncode8NE(x, y, w, h, zos, zrleBeforeBuf, cl);
-      break;
+    break;
 
     case 16:
       if (cl->format.greenMax > 0x1F)
@@ -161,7 +165,7 @@ rfbBool rfbSendRectEncodingZRLE(rfbClient * cl, int x, int y, int w, int h)
         else
         { zrleEncode15LE(x, y, w, h, zos, zrleBeforeBuf, cl); }
       }
-      break;
+    break;
 
     case 32:
     { rfbBool fitsInLS3Bytes
@@ -192,8 +196,7 @@ rfbBool rfbSendRectEncodingZRLE(rfbClient * cl, int x, int y, int w, int h)
         { zrleEncode32BE(x, y, w, h, zos, zrleBeforeBuf, cl); }
         else
         { zrleEncode32LE(x, y, w, h, zos, zrleBeforeBuf, cl); }
-      }
-    }
+    } }
     break;
   }
 
@@ -203,8 +206,8 @@ rfbBool rfbSendRectEncodingZRLE(rfbClient * cl, int x, int y, int w, int h)
   if (cl->ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbZRLEHeader
       > UPDATE_BUF_SIZE)
   { if (!rfbSendUpdateBuf(cl))
-    { return FALSE; }
-  }
+    { return FALSE;
+  } }
 
   rect.r.x = Swap16IfLE(x);
   rect.r.y = Swap16IfLE(y);
@@ -240,8 +243,7 @@ rfbBool rfbSendRectEncodingZRLE(rfbClient * cl, int x, int y, int w, int h)
     if (cl->ublen == UPDATE_BUF_SIZE)
     { if (!rfbSendUpdateBuf(cl))
       { return FALSE; }
-    }
-  }
+  } }
 
   return TRUE;
 }
@@ -252,6 +254,5 @@ void rfbFreeZrleData(rfbClient * cl)
   { FREE( cl->zrleData      );
     FREE( cl->zrleBeforeBuf );
     FREE( cl->paletteHelper );
-  }
-}
+} }
 

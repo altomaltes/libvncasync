@@ -1,29 +1,29 @@
 /*
- * hextile.c
- *
- * Routines to implement Hextile Encoding
- */
+   hextile.c
+
+   Routines to implement Hextile Encoding
+*/
 
 /*
- *  OSXvnc Copyright (C) 2001 Dan McGuirk <mcguirk@incompleteness.net>.
- *  Original Xvnc code Copyright (C) 1999 AT&T Laboratories Cambridge.
- *  All Rights Reserved.
- *
- *  This is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This software is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this software; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
- *  USA.
- */
+    OSXvnc Copyright (C) 2001 Dan McGuirk <mcguirk@incompleteness.net>.
+    Original Xvnc code Copyright (C) 1999 AT&T Laboratories Cambridge.
+    All Rights Reserved.
+
+    This is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This software is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this software; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+    USA.
+*/
 
 #include <string.h>
 #include <rfb/rfbproto.h>
@@ -33,49 +33,42 @@ static rfbBool sendHextiles16( rfbClient * cl, int x, int y, int w, int h);
 static rfbBool sendHextiles32( rfbClient * cl, int x, int y, int w, int h);
 
 
-/*
- * rfbSendRectEncodingHextile - send a rectangle using hextile encoding.
- */
+/**
+   Send a rectangle using hextile encoding.
+*/
 
-rfbBool
-rfbSendRectEncodingHextile(rfbClient * cl,
-                           int x,
-                           int y,
-                           int w,
-                           int h)
-{
-    rfbFramebufferUpdateRectHeader rect;
+rfbBool rfbSendRectEncodingHextile( rfbClient * cl
+                                    , int x, int y
+                                    , int w, int h )
+{ rfbFramebufferUpdateRectHeader rect;
 
-    if (cl->ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE) {
-        if (!rfbSendUpdateBuf(cl))
-            return FALSE;
-    }
+  if (cl->ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE)
+  { if (!rfbSendUpdateBuf(cl))
+    { return FALSE;
+  } }
 
-    rect.r.x = Swap16IfLE(x);
-    rect.r.y = Swap16IfLE(y);
-    rect.r.w = Swap16IfLE(w);
-    rect.r.h = Swap16IfLE(h);
-    rect.encoding = Swap32IfLE(rfbEncodingHextile);
+  rect.r.x = Swap16IfLE(x);
+  rect.r.y = Swap16IfLE(y);
+  rect.r.w = Swap16IfLE(w);
+  rect.r.h = Swap16IfLE(h);
+  rect.encoding = Swap32IfLE(rfbEncodingHextile);
 
-    memcpy(&cl->updateBuf[cl->ublen], (char *)&rect,
-           sz_rfbFramebufferUpdateRectHeader);
-    cl->ublen += sz_rfbFramebufferUpdateRectHeader;
+  memcpy(&cl->updateBuf[cl->ublen], (char *)&rect,
+         sz_rfbFramebufferUpdateRectHeader);
+  cl->ublen += sz_rfbFramebufferUpdateRectHeader;
 
-    rfbStatRecordEncodingSent(cl, rfbEncodingHextile,
-          sz_rfbFramebufferUpdateRectHeader,
-          sz_rfbFramebufferUpdateRectHeader + w * (cl->format.bitsPerPixel / 8) * h);
+  rfbStatRecordEncodingSent(cl, rfbEncodingHextile,
+                            sz_rfbFramebufferUpdateRectHeader,
+                            sz_rfbFramebufferUpdateRectHeader + w * (cl->format.bitsPerPixel / 8) * h);
 
-    switch (cl->format.bitsPerPixel) {
-    case 8:
-        return sendHextiles8(cl, x, y, w, h);
-    case 16:
-        return sendHextiles16(cl, x, y, w, h);
-    case 32:
-        return sendHextiles32(cl, x, y, w, h);
-    }
+  switch (cl->format.bitsPerPixel)
+  { case 8:      return sendHextiles8(cl, x, y, w, h);
+    case 16:      return sendHextiles16(cl, x, y, w, h);
+    case 32:      return sendHextiles32(cl, x, y, w, h);
+  }
 
-    rfbLog("rfbSendRectEncodingHextile: bpp %d?\n", cl->format.bitsPerPixel);
-    return FALSE;
+  rfbLog("rfbSendRectEncodingHextile: bpp %d?\n", cl->format.bitsPerPixel);
+  return FALSE;
 }
 
 
@@ -94,14 +87,14 @@ rfbSendRectEncodingHextile(rfbClient * cl,
                                                                                 \
                                                                                 \
 static rfbBool subrectEncode##bpp(rfbClient * cli, uint##bpp##_t *data,        \
-		int w, int h, uint##bpp##_t bg, uint##bpp##_t fg, rfbBool mono);\
+    int w, int h, uint##bpp##_t bg, uint##bpp##_t fg, rfbBool mono);\
 static void testColours##bpp(uint##bpp##_t *data, int size, rfbBool *mono,      \
                   rfbBool *solid, uint##bpp##_t *bg, uint##bpp##_t *fg);        \
                                                                                 \
                                                                                 \
 /*                                                                              \
- * rfbSendHextiles                                                              \
- */                                                                             \
+   rfbSendHextiles                                                              \
+*/                                                                             \
                                                                                 \
 static rfbBool                                                                  \
 sendHextiles##bpp(rfbClient * cl, int rx, int ry, int rw, int rh) {            \
@@ -128,12 +121,12 @@ sendHextiles##bpp(rfbClient * cl, int rx, int ry, int rw, int rh) {            \
                     return FALSE;                                               \
             }                                                                   \
                                                                                 \
-            fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)   \
-                     + (x * (cl->scaledScreen->bitsPerPixel / 8)));                   \
+            fbptr = (cl->scaledScreen->window.frameBuffer + (cl->scaledScreen->window.paddedWidthInBytes * y)   \
+                     + (x * (cl->scaledScreen->window.bitsPerPixel / 8)));                   \
                                                                                 \
-            (*cl->translateFn)(cl->translateLookupTable, &(cl->screen->serverFormat),      \
+            (*cl->translateFn)(cl->translateLookupTable, &(cl->screen->window.serverFormat),      \
                                &cl->format, fbptr, (char *)clientPixelData,     \
-                               cl->scaledScreen->paddedWidthInBytes, w, h);           \
+                               cl->scaledScreen->window.paddedWidthInBytes, w, h);           \
                                                                                 \
             startUblen = cl->ublen;                                             \
             cl->updateBuf[startUblen] = 0;                                      \
@@ -175,9 +168,9 @@ sendHextiles##bpp(rfbClient * cl, int rx, int ry, int rw, int rh) {            \
                 cl->ublen = startUblen;                                         \
                 cl->updateBuf[cl->ublen++] = rfbHextileRaw;                     \
                 (*cl->translateFn)(cl->translateLookupTable,                    \
-                                   &(cl->screen->serverFormat), &cl->format, fbptr,        \
+                                   &(cl->screen->window.serverFormat), &cl->format, fbptr,        \
                                    (char *)clientPixelData,                     \
-                                   cl->scaledScreen->paddedWidthInBytes, w, h); \
+                                   cl->scaledScreen->window.paddedWidthInBytes, w, h); \
                                                                                 \
                 memcpy(&cl->updateBuf[cl->ublen], (char *)clientPixelData,      \
                        w * h * (bpp/8));                                        \
@@ -238,8 +231,8 @@ subrectEncode##bpp(rfbClient * cl, uint##bpp##_t *data, int w, int h,          \
                 vy = j-1;                                                       \
                                                                                 \
                 /* We now have two possible subrects: (x,y,hx,hy) and           \
-                 * (x,y,vx,vy).  We'll choose the bigger of the two.            \
-                 */                                                             \
+                   (x,y,vx,vy).  We'll choose the bigger of the two.            \
+*/                                                             \
                 hw = hx-x+1;                                                    \
                 hh = hy-y+1;                                                    \
                 vw = vx-x+1;                                                    \
@@ -274,8 +267,8 @@ subrectEncode##bpp(rfbClient * cl, uint##bpp##_t *data, int w, int h,          \
                 rfbStatRecordEncodingSentAdd(cl, rfbEncodingHextile, 1);        \
                                                                                 \
                 /*                                                              \
-                 * Now mark the subrect as done.                                \
-                 */                                                             \
+                   Now mark the subrect as done.                                \
+*/                                                             \
                 for (j=they; j < (they+theh); j++) {                            \
                     for (i=thex; i < (thex+thew); i++) {                        \
                         data[j*w+i] = bg;                                       \
@@ -292,10 +285,10 @@ subrectEncode##bpp(rfbClient * cl, uint##bpp##_t *data, int w, int h,          \
                                                                                 \
                                                                                 \
 /*                                                                              \
- * testColours() tests if there are one (solid), two (mono) or more             \
- * colours in a tile and gets a reasonable guess at the best background         \
- * pixel, and the foreground pixel for mono.                                    \
- */                                                                             \
+   testColours() tests if there are one (solid), two (mono) or more             \
+   colours in a tile and gets a reasonable guess at the best background         \
+   pixel, and the foreground pixel for mono.                                    \
+*/                                                                             \
                                                                                 \
 static void                                                                     \
 testColours##bpp(uint##bpp##_t *data, int size, rfbBool *mono, rfbBool *solid,  \

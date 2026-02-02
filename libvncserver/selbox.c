@@ -61,13 +61,14 @@ static void selPaintLine(rfbSelectData* m,int line,rfbBool invert)
   if(y2>m->y2)
     y2=m->y2;
   rfbFillRect(m->screen,m->x1,y1,m->x2,y2,invert?m->colour:m->backColour);
+
   if(m->displayStart+line<m->listSize)
-    rfbDrawStringWithClip( m->screen,m->font,m->x1+m->xhot,y2-1+m->yhot
+  { rfbDrawStringWithClip( m->screen,m->font,m->x1+m->xhot,y2-1+m->yhot
                          , m->list[m->displayStart+line]
                          , m->x1,y1,m->x2,y2
                          , invert ? m->backColour : m->colour
                          , invert ? m->backColour : m->colour );
-}
+} }
 
 static void selSelect(rfbSelectData* m,int _index)
 { int delta;
@@ -78,11 +79,14 @@ static void selSelect(rfbSelectData* m,int _index)
   if(m->selected>=0)
     selPaintLine(m,m->selected-m->displayStart,FALSE);
 
-  if(_index<m->displayStart || _index>=m->displayStart+m->pageH)
-  { /* targetLine is the screen line in which the selected line will
-       be displayed.
-       targetLine = m->pageH/2 doesn't look so nice */
-    int targetLine = m->selected-m->displayStart;
+/**
+ * targetLine is the screen line in which the selected line will
+ *      be displayed.
+ *      targetLine = m->pageH/2 doesn't look so nice
+ */
+  if( _index < m->displayStart
+   || _index >=m->displayStart+m->pageH)
+  { int targetLine = m->selected-m->displayStart;
     int lineStart,lineEnd;
 
     /* scroll */
@@ -105,12 +109,13 @@ static void selSelect(rfbSelectData* m,int _index)
         rfbDoCopyRect(m->screen,
                       m->x1,m->y1+lineEnd*m->textH,m->x2,m->y2,
                       0,-delta*m->textH);
-      }
-    }
+    } }
+
     else
     { lineStart = 0;
       lineEnd = m->pageH;
     }
+
     m->displayStart += delta;
     for(delta=lineStart; delta<lineEnd; delta++)
       if(delta!=_index)
@@ -216,12 +221,13 @@ static rfbCursorPtr selGetCursorPtr(rfbClient * cl)
 { return NULL;
 }
 
-int rfbSelectBox( rfbScreenInfo * rfbScreen,rfbFontDataPtr font
+int rfbSelectBox( rfbScreenInfo * rfbScreen
+                , rfbFontDataPtr font
                 , char** list
                 , int x1,int y1,int x2,int y2
                 , rfbPixel colour, rfbPixel backColour
                 , int border, SelectionChangedHookPtr selChangedHook)
-{ int bpp = rfbScreen->bitsPerPixel/8;
+{ int bpp = rfbScreen->window.bitsPerPixel/8;
   char* frameBufferBackup;
   void* screenDataBackup                  = rfbScreen->screenData;
   rfbKbdAddEventProcPtr kbdAddEventBackup = rfbScreen->kbdAddEvent;
@@ -285,7 +291,7 @@ int rfbSelectBox( rfbScreenInfo * rfbScreen,rfbFontDataPtr font
      ; j<y2-y1
      ; j++)
   { memcpy(frameBufferBackup+j*(x2-x1)*bpp,
-           rfbScreen->frameBuffer+j*rfbScreen->paddedWidthInBytes+x1*bpp,
+           rfbScreen->window.frameBuffer+j*rfbScreen->window.paddedWidthInBytes+x1*bpp,
            (x2-x1)*bpp);
   }
 
@@ -302,7 +308,7 @@ int rfbSelectBox( rfbScreenInfo * rfbScreen,rfbFontDataPtr font
   for( j=0
      ; j<y2-y1
      ; j++)
-  { memcpy( rfbScreen->frameBuffer+j*rfbScreen->paddedWidthInBytes + x1*bpp
+  { memcpy( rfbScreen->window.frameBuffer+j*rfbScreen->window.paddedWidthInBytes + x1*bpp
           , frameBufferBackup+j*(x2-x1)*bpp
           , (x2-x1)*bpp);
   }

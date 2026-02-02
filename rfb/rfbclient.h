@@ -714,7 +714,7 @@ rfbBool rfbInitClient(rfbClient* client,int* argc,char** argv);
  * Cleans up the client structure and releases the memory allocated for it. You
  * should call this when you're done with the rfbClient structure that you
  * allocated with rfbGetClient().
- * @note rfbClientCleanup() does not touch client->frameBuffer.
+ * @note rfbClientCleanup() does not touch client->window.frameBuffer.
  * @param client The client to clean up
  */
 void rfbClientCleanup(rfbClient* client);

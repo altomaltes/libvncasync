@@ -54,57 +54,45 @@ rfbBool rfbSendRectEncodingRRE( rfbClient * cl
    int nSubrects;
    int i;
 
-   char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
-               + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+   char *fbptr = (cl->scaledScreen->window.frameBuffer + (cl->scaledScreen->window.paddedWidthInBytes * y)
+               + (x * (cl->scaledScreen->window.bitsPerPixel / 8)));
 
-   int maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
+   int maxRawSize = (cl->scaledScreen->window.width * cl->scaledScreen->window.height
                   * (cl->format.bitsPerPixel / 8));
 
    if (cl->beforeEncBufSize < maxRawSize)
    {  cl->beforeEncBufSize = maxRawSize;
+
       if (cl->beforeEncBuf == NULL)
-         cl->beforeEncBuf = (char *)malloc(cl->beforeEncBufSize);
+      {   cl->beforeEncBuf = (char *)malloc(cl->beforeEncBufSize);
+      }
       else
-         cl->beforeEncBuf = (char *)realloc(cl->beforeEncBuf, cl->beforeEncBufSize);
-   }
+      {   cl->beforeEncBuf = (char *)realloc(cl->beforeEncBuf, cl->beforeEncBufSize);
+   }  }
 
    if (cl->afterEncBufSize < maxRawSize)
    {  cl->afterEncBufSize = maxRawSize;
       if (cl->afterEncBuf == NULL)
-         cl->afterEncBuf = (char *)malloc(cl->afterEncBufSize);
+      {   cl->afterEncBuf = (char *)malloc(cl->afterEncBufSize);
+      }
       else
-         cl->afterEncBuf = (char *)realloc(cl->afterEncBuf, cl->afterEncBufSize);
-   }
+      {   cl->afterEncBuf = (char *)realloc(cl->afterEncBuf, cl->afterEncBufSize);
+   }  }
 
-   (*cl->translateFn)(cl->translateLookupTable,
-                      &(cl->screen->serverFormat),
-                      &cl->format, fbptr, cl->beforeEncBuf,
-                      cl->scaledScreen->paddedWidthInBytes, w, h);
+   (*cl->translateFn)( cl->translateLookupTable
+                     , &(cl->screen->window.serverFormat)
+                     , &cl->format, fbptr, cl->beforeEncBuf
+                     , cl->scaledScreen->window.paddedWidthInBytes, w, h);
 
    switch (cl->format.bitsPerPixel)
-   {  case 8:
-         nSubrects = subrectEncode8(cl, (uint8_t *)cl->beforeEncBuf, w, h);
-         break;
-
-      case 16:
-         nSubrects = subrectEncode16(cl, (uint16_t *)cl->beforeEncBuf, w, h);
-         break;
-
-      case 32:
-         nSubrects = subrectEncode32(cl, (uint32_t *)cl->beforeEncBuf, w, h);
-         break;
-
-      default:
-         rfbLog("getBgColour: bpp %d?\n",cl->format.bitsPerPixel);
-         return FALSE;
+   {  case  8: nSubrects= subrectEncode8 (cl, (uint8_t  *)cl->beforeEncBuf, w, h); break;
+      case 16: nSubrects= subrectEncode16(cl, (uint16_t *)cl->beforeEncBuf, w, h); break;
+      case 32: nSubrects= subrectEncode32(cl, (uint32_t *)cl->beforeEncBuf, w, h); break;
+      default: rfbLog("getBgColour: bpp %d?\n",cl->format.bitsPerPixel);           return FALSE;
    }
 
-   if (nSubrects < 0)
-   {
-
-      /* RRE encoding was too large, use raw */
-
-      return rfbSendRectEncodingRaw(cl, x, y, w, h);
+   if (nSubrects < 0)       /* RRE encoding was too large, use raw */
+   { return rfbSendRectEncodingRaw(cl, x, y, w, h);
    }
 
    rfbStatRecordEncodingSent(cl, rfbEncodingRRE,
@@ -263,11 +251,12 @@ DEFINE_SUBRECT_ENCODE( 16 )
 DEFINE_SUBRECT_ENCODE( 32 )
 
 
-/*
-   getBgColour() gets the most prevalent colour in a byte array.
-*/
-static uint32_t
-getBgColour(char *data, int size, int bpp)
+/**
+ *  getBgColour() gets the most prevalent colour in a byte array.
+ */
+static uint32_t getBgColour( char *data
+                           , int size
+                           , int bpp)
 {
 
 #define NUMCLRS 256

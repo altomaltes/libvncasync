@@ -248,7 +248,7 @@ static int HandleZRLETile(rfbClient* client,
 		if( type == 0 ) /* raw */
 #if BPP!=8
           if( zywrle_level > 0 ){
-			CARDBPP* pFrame = (CARDBPP*)client->frameBuffer + y*client->width+x;
+			CARDBPP* pFrame = (CARDBPP*)client->window.frameBuffer + y*client->width+x;
 			int ret;
 			client->appData.qualityLevel |= 0x80;
 			ret = HandleZRLETile(client, buffer, buffer_end-buffer, x, y, w, h);
@@ -271,7 +271,7 @@ static int HandleZRLETile(rfbClient* client,
 
 			for(j=y*client->width; j<(y+h)*client->width; j+=client->width)
 				for(i=x; i<x+w; i++,buffer+=REALBPP/8)
-					((CARDBPP*)client->frameBuffer)[j+i] = UncompressCPixel(buffer);
+					((CARDBPP*)client->window.frameBuffer)[j+i] = UncompressCPixel(buffer);
 #else
 			client->GotBitmap(client, buffer, x, y, w, h);
 			buffer+=w*h*REALBPP/8;
@@ -307,7 +307,7 @@ static int HandleZRLETile(rfbClient* client,
 			/* read palettized pixels */
 			for(j=y*client->width; j<(y+h)*client->width; j+=client->width) {
 				for(i=x,shift=8-bpp; i<x+w; i++) {
-					((CARDBPP*)client->frameBuffer)[j+i] = palette[((*buffer)>>shift)&mask];
+					((CARDBPP*)client->window.frameBuffer)[j+i] = palette[((*buffer)>>shift)&mask];
 					shift-=bpp;
 					if(shift<0) {
 						shift=8-bpp;
@@ -341,7 +341,7 @@ static int HandleZRLETile(rfbClient* client,
 				length+=*buffer;
 				buffer++;
 				while(j<h && length>0) {
-					((CARDBPP*)client->frameBuffer)[(y+j)*client->width+x+i] = color;
+					((CARDBPP*)client->window.frameBuffer)[(y+j)*client->width+x+i] = color;
 					length--;
 					i++;
 					if(i>=w) {
@@ -393,7 +393,7 @@ static int HandleZRLETile(rfbClient* client,
 				}
 				buffer++;
 				while(j<h && length>0) {
-					((CARDBPP*)client->frameBuffer)[(y+j)*client->width+x+i] = color;
+					((CARDBPP*)client->window.frameBuffer)[(y+j)*client->width+x+i] = color;
 					length--;
 					i++;
 					if(i>=w) {

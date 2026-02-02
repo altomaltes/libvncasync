@@ -110,7 +110,6 @@
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DHAVE_SYS_STAT_H" />
 					<Add directory="../../libvncserver" />
 					<Add directory="../common" />
 				</Compiler>
@@ -124,6 +123,7 @@
 			<Add option="-Wall" />
 			<Add option="-DHAVE_CONFIG_H" />
 			<Add option="-DBUILDING_VNCASYNC" />
+			<Add option="-DHAVE_SYS_TYPES_H" />
 			<Add directory="../../libvncserver" />
 			<Add directory="../common" />
 			<Add directory="../rfb" />
@@ -202,6 +202,9 @@
 			<Option target="Release" />
 			<Option target="static" />
 			<Option target="shared" />
+			<Option target="linux" />
+		</Unit>
+		<Unit filename="../common/rfb-config.h">
 			<Option target="linux" />
 		</Unit>
 		<Unit filename="../common/rfbcrypto.h">
@@ -454,7 +457,6 @@
 			<Option target="Release" />
 			<Option target="static" />
 			<Option target="shared" />
-			<Option target="linux" />
 		</Unit>
 		<Unit filename="../libvncserver/rfbssl_openssl.c">
 			<Option compilerVar="CC" />

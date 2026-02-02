@@ -262,15 +262,16 @@ rfbBool rfbSetTranslateFunction( rfbClient * cl )
      Check that bits per pixel values are valid
   */
 
-  if ((cl->screen->serverFormat.bitsPerPixel != 8) &&
-      (cl->screen->serverFormat.bitsPerPixel != 16) &&
+  if ((cl->screen->window.serverFormat.bitsPerPixel != 8)
+    &&(cl->screen->window.serverFormat.bitsPerPixel != 16)
+    &&
 #ifdef ALLOW24BPP
-      (cl->screen->serverFormat.bitsPerPixel != 24) &&
+      (cl->screen->window.serverFormat.bitsPerPixel != 24) &&
 #endif
-      (cl->screen->serverFormat.bitsPerPixel != 32))
+      (cl->screen->window.serverFormat.bitsPerPixel != 32))
   { rfbErr("%s: server bits per pixel not 8, 16 or 32 (is %d)\n",
            "rfbSetTranslateFunction",
-           cl->screen->serverFormat.bitsPerPixel);
+           cl->screen->window.serverFormat.bitsPerPixel);
     rfbCloseClient(cl);
     return FALSE;
   }
@@ -315,7 +316,8 @@ rfbBool rfbSetTranslateFunction( rfbClient * cl )
 
   /* truecolour -> truecolour */
 
-  if (PF_EQ(cl->format,cl->screen->serverFormat))
+  if (PF_EQ( cl->format
+           , cl->screen->window.serverFormat ))
   {
 
     /* client & server the same */
@@ -325,25 +327,26 @@ rfbBool rfbSetTranslateFunction( rfbClient * cl )
     return TRUE;
   }
 
-  if ((cl->screen->serverFormat.bitsPerPixel < 16) ||
-      ((!cl->screen->serverFormat.trueColour || !rfbEconomicTranslate) &&
-       (cl->screen->serverFormat.bitsPerPixel == 16)))
+  if  (( cl->screen->window.serverFormat.bitsPerPixel < 16)
+    ||((!cl->screen->window.serverFormat.trueColour || !rfbEconomicTranslate)
+      &&(cl->screen->window.serverFormat.bitsPerPixel == 16)))
   {
 
     /* we can use a single lookup table for <= 16 bpp */
 
     cl->translateFn = rfbTranslateWithSingleTableFns
-                      [ BPP2OFFSET( cl->screen->serverFormat.bitsPerPixel)]
+                      [ BPP2OFFSET( cl->screen->window.serverFormat.bitsPerPixel)]
                       [ BPP2OFFSET( cl->format.bitsPerPixel              )];
 
-    if(cl->screen->serverFormat.trueColour)
+    if(cl->screen->window.serverFormat.trueColour)
       (*rfbInitTrueColourSingleTableFns
-       [BPP2OFFSET(cl->format.bitsPerPixel)]) (&cl->translateLookupTable,
-           &(cl->screen->serverFormat), &cl->format);
+       [BPP2OFFSET(cl->format.bitsPerPixel)]) (&cl->translateLookupTable
+                                              , &(cl->screen->window.serverFormat)
+                                              , &cl->format);
     else
       (*rfbInitColourMapSingleTableFns
           [BPP2OFFSET(cl->format.bitsPerPixel)]) (&cl->translateLookupTable,
-              &(cl->screen->serverFormat), &cl->format,&cl->screen->colourMap);
+              &(cl->screen->window.serverFormat), &cl->format,&cl->screen->colourMap);
 
   }
   else
@@ -352,12 +355,12 @@ rfbBool rfbSetTranslateFunction( rfbClient * cl )
     /* otherwise we use three separate tables for red, green and blue */
 
     cl->translateFn = rfbTranslateWithRGBTablesFns
-                      [BPP2OFFSET(cl->screen->serverFormat.bitsPerPixel)]
+                      [BPP2OFFSET(cl->screen->window.serverFormat.bitsPerPixel)]
                       [BPP2OFFSET(cl->format.bitsPerPixel)];
 
     (*rfbInitTrueColourRGBTablesFns
      [BPP2OFFSET(cl->format.bitsPerPixel)]) (&cl->translateLookupTable,
-         &(cl->screen->serverFormat), &cl->format);
+         &(cl->screen->window.serverFormat), &cl->format);
   }
 
   return TRUE;
@@ -416,14 +419,16 @@ static rfbBool rfbSetClientColourMapBGR233(rfbClient * cl)
 /* this function is not called very often, so it needn't be
    efficient. */
 
-/*
-   rfbSetClientColourMap is called to set the client's colour map.  If the
-   client is a true colour client, we simply update our own translation table
-   and mark the whole screen as having been modified.
-*/
-
-rfbBool rfbSetClientColourMap(rfbClient * cl, int firstColour, int nColours)
-{ if (cl->screen->serverFormat.trueColour || !cl->readyForSetColourMapEntries)
+/**
+ *  rfbSetClientColourMap is called to set the client's colour map.  If the
+ *  client is a true colour client, we simply update our own translation table
+ *  and mark the whole screen as having been modified.
+ */
+rfbBool rfbSetClientColourMap( rfbClient * cl
+                             , int firstColour
+                             , int nColours )
+{ if (cl->screen->window.serverFormat.trueColour
+  || !cl->readyForSetColourMapEntries)
   { return TRUE;
   }
 
@@ -433,12 +438,17 @@ rfbBool rfbSetClientColourMap(rfbClient * cl, int firstColour, int nColours)
 
   if (cl->format.trueColour)
   { (*rfbInitColourMapSingleTableFns
-     [BPP2OFFSET(cl->format.bitsPerPixel)]) (&cl->translateLookupTable,
-         &cl->screen->serverFormat, &cl->format,&cl->screen->colourMap);
+     [ BPP2OFFSET(cl->format.bitsPerPixel)])
+     ( &cl->translateLookupTable
+     , &cl->screen->window.serverFormat
+     , &cl->format
+     , &cl->screen->colourMap )      ;
 
     sraRgnDestroy(cl->modifiedRegion);
     cl->modifiedRegion =
-      sraRgnCreateRect(0,0,cl->screen->width,cl->screen->height);
+      sraRgnCreateRect( 0,0
+                      , cl->screen->window.width
+                      , cl->screen->window.height);
 
     return TRUE;
   }
@@ -447,16 +457,17 @@ rfbBool rfbSetClientColourMap(rfbClient * cl, int firstColour, int nColours)
 }
 
 
-/*
-   rfbSetClientColourMaps sets the colour map for each RFB client.
-*/
-
-void
-rfbSetClientColourMaps(rfbScreenInfo * rfbScreen, int firstColour, int nColours)
+/**
+ * Sets the colour map for each RFB client.
+ */
+void rfbSetClientColourMaps( rfbScreenInfo * rfbScreen
+                           , int firstColour
+                           , int nColours )
 { rfbClientIteratorPtr i;
   rfbClient * cl;
 
   i = rfbGetClientIterator(rfbScreen);
+
   while((cl = rfbClientIteratorNext(i)))
     rfbSetClientColourMap(cl, firstColour, nColours);
   rfbReleaseClientIterator(i);
@@ -467,6 +478,7 @@ static void PrintPixelFormat(rfbPixelFormat *pf)
   { rfbLog("  1 bpp, %s sig bit in each byte is leftmost on the screen.\n",
            (pf->bigEndian ? "most" : "least"));
   }
+
   else
   { rfbLog("  %d bpp, depth %d%s\n",pf->bitsPerPixel,pf->depth,
            ((pf->bitsPerPixel == 8) ? ""

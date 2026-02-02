@@ -316,8 +316,8 @@ void rfbDoCopyRegion( rfbScreenInfo * screen
                       , int dx,int dy )
 { sraRectangleIterator* i;
   sraRect rect;
-  int j,widthInBytes,bpp=screen->serverFormat.bitsPerPixel/8,
-                     rowstride=screen->paddedWidthInBytes;
+  int j,widthInBytes,bpp=screen->window.serverFormat.bitsPerPixel/8,
+                     rowstride=screen->window.paddedWidthInBytes;
   char *in,*out;
 
   /* copy it, really */
@@ -325,8 +325,8 @@ void rfbDoCopyRegion( rfbScreenInfo * screen
 
   while(sraRgnIteratorNext(i,&rect))
   { widthInBytes = (rect.x2-rect.x1)*bpp;
-    out = screen->frameBuffer+rect.x1*bpp+rect.y1*rowstride;
-    in  = screen->frameBuffer+(rect.x1-dx)*bpp+(rect.y1-dy)*rowstride;
+    out = screen->window.frameBuffer+rect.x1*bpp+rect.y1*rowstride;
+    in  = screen->window.frameBuffer+(rect.x1-dx)*bpp+(rect.y1-dy)*rowstride;
 
     if ( dy<0 )
       for(j=rect.y1; j<rect.y2; j++,out+=rowstride,in+=rowstride)
@@ -374,7 +374,7 @@ void rfbScaledScreenUpdate( rfbScreenInfo * screen
                           , int x1, int y1
                           , int x2, int y2);
 
-void rfbMarkRectAsModified( rfbScreenInfoPtr screen
+void rfbMarkRectAsModified( rfbScreenInfo * screen
                           , int x1, int y1
                           , int x2, int y2 )
 { sraRegionPtr region;
@@ -390,7 +390,7 @@ void rfbMarkRectAsModified( rfbScreenInfoPtr screen
   { x1=0;
   }
 
-  if ( x2>screen->width) x2=screen->width;
+  if ( x2>screen->window.width) x2=screen->window.width;
   if ( x1==x2) return;
 
   if ( y1>y2)
@@ -400,7 +400,10 @@ void rfbMarkRectAsModified( rfbScreenInfoPtr screen
   }
 
   if ( y1<0) y1=0;
-  if ( y2>screen->height) y2=screen->height;
+
+  if ( y2>screen->window.height)
+  { y2=screen->window.height;
+  }
   if ( y1==y2) return;
 
   /* update scaled copies for this rectangle */
@@ -584,8 +587,8 @@ static rfbBool rfbDefaultGetExtDesktopScreen(int seqnumber, rfbExtDesktopScreen*
 
   /* Populate the provided rfbExtDesktopScreen structure */
   s->id = 1;
-  s->width = cl->scaledScreen->width;
-  s->height = cl->scaledScreen->height;
+  s->width = cl->scaledScreen->window.width;
+  s->height = cl->scaledScreen->window.height;
   s->x = 0;
   s->y = 0;
   s->flags = 0;
@@ -602,10 +605,11 @@ static int rfbDefaultSetDesktopSize(int width, int height, int numScreens, rfbEx
    function is called from rfbGetScreen() and rfbNewFramebuffer().
 */
 
-static void rfbInitServerFormat(rfbScreenInfo * screen, int bitsPerSample)
-{ rfbPixelFormat* format=&screen->serverFormat;
+static void rfbInitServerFormat( rfbScreenInfo * screen
+                               , int bitsPerSample )
+{ rfbPixelFormat* format=&screen->window.serverFormat;
 
-  format->bitsPerPixel = screen->bitsPerPixel;
+  format->bitsPerPixel = screen->window.bitsPerPixel;
   format->depth = screen->depth;
   format->bigEndian = rfbEndianTest?FALSE:TRUE;
   format->trueColour = TRUE;
@@ -697,7 +701,7 @@ rfbScreenInfo * rfbGetScreen( void * frameBuffer
   { rfbErr("WARNING: Width (%d) is not a multiple of 4. VncViewer has problems with that.\n",width);
   }
 
-  screen->frameBuffer=   frameBuffer;
+  screen->window.frameBuffer=   frameBuffer;
  // screen->autoPort=      FALSE;
   screen->clientHead=    NULL;
   screen->pointerClient= NULL;
@@ -712,9 +716,9 @@ rfbScreenInfo * rfbGetScreen( void * frameBuffer
   screen->authPasswdData = NULL;
   screen->authPasswdFirstViewOnly = 1;
 
-  screen->width = width;
-  screen->height = height;
-  screen->bitsPerPixel = screen->depth = 8*bytesPerPixel;
+  screen->window.width = width;
+  screen->window.height = height;
+  screen->window.bitsPerPixel = screen->depth = 8*bytesPerPixel;
 
   screen->passwordCheck = rfbDefaultPasswordCheck;
   screen->ignoreSIGPIPE = TRUE;
@@ -747,8 +751,8 @@ rfbScreenInfo * rfbGetScreen( void * frameBuffer
   gethostname( screen->thisHost, 255);
 #endif
 
-//  screen->paddedWidthInBytes = width*bytesPerPixel;
-  screen->paddedWidthInBytes= ( stride < 0  ? -stride : width ) * bytesPerPixel;  /*  JACS, partial surface support */
+//  screen->window.paddedWidthInBytes = width*bytesPerPixel;
+  screen->window.paddedWidthInBytes= ( stride < 0  ? -stride : width ) * bytesPerPixel;  /*  JACS, partial surface support */
 
   /* format */
 
@@ -785,18 +789,17 @@ rfbScreenInfo * rfbGetScreen( void * frameBuffer
   return(screen);
 }
 
-/*
-   Switch to another framebuffer (maybe of different size and color
-   format). Clients supporting NewFBSize pseudo-encoding will change
-   their local framebuffer dimensions if necessary.
-   NOTE: Rich cursor data should be converted to new pixel format by
-   the caller.
-*/
-
+/**
+ *  Switch to another framebuffer (maybe of different size and color
+ *  format). Clients supporting NewFBSize pseudo-encoding will change
+ *  their local framebuffer dimensions if necessary.
+ *  NOTE: Rich cursor data should be converted to new pixel format by
+ *  the caller.
+ */
 void rfbNewFramebuffer( rfbScreenInfo * screen, char *framebuffer
                       , int width, int height
                       , int bitsPerSample, int samplesPerPixel
-                      ,  int bytesPerPixel )
+                      , int bytesPerPixel )
 { rfbPixelFormat old_format;
   rfbBool format_changed = FALSE;
   rfbClientIteratorPtr iterator;
@@ -804,24 +807,24 @@ void rfbNewFramebuffer( rfbScreenInfo * screen, char *framebuffer
 
   /* Update information in the screenInfo structure */
 
-  old_format = screen->serverFormat;
+  old_format = screen->window.serverFormat;
 
   if (width & 3)
     rfbErr("WARNING: New width (%d) is not a multiple of 4.\n", width);
 
-  screen->width = width;
-  screen->height = height;
-  screen->bitsPerPixel = screen->depth = 8*bytesPerPixel;
-  screen->paddedWidthInBytes = width*bytesPerPixel;
+  screen->window.width = width;
+  screen->window.height = height;
+  screen->window.bitsPerPixel = screen->depth = 8*bytesPerPixel;
+  screen->window.paddedWidthInBytes = width*bytesPerPixel;
 
   rfbInitServerFormat(screen, bitsPerSample);
 
-  if (memcmp(&screen->serverFormat, &old_format,
+  if (memcmp(&screen->window.serverFormat, &old_format,
              sizeof(rfbPixelFormat)) != 0)
   { format_changed = TRUE;
   }
 
-  screen->frameBuffer= framebuffer;
+  screen->window.frameBuffer= framebuffer;
 
   /* Adjust pointer position if necessary */
 
@@ -888,7 +891,7 @@ void rfbScreenCleanup(rfbScreenInfo * screen)
   { rfbScreenInfo * ptr;
     ptr = screen->scaledScreenNext;
     screen->scaledScreenNext = ptr->scaledScreenNext;
-    FREE( ptr->frameBuffer );
+    FREE( ptr->window.frameBuffer );
     FREE( ptr );
   }
 

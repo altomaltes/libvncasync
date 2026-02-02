@@ -30,12 +30,10 @@
 
 void rfbScaledScreenUpdate(rfbScreenInfo * screen, int x1, int y1, int x2, int y2);
 
-/*
-   Send cursor shape either in X-style format or in client pixel format.
-*/
-
-rfbBool
-rfbSendCursorShape(rfbClient * cl)
+/**
+ *  Send cursor shape either in X-style format or in client pixel format.
+ */
+rfbBool rfbSendCursorShape(rfbClient * cl)
 { rfbCursorPtr pCursor;
   rfbFramebufferUpdateRectHeader rect;
   rfbXCursorColors colors;
@@ -144,13 +142,14 @@ rfbSendCursorShape(rfbClient * cl)
   }
   else
   { /* RichCursor encoding. */
-    int bpp1=cl->screen->serverFormat.bitsPerPixel/8,
-        bpp2=cl->format.bitsPerPixel/8;
-    (*cl->translateFn)(cl->translateLookupTable,
-                       &(cl->screen->serverFormat),
-                       &cl->format, (char*)pCursor->richSource,
-                       &cl->updateBuf[cl->ublen],
-                       pCursor->width*bpp1, pCursor->width, pCursor->height);
+    int bpp1= cl->screen->window.serverFormat.bitsPerPixel/8,
+        bpp2= cl->format.bitsPerPixel/8;
+
+    (*cl->translateFn)( cl->translateLookupTable
+                      , &(cl->screen->window.serverFormat)
+                      , &cl->format, (char*)pCursor->richSource
+                      , &cl->updateBuf[cl->ublen]
+                      , pCursor->width*bpp1, pCursor->width, pCursor->height );
 
     cl->ublen += pCursor->width*bpp2*pCursor->height;
   }
@@ -362,10 +361,13 @@ void rfbFreeCursor( rfbCursorPtr cursor )
   }
 }
 
-/* background and foregroud colour have to be set beforehand */
+/**
+ * background and foregroud colour have to be set beforehand
+ */
 void rfbMakeXCursorFromRichCursor( rfbScreenInfo * rfbScreen
-                                   , rfbCursorPtr cursor )
-{ rfbPixelFormat* format=&rfbScreen->serverFormat;
+                                 , rfbCursorPtr cursor )
+{ rfbPixelFormat* format=&rfbScreen->window.serverFormat;
+
   int i,j,w=(cursor->width+7)/8,bpp=format->bitsPerPixel/8,
           width=cursor->width*bpp;
   uint32_t background;
@@ -431,14 +433,14 @@ void rfbMakeXCursorFromRichCursor( rfbScreenInfo * rfbScreen
       }
       else if(memcmp(cursor->richSource+j*width+i*bpp, back, bpp))
       { cursor->source[j*w+i/8]|=bit;
-      }
-    }
-    if (db) { fprintf(stderr, "\n"); }
-  }
-}
+    } }
 
-void rfbMakeRichCursorFromXCursor(rfbScreenInfo * rfbScreen,rfbCursorPtr cursor)
-{ rfbPixelFormat* format=&rfbScreen->serverFormat;
+    if (db) { fprintf(stderr, "\n"); }
+} }
+
+void rfbMakeRichCursorFromXCursor( rfbScreenInfo * rfbScreen
+                                 , rfbCursorPtr cursor)
+{ rfbPixelFormat* format=&rfbScreen->window.serverFormat;
   int i,j,w=(cursor->width+7)/8,bpp=format->bitsPerPixel/8;
   uint32_t background,foreground;
   char *back=(char*)&background,*fore=(char*)&foreground;
@@ -467,13 +469,14 @@ void rfbMakeRichCursorFromXCursor(rfbScreenInfo * rfbScreen,rfbCursorPtr cursor)
       else { memcpy(cp,back,bpp); }
 }
 
-/* functions to draw/hide cursor directly in the frame buffer */
-
+/**
+ * functions to draw/hide cursor directly in the frame buffer
+ */
 void rfbHideCursor(rfbClient * cl)
 { rfbScreenInfo * s=cl->screen;
   rfbCursorPtr c=s->cursor;
-  int j,x1,x2,y1,y2,bpp=s->serverFormat.bitsPerPixel/8,
-                    rowstride=s->paddedWidthInBytes;
+  int j,x1,x2,y1,y2,bpp=s->window.serverFormat.bitsPerPixel/8,
+                    rowstride=s->window.paddedWidthInBytes;
   if(!c)
   { return;
   }
@@ -482,23 +485,31 @@ void rfbHideCursor(rfbClient * cl)
   x1=cl->cursorX-c->xhot;
   x2=x1+c->width;
   if(x1<0) { x1=0; }
-  if(x2>=s->width) { x2=s->width-1; }
+
+  if( x2 >= s->window.width) { x2=s->window.width-1; }
+
   x2-=x1;
   if(x2<=0)
   { return;
   }
   y1=cl->cursorY-c->yhot;
   y2=y1+c->height;
-  if(y1<0) { y1=0; }
-  if(y2>=s->height) { y2=s->height-1; }
-  y2-=y1;
-  if(y2<=0)
+
+  if(y1<0)
+  { y1=0;
+  }
+
+  if(y2>=s->window.height)
+  { y2=s->window.height-1;
+  }
+
+  y2-=y1; if(y2<=0)
   { return;
   }
 
   /* get saved data */
   for(j=0; j<y2; j++)
-    memcpy(s->frameBuffer+(y1+j)*rowstride+x1*bpp,
+    memcpy(s->window.frameBuffer+(y1+j)*rowstride+x1*bpp,
            s->underCursorBuffer+j*x2*bpp,
            x2*bpp);
 
@@ -510,8 +521,8 @@ void rfbHideCursor(rfbClient * cl)
 void rfbShowCursor(rfbClient * cl)
 { rfbScreenInfo * s=cl->screen;
   rfbCursorPtr c=s->cursor;
-  int i,j,x1,x2,y1,y2,i1,j1,bpp=s->serverFormat.bitsPerPixel/8,
-                            rowstride=s->paddedWidthInBytes,
+  int i,j,x1,x2,y1,y2,i1,j1,bpp=s->window.serverFormat.bitsPerPixel/8,
+                            rowstride=s->window.paddedWidthInBytes,
                             bufSize,w;
   rfbBool wasChanged=FALSE;
 
@@ -532,16 +543,16 @@ void rfbShowCursor(rfbClient * cl)
   x1=cl->cursorX-c->xhot;
   x2=x1+c->width;
   if(x1<0) { i1=-x1; x1=0; }
-  if(x2>=s->width) { x2=s->width-1; }
-  x2-=x1;
-  if(x2<=0)
+  if(x2>=s->window.width) { x2=s->window.width-1; }
+
+  x2-=x1; if(x2<=0)
   { return; /* nothing to do */
   }
 
   y1=cl->cursorY-c->yhot;
   y2=y1+c->height;
   if(y1<0) { j1=-y1; y1=0; }
-  if(y2>=s->height) { y2=s->height-1; }
+  if(y2>=s->window.height) { y2=s->window.height-1; }
   y2-=y1;
   if(y2<=0)
   { return; /* nothing to do */
@@ -550,16 +561,16 @@ void rfbShowCursor(rfbClient * cl)
   /* save data */
   for(j=0; j<y2; j++)
   { char* dest=s->underCursorBuffer+j*x2*bpp;
-    const char* src=s->frameBuffer+(y1+j)*rowstride+x1*bpp;
+    const char* src=s->window.frameBuffer+(y1+j)*rowstride+x1*bpp;
     unsigned int count=x2*bpp;
     if(wasChanged || memcmp(dest,src,count))
     { wasChanged=TRUE;
       memcpy(dest,src,count);
-    }
-  }
+  } }
 
   if(!c->richSource)
-  { rfbMakeRichCursorFromXCursor(s,c); }
+  { rfbMakeRichCursorFromXCursor(s,c);
+  }
 
   if (c->alphaSource)
   { int rmax, rshift;
@@ -568,12 +579,12 @@ void rfbShowCursor(rfbClient * cl)
     int amax = 255; /* alphaSource is always 8bits of info per pixel */
     unsigned int rmask, gmask, bmask;
 
-    rmax   = s->serverFormat.redMax;
-    gmax   = s->serverFormat.greenMax;
-    bmax   = s->serverFormat.blueMax;
-    rshift = s->serverFormat.redShift;
-    gshift = s->serverFormat.greenShift;
-    bshift = s->serverFormat.blueShift;
+    rmax   = s->window.serverFormat.redMax;
+    gmax   = s->window.serverFormat.greenMax;
+    bmax   = s->window.serverFormat.blueMax;
+    rshift = s->window.serverFormat.redShift;
+    gshift = s->window.serverFormat.greenShift;
+    bshift = s->window.serverFormat.blueShift;
 
     rmask = (rmax << rshift);
     gmask = (gmax << gshift);
@@ -591,7 +602,7 @@ void rfbShowCursor(rfbClient * cl)
         int rdst, gdst, bdst;   /* fb RGB */
         int asrc, rsrc, gsrc, bsrc; /* rich source ARGB */
 
-        dest = s->frameBuffer + (j+y1)*rowstride + (i+x1)*bpp;
+        dest = s->window.frameBuffer + (j+y1)*rowstride + (i+x1)*bpp;
         src  = c->richSource  + (j+j1)*c->width*bpp + (i+i1)*bpp;
         aptr = c->alphaSource + (j+j1)*c->width + (i+i1);
 
@@ -661,7 +672,7 @@ void rfbShowCursor(rfbClient * cl)
     for(j=0; j<y2; j++)
       for(i=0; i<x2; i++)
         if((c->mask[(j+j1)*w+(i+i1)/8]<<((i+i1)&7))&0x80)
-          memcpy(s->frameBuffer+(j+y1)*rowstride+(i+x1)*bpp,
+          memcpy(s->window.frameBuffer+(j+y1)*rowstride+(i+x1)*bpp,
                  c->richSource+(j+j1)*c->width*bpp+(i+i1)*bpp,bpp);
   }
 
@@ -688,36 +699,55 @@ void rfbRedrawAfterHideCursor(rfbClient * cl,sraRegionPtr updateRegion)
     x2 = x+c->width;
     y2 = y+c->height;
 
-    if(sraClipRect2(&x,&y,&x2,&y2,0,0,s->width,s->height))
+    if(sraClipRect2( &x,&y
+                   , &x2,&y2
+                   , 0,0
+                   , s->window.width
+                   , s->window.height))
     { sraRegionPtr rect;
       rect = sraRgnCreateRect(x,y,x2,y2);
+
       if(updateRegion)
       { sraRgnOr(updateRegion,rect);
       }
       else
       { sraRgnOr(cl->modifiedRegion,rect);
       }
+
       sraRgnDestroy(rect);
-    }
-  }
-}
+} } }
 
 #ifdef DEBUG
 
 static void rfbPrintXCursor(rfbCursorPtr cursor)
 { int i,i1,j,w=(cursor->width+7)/8;
   unsigned char bit;
-  for(j=0; j<cursor->height; j++)
-  { for(i=0,i1=0,bit=0x80; i1<cursor->width; i1++,i+=(bit&1)?1:0,bit=(bit&1)?0x80:bit>>1)
-      if(cursor->source[j*w+i]&bit) { putchar('#'); }
-      else { putchar(' '); }
-    putchar(':');
-    for(i=0,i1=0,bit=0x80; i1<cursor->width; i1++,i+=(bit&1)?1:0,bit=(bit&1)?0x80:bit>>1)
-      if(cursor->mask[j*w+i]&bit) { putchar('#'); }
-      else { putchar(' '); }
+
+  for( j=0
+     ; j<cursor->height
+     ; j++)
+  { for( i=0,i1=0,bit=0x80
+       ; i1<cursor->width
+       ; i1++,i+=(bit&1)?1:0,bit=(bit&1)?0x80:bit>>1 )
+      if(cursor->source[j*w+i]&bit)
+      { putchar('#');
+      }
+      else
+      { putchar(' ');
+      }
+
+      putchar(':');
+      for( i=0,i1=0,bit=0x80
+         ; i1<cursor->width
+         ; i1++,i+=(bit&1)?1:0,bit=(bit&1)?0x80:bit>>1)
+      if(cursor->mask[j*w+i]&bit)
+      { putchar('#');
+      }
+      else
+      { putchar(' ');
+      }
     putchar('\n');
-  }
-}
+} }
 
 #endif
 
@@ -733,8 +763,8 @@ void rfbSetCursor(rfbScreenInfo * rfbScreen,rfbCursorPtr c)
     rfbReleaseClientIterator(iterator);
 
     if(rfbScreen->cursor->cleanup)
-    { rfbFreeCursor(rfbScreen->cursor); }
-  }
+    { rfbFreeCursor(rfbScreen->cursor);
+  } }
 
   rfbScreen->cursor = c;
 

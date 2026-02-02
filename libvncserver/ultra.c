@@ -42,16 +42,16 @@ void rfbFreeUltraData( rfbClient * cl )
 
 
 static rfbBool rfbSendOneRectEncodingUltra( rfbClient * cl
-    , int x, int y
-    , int w, int h )
+                                          , int x, int y
+                                          , int w, int h )
 { rfbFramebufferUpdateRectHeader rect;
   rfbZlibHeader hdr;
   int deflateResult;
   int i;
 
-  char *fbptr= (cl->scaledScreen->frameBuffer
-                + (cl->scaledScreen->paddedWidthInBytes * y)
-                + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+  char *fbptr= (cl->scaledScreen->window.frameBuffer
+             + (cl->scaledScreen->window.paddedWidthInBytes * y)
+             + (x * (cl->scaledScreen->window.bitsPerPixel / 8)));
 
   int maxRawSize;
   lzo_uint maxCompSize;
@@ -75,17 +75,21 @@ static rfbBool rfbSendOneRectEncodingUltra( rfbClient * cl
   if (cl->afterEncBufSize < (int)maxCompSize)
   { cl->afterEncBufSize = maxCompSize;
     if (cl->afterEncBuf == NULL)
-    { cl->afterEncBuf = (char *)malloc(cl->afterEncBufSize); }
+    { cl->afterEncBuf = (char *)malloc(cl->afterEncBufSize);
+    }
     else
-    { cl->afterEncBuf = (char *)realloc(cl->afterEncBuf, cl->afterEncBufSize); }
-  }
+    { cl->afterEncBuf = (char *)realloc(cl->afterEncBuf, cl->afterEncBufSize);
+  } }
 
   /*
      Convert pixel data to client format.
   */
-  (*cl->translateFn)(cl->translateLookupTable, &cl->screen->serverFormat,
-                     &cl->format, fbptr, cl->beforeEncBuf,
-                     cl->scaledScreen->paddedWidthInBytes, w, h);
+  (*cl->translateFn)( cl->translateLookupTable
+                    , &cl->screen->window.serverFormat
+                    , &cl->format
+                    , fbptr
+                    , cl->beforeEncBuf
+                    , cl->scaledScreen->window.paddedWidthInBytes, w, h);
 
   if ( cl->compStreamInitedLZO == FALSE )
   { cl->compStreamInitedLZO = TRUE;
@@ -149,24 +153,17 @@ static rfbBool rfbSendOneRectEncodingUltra( rfbClient * cl
     if (cl->ublen == UPDATE_BUF_SIZE)
     { if (!rfbSendUpdateBuf(cl))
       { return FALSE; }
-    }
-  }
+  } }
 
   return TRUE;
-
 }
 
-/*
-   rfbSendRectEncodingUltra - send a given rectangle using one or more
-                             LZO encoding rectangles.
-*/
-
-rfbBool
-rfbSendRectEncodingUltra(rfbClient * cl,
-                         int x,
-                         int y,
-                         int w,
-                         int h)
+/**
+ *
+ */
+rfbBool rfbSendRectEncodingUltra( rfbClient * cl
+                                , int x, int y
+                                , int w, int h )
 { int  maxLines;
   int  linesRemaining;
   rfbRectangle partialRect;
@@ -202,23 +199,23 @@ rfbSendRectEncodingUltra(rfbClient * cl,
     { return FALSE;
     }
 
-/** Technically, flushing the buffer here is not extremely
-       efficient.  However, this improves the overall throughput
-       of the system over very slow networks.  By flushing
-       the buffer with every maximum size lzo rectangle, we
-       improve the pipelining usage of the server CPU, network,
-       and viewer CPU components.  Insuring that these components
-       are working in parallel actually improves the performance
-       seen by the user.
-       Since, lzo is most useful for slow networks, this flush
-       is appropriate for the desired behavior of the lzo encoding.
-    */
+/**
+ *    Technically, flushing the buffer here is not extremely
+ * efficient.  However, this improves the overall throughput
+ * of the system over very slow networks.  By flushing
+ * the buffer with every maximum size lzo rectangle, we
+ * improve the pipelining usage of the server CPU, network,
+ * and viewer CPU components.  Insuring that these components
+ * are working in parallel actually improves the performance
+ * seen by the user.
+ * Since, lzo is most useful for slow networks, this flush
+ * is appropriate for the desired behavior of the lzo encoding.
+ */
     if (( cl->ublen > 0 )
         &&   ( linesToComp == maxLines ))
     { if (!rfbSendUpdateBuf(cl))
       { return FALSE;
-      }
-    }
+    } }
 
     /* Update remaining and incremental rectangle location.
     */

@@ -35,6 +35,5 @@
 void rfbGotXCutText( rfbScreenInfo * rfbScreen
                    , char *str
                    , int len)
-{
-   rfbSendServerCutText(rfbScreen, str, len);
+{ rfbSendServerCutText(rfbScreen, str, len);
 }

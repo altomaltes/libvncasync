@@ -87,11 +87,11 @@ typedef struct TIGHT_CONF_s
 } TIGHT_CONF;
 
 static TIGHT_CONF tightConf[4] =
-{ { 65536, 2048,   6, 0, 0, 0,   4,  24 } /* 0  (used only without JPEG) */
-  ,{ 65536, 2048,  32, 1, 1, 1,  96,  24 } /* 1 */
-  ,{ 65536, 2048,  32, 3, 3, 2,  96,  96 } /* 2  (used only with JPEG) */
-  ,{ 65536, 2048,  32, 7, 7, 5,  96, 256 } /* 9 */
-};
+{{ 65536, 2048,   6, 0, 0, 0,   4,  24 } /* 0  (used only without JPEG) */
+,{ 65536, 2048,  32, 1, 1, 1,  96,  24 } /* 1 */
+,{ 65536, 2048,  32, 3, 3, 2,  96,  96 } /* 2  (used only with JPEG) */
+,{ 65536, 2048,  32, 7, 7, 5,  96, 256 }}; /* 9 */
+
 
 #ifdef HAVE_LIBPNG
 typedef struct TIGHT_PNG_CONF_s
@@ -99,17 +99,16 @@ typedef struct TIGHT_PNG_CONF_s
 } TIGHT_PNG_CONF;
 
 static TIGHT_PNG_CONF tightPngConf[10] =
-{ { 0, PNG_NO_FILTERS },
-  { 1, PNG_NO_FILTERS },
-  { 2, PNG_NO_FILTERS },
-  { 3, PNG_NO_FILTERS },
-  { 4, PNG_NO_FILTERS },
-  { 5, PNG_ALL_FILTERS },
-  { 6, PNG_ALL_FILTERS },
-  { 7, PNG_ALL_FILTERS },
-  { 8, PNG_ALL_FILTERS },
-  { 9, PNG_ALL_FILTERS },
-};
+{{ 0, PNG_NO_FILTERS }
+,{ 1, PNG_NO_FILTERS }
+,{ 2, PNG_NO_FILTERS }
+,{ 3, PNG_NO_FILTERS }
+,{ 4, PNG_NO_FILTERS }
+,{ 5, PNG_ALL_FILTERS }
+,{ 6, PNG_ALL_FILTERS }
+,{ 7, PNG_ALL_FILTERS }
+,{ 8, PNG_ALL_FILTERS }
+,{ 9, PNG_ALL_FILTERS }};
 #endif
 
 static TLS int compressLevel = 1;
@@ -235,16 +234,12 @@ static rfbBool SendPngRect(rfbClient * cl, int x, int y, int w, int h);
 static rfbBool CanSendPngRect(rfbClient * cl, int w, int h);
 #endif
 
-/*
-   Tight encoding implementation.
-*/
-
-int
-rfbNumCodedRectsTight(rfbClient * cl,
-                      int x,
-                      int y,
-                      int w,
-                      int h)
+/**
+ *  Tight encoding implementation.
+ */
+int rfbNumCodedRectsTight( rfbClient * cl
+                         , int x, int y
+                         , int w, int h )
 { int maxRectSize, maxRectWidth;
   int subrectMaxWidth, subrectMaxHeight;
 
@@ -262,30 +257,29 @@ rfbNumCodedRectsTight(rfbClient * cl,
     return (((w - 1) / maxRectWidth + 1) *
             ((h - 1) / subrectMaxHeight + 1));
   }
+
   else
   { return 1;
-  }
-}
+} }
 
 rfbBool rfbSendRectEncodingTight( rfbClient * cl
-                                  , int x, int y
-                                  , int w, int h )
+                                , int x, int y
+                                , int w, int h )
 { cl->tightEncoding = rfbEncodingTight;
   return SendRectEncodingTight(cl, x, y, w, h);
 }
 
-rfbBool
-rfbSendRectEncodingTightPng( rfbClient * cl
-                             , int x, int y
-                             , int w, int h )
+rfbBool rfbSendRectEncodingTightPng( rfbClient * cl
+                                   , int x, int y
+                                   , int w, int h )
 { cl->tightEncoding = rfbEncodingTightPng;
   return SendRectEncodingTight(cl, x, y, w, h);
 }
 
 
 rfbBool SendRectEncodingTight( rfbClient * cl
-                               , int x, int y
-                               , int w, int h )
+                             , int x, int y
+                             , int w, int h )
 { int nMaxRows;
   uint32_t colorValue;
   int dx, dy, dw, dh;
@@ -298,53 +292,63 @@ rfbBool SendRectEncodingTight( rfbClient * cl
   qualityLevel = cl->turboQualityLevel;
   subsampLevel = cl->turboSubsampLevel;
 
-  /* We only allow compression levels that have a demonstrable performance
-     benefit.  CL 0 with JPEG reduces CPU usage for workloads that have low
-     numbers of unique colors, but the same thing can be accomplished by
-     using CL 0 without JPEG (AKA "Lossless Tight.")  For those same
-     low-color workloads, CL 2 can provide typically 20-40% better
-     compression than CL 1 (with a commensurate increase in CPU usage.)  For
-     high-color workloads, CL 1 should always be used, as higher compression
-     levels increase CPU usage for these workloads without providing any
-     significant reduction in bandwidth.
-  */
+/**
+ * We only allow compression levels that have a demonstrable performance
+ *    benefit.  CL 0 with JPEG reduces CPU usage for workloads that have low
+ *    numbers of unique colors, but the same thing can be accomplished by
+ *    using CL 0 without JPEG (AKA "Lossless Tight.")  For those same
+ *    low-color workloads, CL 2 can provide typically 20-40% better
+ *    compression than CL 1 (with a commensurate increase in CPU usage.)  For
+ *    high-color workloads, CL 1 should always be used, as higher compression
+ *    levels increase CPU usage for these workloads without providing any
+ *    significant reduction in bandwidth.
+ */
+
   if (qualityLevel != -1)
   { if (compressLevel < 1) { compressLevel = 1; }
     if (compressLevel > 2) { compressLevel = 2; }
   }
 
-  /* With JPEG disabled, CL 2 offers no significant bandwidth savings over
-     CL 1, so we don't include it. */
+/** With JPEG disabled, CL 2 offers no significant bandwidth savings over
+ *    CL 1, so we don't include it.
+ */
   else if (compressLevel > 1)
   { compressLevel = 1;
   }
 
-  /* CL 9 (which maps internally to CL 3) is included mainly for backward
-     compatibility with TightVNC Compression Levels 5-9.  It should be used
-     only in extremely low-bandwidth cases in which it can be shown to have a
-     benefit.  For low-color workloads, it provides typically only 10-20%
-     better compression than CL 2 with JPEG and CL 1 without JPEG, and it
-     uses, on average, twice as much CPU time.
-  */
-  if (cl->tightCompressLevel == 9) { compressLevel = 3; }
+/** CL 9 (which maps internally to CL 3) is included mainly for backward
+ *    compatibility with TightVNC Compression Levels 5-9.  It should be used
+ *    only in extremely low-bandwidth cases in which it can be shown to have a
+ *    benefit.  For low-color workloads, it provides typically only 10-20%
+ *    better compression than CL 2 with JPEG and CL 1 without JPEG, and it
+ *    uses, on average, twice as much CPU time.
+ */
 
-  if ( cl->format.depth == 24 && cl->format.redMax == 0xFF &&
-       cl->format.greenMax == 0xFF && cl->format.blueMax == 0xFF )
+  if (cl->tightCompressLevel == 9)
+  { compressLevel = 3;
+  }
+
+  if ( cl->format.depth    ==   24 && cl->format.redMax  == 0xFF
+    && cl->format.greenMax == 0xFF && cl->format.blueMax == 0xFF )
   { usePixelFormat24 = TRUE;
   }
   else
   { usePixelFormat24 = FALSE;
   }
 
-  if (!cl->enableLastRectEncoding || w * h < MIN_SPLIT_RECT_SIZE)
-  { return SendRectSimple(cl, x, y, w, h); }
+  if (!cl->enableLastRectEncoding
+    || w * h < MIN_SPLIT_RECT_SIZE )
+  { return SendRectSimple(cl, x, y, w, h);
+  }
 
   /* Make sure we can write at least one pixel into tightBeforeBuf. */
 
   if (tightBeforeBufSize < 4)
   { tightBeforeBufSize = 4;
+
     if (tightBeforeBuf == NULL)
-    { tightBeforeBuf = (char *)malloc(tightBeforeBufSize); }
+    { tightBeforeBuf = (char *)malloc(tightBeforeBufSize);
+    }
     else
       tightBeforeBuf = (char *)realloc(tightBeforeBuf,
                                        tightBeforeBufSize);
@@ -362,9 +366,9 @@ rfbBool SendRectEncodingTight( rfbClient * cl
 
   /* Try to find large solid-color areas and send them separately. */
 
-  for ( dy = y /* If a rectangle becomes too large, send its upper part now. */
-             ; dy < y + h
-        ; dy += MAX_SPLIT_TILE_SIZE )
+  for( dy = y /* If a rectangle becomes too large, send its upper part now. */
+     ; dy < y + h
+     ; dy += MAX_SPLIT_TILE_SIZE )
   { if (dy - y >= nMaxRows)
     { if ( !SendRectSimple( cl
                             , x, y
@@ -417,7 +421,9 @@ rfbBool SendRectEncodingTight( rfbClient * cl
 
         if ( y_best != y &&
              !SendRectSimple(cl, x, y, w, y_best-y) )
-        { return FALSE; }
+        { return FALSE;
+        }
+
         if ( x_best != x &&
              !SendRectEncodingTight(cl, x, y_best,
                                     x_best-x, h_best) )
@@ -429,13 +435,13 @@ rfbBool SendRectEncodingTight( rfbClient * cl
         { return FALSE;
         }
 
-        fbptr= ( cl->scaledScreen->frameBuffer
-             + ( cl->scaledScreen->paddedWidthInBytes * y_best)
-             + ( x_best * (cl->scaledScreen->bitsPerPixel / 8)));
+        fbptr= ( cl->scaledScreen->window.frameBuffer
+             + ( cl->scaledScreen->window.paddedWidthInBytes * y_best)
+             + ( x_best * (cl->scaledScreen->window.bitsPerPixel / 8)));
 
-        (*cl->translateFn)(cl->translateLookupTable, &cl->screen->serverFormat,
+        (*cl->translateFn)(cl->translateLookupTable, &cl->screen->window.serverFormat,
                            &cl->format, fbptr, tightBeforeBuf,
-                           cl->scaledScreen->paddedWidthInBytes, 1, 1);
+                           cl->scaledScreen->window.paddedWidthInBytes, 1, 1);
 
         if (!SendSolidRect(cl))
         { return FALSE;
@@ -446,7 +452,9 @@ rfbBool SendRectEncodingTight( rfbClient * cl
         if ( x_best + w_best != x + w &&
              !SendRectEncodingTight(cl, x_best + w_best, y_best,
                                     w - (x_best-x) - w_best, h_best) )
-        { return FALSE; }
+        { return FALSE;
+        }
+
         if ( y_best + h_best != y + h &&
              !SendRectEncodingTight(cl, x, y_best + h_best,
                                     w, h - (y_best-y) - h_best) )
@@ -455,9 +463,7 @@ rfbBool SendRectEncodingTight( rfbClient * cl
         /* Return after all recursive calls are done. */
 
         return TRUE;
-      }
-    }
-  }
+  } } }
 
   /* No suitable solid-color rectangles found. */
 
@@ -466,19 +472,19 @@ rfbBool SendRectEncodingTight( rfbClient * cl
 
 
 static void FindBestSolidArea( rfbClient * cl
-                               , int x,                  int y
-                               , int w,                  int h
-                               , uint32_t colorValue
-                               , int *w_ptr,  int *h_ptr)
+                             , int x, int y
+                             , int w, int h
+                             , uint32_t colorValue
+                             , int *w_ptr,  int *h_ptr)
 { int dx, dy, dw, dh;
   int w_prev;
   int w_best = 0, h_best = 0;
 
   w_prev = w;
 
-  for ( dy = y
-             ; dy < y + h
-        ; dy += MAX_SPLIT_TILE_SIZE)
+  for( dy = y
+     ; dy < y + h
+     ; dy += MAX_SPLIT_TILE_SIZE)
   { dh = (dy + MAX_SPLIT_TILE_SIZE <= y + h) ? MAX_SPLIT_TILE_SIZE
          : (y + h - dy);
     dw = (w_prev > MAX_SPLIT_TILE_SIZE) ?
@@ -499,8 +505,7 @@ static void FindBestSolidArea( rfbClient * cl
     if (w_prev * (dy + dh - y) > w_best * h_best)
     { w_best = w_prev;
       h_best = dy + dh - y;
-    }
-  }
+  } }
 
   *w_ptr = w_best;
   *h_ptr = h_best;
@@ -545,27 +550,22 @@ static void ExtendSolidArea( rfbClient * cl
 }
 
 
-/*
-   Check if a rectangle is all of the same color. If needSameColor is
-   set to non-zero, then also check that its color equals to the
+/**
+ *    Check if a rectangle is all of the same color. If needSameColor is
+ *  set to non-zero, then also check that its color equals to the
  * *colorPtr value. The result is 1 if the test is successful, and in
-   that case new color will be stored in *colorPtr.
-*/
-
+ *  that case new color will be stored in *colorPtr.
+ */
 static rfbBool CheckSolidTile( rfbClient * cl
-                               , int x, int y
-                               , int w, int h
-                               , uint32_t* colorPtr
-                               , rfbBool needSameColor )
-{ switch(cl->screen->serverFormat.bitsPerPixel)
-  { case 32:
-      return CheckSolidTile32( cl, x, y, w, h, colorPtr, needSameColor );
-    case 16:
-      return CheckSolidTile16( cl, x, y, w, h, colorPtr, needSameColor );
-    default:
-      return CheckSolidTile8(  cl, x, y, w, h, colorPtr, needSameColor );
-  }
-}
+                             , int x, int y
+                             , int w, int h
+                             , uint32_t* colorPtr
+                             , rfbBool needSameColor )
+{ switch(cl->screen->window.serverFormat.bitsPerPixel)
+  { case 32: return CheckSolidTile32( cl, x, y, w, h, colorPtr, needSameColor );
+    case 16: return CheckSolidTile16( cl, x, y, w, h, colorPtr, needSameColor );
+    default: return CheckSolidTile8(  cl, x, y, w, h, colorPtr, needSameColor );
+} }
 
 
 #define DEFINE_CHECK_SOLID_FUNCTION( bpp )                                    \
@@ -578,8 +578,8 @@ CheckSolidTile##bpp( rfbClient * cl, int x, int y, int w, int h,              \
     uint##bpp##_t colorValue;                                                 \
     int dx, dy;                                                               \
                                                                               \
-    fbptr = (uint##bpp##_t *)&cl->scaledScreen->frameBuffer                   \
-        [y * cl->scaledScreen->paddedWidthInBytes + x * (bpp/8)];             \
+    fbptr = (uint##bpp##_t *)&cl->scaledScreen->window.frameBuffer                   \
+        [y * cl->scaledScreen->window.paddedWidthInBytes + x * (bpp/8)];             \
                                                                               \
     colorValue = *fbptr;                                                      \
     if (needSameColor && (uint32_t)colorValue != *colorPtr)                   \
@@ -591,7 +591,7 @@ CheckSolidTile##bpp( rfbClient * cl, int x, int y, int w, int h,              \
         {   return FALSE;                                                 \
         } }                                                                     \
         fbptr = (uint##bpp##_t *)((uint8_t *)fbptr                            \
-                 + cl->scaledScreen->paddedWidthInBytes);                     \
+                 + cl->scaledScreen->window.paddedWidthInBytes);                     \
     }                                                                         \
                                                                               \
     *colorPtr = (uint32_t)colorValue;                                         \
@@ -599,20 +599,20 @@ CheckSolidTile##bpp( rfbClient * cl, int x, int y, int w, int h,              \
 }
 
 static rfbBool CheckSolidTile32( rfbClient * cl
-                                 , int x, int y
-                                 , int w, int h
-                                 ,  uint32_t* colorPtr
-                                 , rfbBool needSameColor )
+                               , int x, int y
+                               , int w, int h
+                               ,  uint32_t* colorPtr
+                               , rfbBool needSameColor )
 { uint32_t *fbptr;
   uint32_t colorValue;
   int dx, dy;
 
-  if ( ! cl->scaledScreen->frameBuffer )
+  if ( ! cl->scaledScreen->window.frameBuffer )
   { return( FALSE );
   }
 
-  fbptr= (uint32_t *)&cl->scaledScreen->frameBuffer
-         [y * cl->scaledScreen->paddedWidthInBytes + x * (32/8)];
+  fbptr= (uint32_t *)&cl->scaledScreen->window.frameBuffer
+         [y * cl->scaledScreen->window.paddedWidthInBytes + x * (32/8)];
 
   colorValue = *fbptr;
   if (needSameColor && (uint32_t)colorValue != *colorPtr)
@@ -622,11 +622,10 @@ static rfbBool CheckSolidTile32( rfbClient * cl
   { for (dx = 0; dx < w; dx++)
     { if (colorValue != fbptr[dx])
       { return FALSE;
-      }
-    }
+    } }
 
     fbptr= (uint32_t *)((uint8_t *)fbptr
-                        + cl->scaledScreen->paddedWidthInBytes);
+                        + cl->scaledScreen->window.paddedWidthInBytes);
   }
 
   *colorPtr = (uint32_t)colorValue;
@@ -662,8 +661,7 @@ static rfbBool SendRectSimple( rfbClient * cl
     }
     else
     { tightBeforeBuf = (char *)malloc(tightBeforeBufSize );
-    }
-  }
+  } }
 
   if (tightAfterBufSize < maxAfterSize)
   { tightAfterBufSize = maxAfterSize;
@@ -672,8 +670,8 @@ static rfbBool SendRectSimple( rfbClient * cl
       tightAfterBuf = (char *)realloc(tightAfterBuf,
                                       tightAfterBufSize);
     else
-    { tightAfterBuf = (char *)malloc(tightAfterBufSize); }
-  }
+    { tightAfterBuf = (char *)malloc(tightAfterBufSize);
+  } }
 
   if ( w     > maxRectWidth
        || w * h > maxRectSize )
@@ -685,10 +683,9 @@ static rfbBool SendRectSimple( rfbClient * cl
       { rw = (dx + maxRectWidth < w) ? maxRectWidth : w - dx;
         rh = (dy + subrectMaxHeight < h) ? subrectMaxHeight : h - dy;
         if (!SendSubrect(cl, x + dx, y + dy, rw, rh))
-        { return FALSE; }
-      }
-    }
-  }
+        { return FALSE;
+  } } } }
+
   else
   { if (!SendSubrect(cl, x, y, w, h))
     { return FALSE; }
@@ -703,7 +700,7 @@ static rfbBool SendSubrect( rfbClient * cl
 { char * fbptr;
   rfbBool success = FALSE;
 
-  if ( !cl->scaledScreen->frameBuffer )
+  if ( !cl->scaledScreen->window.frameBuffer )
   { return( FALSE );
   }
 
@@ -716,9 +713,9 @@ static rfbBool SendSubrect( rfbClient * cl
   if (!rfbSendTightHeader(cl, x, y, w, h))
   { return FALSE; }
 
-  fbptr= ( cl->scaledScreen->frameBuffer
-       + ( cl->scaledScreen->paddedWidthInBytes * y)
-       + ( x * (cl->scaledScreen->bitsPerPixel / 8)));
+  fbptr= ( cl->scaledScreen->window.frameBuffer
+       + ( cl->scaledScreen->window.paddedWidthInBytes * y)
+       + ( x * (cl->scaledScreen->window.bitsPerPixel / 8)));
 
   if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1)
   { return SendJpegRect(cl, x, y, w, h, qualityLevel); }
@@ -736,44 +733,39 @@ static rfbBool SendSubrect( rfbClient * cl
 
   /* This is so we can avoid translating the pixels when compressing
      with JPEG, since it is unnecessary */
-  if ( cl->format.bitsPerPixel    == cl->screen->serverFormat.bitsPerPixel
-       && cl->format.redMax       == cl->screen->serverFormat.redMax
-       && cl->format.greenMax     == cl->screen->serverFormat.greenMax
-       && cl->format.blueMax      == cl->screen->serverFormat.blueMax
+  if ( cl->format.bitsPerPixel    == cl->screen->window.serverFormat.bitsPerPixel
+       && cl->format.redMax       == cl->screen->window.serverFormat.redMax
+       && cl->format.greenMax     == cl->screen->window.serverFormat.greenMax
+       && cl->format.blueMax      == cl->screen->window.serverFormat.blueMax
        && cl->format.bitsPerPixel >= 16)
   { switch ( cl->format.bitsPerPixel )
     { case 16:
         FastFillPalette16( cl, (uint16_t *)fbptr
-                           , w, cl->scaledScreen->paddedWidthInBytes / 2
+                           , w, cl->scaledScreen->window.paddedWidthInBytes / 2
                            , h );
         break;
       default:
         FastFillPalette32( cl, (uint32_t *)fbptr
-                           , w, cl->scaledScreen->paddedWidthInBytes / 4
+                           , w, cl->scaledScreen->window.paddedWidthInBytes / 4
                            , h );
     }
 
     if(paletteNumColors != 0 || qualityLevel == -1)
     { (*cl->translateFn)(cl->translateLookupTable,
-                         &cl->screen->serverFormat, &cl->format, fbptr,
+                         &cl->screen->window.serverFormat, &cl->format, fbptr,
                          tightBeforeBuf,
-                         cl->scaledScreen->paddedWidthInBytes, w, h);
+                         cl->scaledScreen->window.paddedWidthInBytes, w, h);
     }
   }
   else
-  { (*cl->translateFn)(cl->translateLookupTable, &cl->screen->serverFormat,
+  { (*cl->translateFn)(cl->translateLookupTable, &cl->screen->window.serverFormat,
                        &cl->format, fbptr, tightBeforeBuf,
-                       cl->scaledScreen->paddedWidthInBytes, w, h);
+                       cl->scaledScreen->window.paddedWidthInBytes, w, h);
 
     switch (cl->format.bitsPerPixel)
-    { case  8:
-        FillPalette8( w * h);
-        break;
-      case 16:
-        FillPalette16(w * h);
-        break;
-      default:
-        FillPalette32(w * h);
+    { case  8:        FillPalette8( w * h);        break;
+      case 16:        FillPalette16(w * h);        break;
+      default:        FillPalette32(w * h);
     }
   }
 
@@ -832,9 +824,9 @@ rfbBool rfbSendTightHeader( rfbClient * cl
   return TRUE;
 }
 
-/*
-   Subencoding implementations.
-*/
+/**
+ *  Subencoding implementations.
+ */
 
 static rfbBool SendSolidRect( rfbClient * cl )
 { int len;
@@ -848,8 +840,8 @@ static rfbBool SendSolidRect( rfbClient * cl )
 
   if (cl->ublen + 1 + len > UPDATE_BUF_SIZE)
   { if (!rfbSendUpdateBuf(cl))
-    { return FALSE; }
-  }
+    { return FALSE;
+  } }
 
   cl->updateBuf[cl->ublen++] = (char)(rfbTightFill << 4);
   memcpy (&cl->updateBuf[cl->ublen], tightBeforeBuf, len);
@@ -884,20 +876,19 @@ static rfbBool SendMonoRect( rfbClient * cl
   dataLen = (w + 7) / 8;
   dataLen *= h;
 
-  if (tightConf[compressLevel].monoZlibLevel == 0 &&
-      cl->tightEncoding != rfbEncodingTightPng)
+  if (tightConf[compressLevel].monoZlibLevel == 0
+   && cl->tightEncoding != rfbEncodingTightPng)
     cl->updateBuf[cl->ublen++] =
       (char)((rfbTightNoZlib | rfbTightExplicitFilter) << 4);
   else
-  { cl->updateBuf[cl->ublen++] = (streamId | rfbTightExplicitFilter) << 4; }
+  { cl->updateBuf[cl->ublen++] = (streamId | rfbTightExplicitFilter) << 4;
+  }
   cl->updateBuf[cl->ublen++] = rfbTightFilterPalette;
   cl->updateBuf[cl->ublen++] = 1;
 
-  /* Prepare palette, convert image. */
-  switch (cl->format.bitsPerPixel)
-  {
 
-    case 32:
+  switch (cl->format.bitsPerPixel) /** Prepare palette, convert image. */
+  { case 32:
       EncodeMonoRect32((uint8_t *)tightBeforeBuf, w, h);
 
       ((uint32_t *)tightAfterBuf)[0] = monoBackground;
@@ -954,8 +945,8 @@ static rfbBool SendIndexedRect( rfbClient * cl
        paletteNumColors * cl->format.bitsPerPixel / 8 >
        UPDATE_BUF_SIZE )
   { if (!rfbSendUpdateBuf(cl))
-    { return FALSE; }
-  }
+    { return FALSE;
+  } }
 
   /* Prepare tight encoding header. */
   if ( tightConf[compressLevel].idxZlibLevel == 0
@@ -1271,12 +1262,12 @@ FastFillPalette##bpp(rfbClient * cl, uint##bpp##_t *data, int w,       \
     int i, j, i2 = 0, j2, n0, n1, ni;                                   \
                                                                         \
     if (cl->translateFn != rfbTranslateNone) {                          \
-        mask = cl->screen->serverFormat.redMax                          \
-            << cl->screen->serverFormat.redShift;                       \
-        mask |= cl->screen->serverFormat.greenMax                       \
-             << cl->screen->serverFormat.greenShift;                    \
-        mask |= cl->screen->serverFormat.blueMax                        \
-             << cl->screen->serverFormat.blueShift;                     \
+        mask = cl->screen->window.serverFormat.redMax                          \
+            << cl->screen->window.serverFormat.redShift;                       \
+        mask |= cl->screen->window.serverFormat.greenMax                       \
+             << cl->screen->window.serverFormat.greenShift;                    \
+        mask |= cl->screen->window.serverFormat.blueMax                        \
+             << cl->screen->window.serverFormat.blueShift;                     \
     } else mask = ~0;                                                   \
                                                                         \
     c0 = data[0] & mask;                                                \
@@ -1314,10 +1305,10 @@ FastFillPalette##bpp(rfbClient * cl, uint##bpp##_t *data, int w,       \
     }                                                                   \
     done2:                                                              \
     (*cl->translateFn)(cl->translateLookupTable,                        \
-                       &cl->screen->serverFormat, &cl->format,          \
+                       &cl->screen->window.serverFormat, &cl->format,          \
                        (char *)&c0, (char *)&c0t, bpp/8, 1, 1);         \
     (*cl->translateFn)(cl->translateLookupTable,                        \
-                       &cl->screen->serverFormat, &cl->format,          \
+                       &cl->screen->window.serverFormat, &cl->format,          \
                        (char *)&c1, (char *)&c1t, bpp/8, 1, 1);         \
     if (j2 >= h) {                                                      \
         if (n0 > n1) {                                                  \
@@ -1343,7 +1334,7 @@ FastFillPalette##bpp(rfbClient * cl, uint##bpp##_t *data, int w,       \
                 ni++;                                                   \
             } else {                                                    \
                 (*cl->translateFn)(cl->translateLookupTable,            \
-                                   &cl->screen->serverFormat,           \
+                                   &cl->screen->window.serverFormat,           \
                                    &cl->format, (char *)&ci,            \
                                    (char *)&cit, bpp/8, 1, 1);          \
                 if (!PaletteInsert (cit, (uint32_t)ni, bpp))            \
@@ -1356,7 +1347,7 @@ FastFillPalette##bpp(rfbClient * cl, uint##bpp##_t *data, int w,       \
     }                                                                   \
                                                                         \
     (*cl->translateFn)(cl->translateLookupTable,                        \
-                       &cl->screen->serverFormat, &cl->format,          \
+                       &cl->screen->window.serverFormat, &cl->format,          \
                        (char *)&ci, (char *)&cit, bpp/8, 1, 1);         \
     PaletteInsert (cit, (uint32_t)ni, bpp);                             \
 }
@@ -1462,7 +1453,7 @@ static void Pack24(rfbClient * cl,
 
   buf32 = (uint32_t *)buf;
 
-  if (!cl->screen->serverFormat.bigEndian == !fmt->bigEndian)
+  if (!cl->screen->window.serverFormat.bigEndian == !fmt->bigEndian)
   { r_shift = fmt->redShift;
     g_shift = fmt->greenShift;
     b_shift = fmt->blueShift;
@@ -1583,13 +1574,13 @@ DEFINE_MONO_ENCODE_FUNCTION( 32 )
 static rfbBool
 SendJpegRect(rfbClient * cl, int x, int y, int w, int h, int quality)
 { unsigned char *srcbuf;
-  int ps = cl->screen->serverFormat.bitsPerPixel / 8;
+  int ps = cl->screen->window.serverFormat.bitsPerPixel / 8;
   int subsamp = subsampLevel2tjsubsamp[subsampLevel];
   unsigned long size = 0;
   int flags = 0, pitch;
   unsigned char *tmpbuf = NULL;
 
-  if (cl->screen->serverFormat.bitsPerPixel == 8)
+  if (cl->screen->window.serverFormat.bitsPerPixel == 8)
   { return SendFullColorRect(cl, x, y, w, h); }
 
   if (ps < 2)
@@ -1625,7 +1616,7 @@ SendJpegRect(rfbClient * cl, int x, int y, int w, int h, int quality)
     { rfbLog("Memory allocation failure!\n");
     }
 
-    srcptr= (uint16_t *)&cl->scaledScreen->frameBuffer[ y * cl->scaledScreen->paddedWidthInBytes + x * ps ];
+    srcptr= (uint16_t *)&cl->scaledScreen->window.frameBuffer[ y * cl->scaledScreen->window.paddedWidthInBytes + x * ps ];
     dst = tmpbuf;
 
     for(j = 0; j < h; j++)
@@ -1634,15 +1625,15 @@ SendJpegRect(rfbClient * cl, int x, int y, int w, int h, int quality)
 
       for (i = 0; i < w; i++)
       { pix = *srcptr2++;
-        inRed   = (int) (pix >> cl->screen->serverFormat.redShift   & cl->screen->serverFormat.redMax);
-        inGreen = (int) (pix >> cl->screen->serverFormat.greenShift & cl->screen->serverFormat.greenMax);
-        inBlue  = (int) (pix >> cl->screen->serverFormat.blueShift  & cl->screen->serverFormat.blueMax);
+        inRed   = (int) (pix >> cl->screen->window.serverFormat.redShift   & cl->screen->window.serverFormat.redMax);
+        inGreen = (int) (pix >> cl->screen->window.serverFormat.greenShift & cl->screen->window.serverFormat.greenMax);
+        inBlue  = (int) (pix >> cl->screen->window.serverFormat.blueShift  & cl->screen->window.serverFormat.blueMax);
 
-        *dst2++ = (uint8_t)((inRed   * 255 + cl->screen->serverFormat.redMax   / 2) / cl->screen->serverFormat.redMax );
-        *dst2++ = (uint8_t)((inGreen * 255 + cl->screen->serverFormat.greenMax / 2) / cl->screen->serverFormat.greenMax );
-        *dst2++ = (uint8_t)((inBlue  * 255 + cl->screen->serverFormat.blueMax  / 2) / cl->screen->serverFormat.blueMax );
+        *dst2++ = (uint8_t)((inRed   * 255 + cl->screen->window.serverFormat.redMax   / 2) / cl->screen->window.serverFormat.redMax );
+        *dst2++ = (uint8_t)((inGreen * 255 + cl->screen->window.serverFormat.greenMax / 2) / cl->screen->window.serverFormat.greenMax );
+        *dst2++ = (uint8_t)((inBlue  * 255 + cl->screen->window.serverFormat.blueMax  / 2) / cl->screen->window.serverFormat.blueMax );
       }
-      srcptr += cl->scaledScreen->paddedWidthInBytes / ps;
+      srcptr += cl->scaledScreen->window.paddedWidthInBytes / ps;
       dst += w * 3;
     }
     srcbuf = tmpbuf;
@@ -1650,15 +1641,15 @@ SendJpegRect(rfbClient * cl, int x, int y, int w, int h, int quality)
     ps = 3;
   }
   else
-  { if (cl->screen->serverFormat.bigEndian && ps == 4)
+  { if (cl->screen->window.serverFormat.bigEndian && ps == 4)
     { flags |= TJ_ALPHAFIRST; }
-    if (cl->screen->serverFormat.redShift == 16
-        && cl->screen->serverFormat.blueShift == 0)
+    if (cl->screen->window.serverFormat.redShift == 16
+        && cl->screen->window.serverFormat.blueShift == 0)
     { flags |= TJ_BGR; }
-    if (cl->screen->serverFormat.bigEndian)
+    if (cl->screen->window.serverFormat.bigEndian)
     { flags ^= TJ_BGR; }
-    pitch = cl->scaledScreen->paddedWidthInBytes;
-    srcbuf = (unsigned char *)&cl->scaledScreen->frameBuffer
+    pitch = cl->scaledScreen->window.paddedWidthInBytes;
+    srcbuf = (unsigned char *)&cl->scaledScreen->window.frameBuffer
              [y * pitch + x * ps];
   }
 
@@ -1692,10 +1683,10 @@ PrepareRowForImg(rfbClient * cl,
                  int x,
                  int y,
                  int count)
-{ if (cl->screen->serverFormat.bitsPerPixel == 32)
-  { if ( cl->screen->serverFormat.redMax == 0xFF &&
-         cl->screen->serverFormat.greenMax == 0xFF &&
-         cl->screen->serverFormat.blueMax == 0xFF )
+{ if (cl->screen->window.serverFormat.bitsPerPixel == 32)
+  { if ( cl->screen->window.serverFormat.redMax == 0xFF &&
+         cl->screen->window.serverFormat.greenMax == 0xFF &&
+         cl->screen->window.serverFormat.blueMax == 0xFF )
     { PrepareRowForImg24(cl, dst, x, y, count);
     }
     else
@@ -1715,13 +1706,13 @@ static void PrepareRowForImg24( rfbClient * cl
   uint32_t pix;
 
   fbptr = (uint32_t *)
-          &cl->scaledScreen->frameBuffer[y * cl->scaledScreen->paddedWidthInBytes + x * 4];
+          &cl->scaledScreen->window.frameBuffer[y * cl->scaledScreen->window.paddedWidthInBytes + x * 4];
 
   while (count--)
   { pix = *fbptr++;
-    *dst++ = (uint8_t)(pix >> cl->screen->serverFormat.redShift);
-    *dst++ = (uint8_t)(pix >> cl->screen->serverFormat.greenShift);
-    *dst++ = (uint8_t)(pix >> cl->screen->serverFormat.blueShift);
+    *dst++ = (uint8_t)(pix >> cl->screen->window.serverFormat.redShift);
+    *dst++ = (uint8_t)(pix >> cl->screen->window.serverFormat.greenShift);
+    *dst++ = (uint8_t)(pix >> cl->screen->window.serverFormat.blueShift);
 } }
 
 #define DEFINE_JPEG_GET_ROW_FUNCTION(bpp)                                   \
@@ -1733,25 +1724,25 @@ PrepareRowForImg##bpp(rfbClient * cl, uint8_t *dst, int x, int y, int count) { \
     int inRed, inGreen, inBlue;                                             \
                                                                             \
     fbptr = (uint##bpp##_t *)                                               \
-        &cl->scaledScreen->frameBuffer[y * cl->scaledScreen->paddedWidthInBytes +       \
+        &cl->scaledScreen->window.frameBuffer[y * cl->scaledScreen->window.paddedWidthInBytes +       \
                              x * (bpp / 8)];                                \
                                                                             \
     while (count--) {                                                       \
         pix = *fbptr++;                                                     \
                                                                             \
         inRed = (int)                                                       \
-            (pix >> cl->screen->serverFormat.redShift   & cl->screen->serverFormat.redMax); \
+            (pix >> cl->screen->window.serverFormat.redShift   & cl->screen->window.serverFormat.redMax); \
         inGreen = (int)                                                     \
-            (pix >> cl->screen->serverFormat.greenShift & cl->screen->serverFormat.greenMax); \
+            (pix >> cl->screen->window.serverFormat.greenShift & cl->screen->window.serverFormat.greenMax); \
         inBlue  = (int)                                                     \
-            (pix >> cl->screen->serverFormat.blueShift  & cl->screen->serverFormat.blueMax); \
+            (pix >> cl->screen->window.serverFormat.blueShift  & cl->screen->window.serverFormat.blueMax); \
                                                                             \
-  *dst++ = (uint8_t)((inRed   * 255 + cl->screen->serverFormat.redMax / 2) / \
-                         cl->screen->serverFormat.redMax);                  \
-  *dst++ = (uint8_t)((inGreen * 255 + cl->screen->serverFormat.greenMax / 2) / \
-                         cl->screen->serverFormat.greenMax);                \
-  *dst++ = (uint8_t)((inBlue  * 255 + cl->screen->serverFormat.blueMax / 2) / \
-                         cl->screen->serverFormat.blueMax);                 \
+  *dst++ = (uint8_t)((inRed   * 255 + cl->screen->window.serverFormat.redMax / 2) / \
+                         cl->screen->window.serverFormat.redMax);                  \
+  *dst++ = (uint8_t)((inGreen * 255 + cl->screen->window.serverFormat.greenMax / 2) / \
+                         cl->screen->window.serverFormat.greenMax);                \
+  *dst++ = (uint8_t)((inBlue  * 255 + cl->screen->window.serverFormat.blueMax / 2) / \
+                         cl->screen->window.serverFormat.blueMax);                 \
     }                                                                       \
 }
 
@@ -1771,7 +1762,7 @@ static rfbBool CanSendPngRect(rfbClient * cl, int w, int h)
   { return FALSE;
   }
 
-  if ( cl->screen->serverFormat.bitsPerPixel == 8
+  if ( cl->screen->window.serverFormat.bitsPerPixel == 8
        || cl->format.bitsPerPixel == 8)
   { return FALSE;
   }

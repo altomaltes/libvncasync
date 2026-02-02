@@ -9,8 +9,8 @@ int rfbDrawChar(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
 { int i,j,width,height;
   unsigned char* data=font->data+font->metaData[c*5];
   unsigned char d=*data;
-  int rowstride=rfbScreen->paddedWidthInBytes;
-  int bpp=rfbScreen->serverFormat.bitsPerPixel/8;
+  int rowstride=rfbScreen->window.paddedWidthInBytes;
+  int bpp=rfbScreen->window.serverFormat.bitsPerPixel/8;
   char *colour=(char*)&col;
 
   if(!rfbEndianTest)
@@ -27,9 +27,10 @@ int rfbDrawChar(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
       { d=*data;
         data++;
       }
-      if(d&0x80 && y+j >= 0 && y+j < rfbScreen->height &&
-          x+i >= 0 && x+i < rfbScreen->width)
-        memcpy(rfbScreen->frameBuffer+(y+j)*rowstride+(x+i)*bpp,colour,bpp);
+      if(d&0x80 && y+j >= 0 && y+j < rfbScreen->window.height
+       && x+i >= 0
+       && x+i < rfbScreen->window.width)
+        memcpy(rfbScreen->window.frameBuffer+(y+j)*rowstride+(x+i)*bpp,colour,bpp);
       d<<=1;
     }
     /* if((i&7)!=0) data++; */
@@ -42,8 +43,7 @@ void rfbDrawString(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
 { while(*string)
   { x+=rfbDrawChar(rfbScreen,font,x,y,*string,colour);
     string++;
-  }
-}
+} }
 
 /* TODO: these two functions need to be more efficient */
 /* if col==bcol, assume transparent background */
@@ -54,8 +54,8 @@ int rfbDrawCharWithClip(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
 { int i,j,width,height;
   unsigned char* data=font->data+font->metaData[c*5];
   unsigned char d;
-  int rowstride=rfbScreen->paddedWidthInBytes;
-  int bpp=rfbScreen->serverFormat.bitsPerPixel/8,extra_bytes=0;
+  int rowstride=rfbScreen->window.paddedWidthInBytes;
+  int bpp=rfbScreen->window.serverFormat.bitsPerPixel/8,extra_bytes=0;
   char* colour=(char*)&col;
   char* bcolour=(char*)&bcol;
 
@@ -103,11 +103,11 @@ int rfbDrawCharWithClip(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
       }
       /* if(x+i>=x1 && x+i<x2 && y+j>=y1 && y+j<y2) */
       { if ( d&0x80 )
-        { memcpy( rfbScreen->frameBuffer+(y+j)*rowstride+(x+i)*bpp
+        { memcpy( rfbScreen->window.frameBuffer+(y+j)*rowstride+(x+i)*bpp
                 , colour,bpp);
         }
         else if(bcol!=col)
-        { memcpy(rfbScreen->frameBuffer+(y+j)*rowstride+(x+i)*bpp,
+        { memcpy(rfbScreen->window.frameBuffer+(y+j)*rowstride+(x+i)*bpp,
                  bcolour,bpp);
         }
       }
@@ -165,8 +165,8 @@ void rfbWholeFontBBox(rfbFontDataPtr font,
   for(i=0; i<256; i++)
   { if ( m[i*5+1]-m[i*5+3]>(*x2))  (*x2)=m[i*5+1]-m[i*5+3];
     if (-m[i*5+2]+m[i*5+4]<(*y1))  (*y1)=-m[i*5+2]+m[i*5+4];
-    if ( m[i*5+3]<(*x1))          (*x1)=m[i*5+3];
-    if (-m[i*5+4]>(*y2))          (*y2)=-m[i*5+4];
+    if ( m[i*5+3]         <(*x1))          (*x1)=m[i*5+3];
+    if (-m[i*5+4]         >(*y2))          (*y2)=-m[i*5+4];
   }
 
   (*x2)++;
@@ -206,5 +206,4 @@ void rfbFreeFont( rfbFontDataPtr f )
   { FREE(f->data);
     FREE(f->metaData);
     FREE(f);
-  }
-}
+} }

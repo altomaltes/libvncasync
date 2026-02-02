@@ -103,7 +103,7 @@ static rfbBool HandleTightBPP( rfbClient* client, int rx, int ry, int rw, int rh
   int bufferSize, rowSize, numRows, portionLen, rowsProcessed, extraBytes;
   rfbBool readUncompressed = FALSE;
 
-  if ( !client->frameBuffer )
+  if ( !client->window.frameBuffer )
   { return FALSE;
   }
 
@@ -341,7 +341,7 @@ InitFilterCopyBPP (rfbClient* client, int rw, int rh)
 
 static void FilterCopyBPP (rfbClient* client, int srcx, int srcy, int numRows)
 { CARDBPP *dst =
-    (CARDBPP *)&client->frameBuffer[(srcy * client->width + srcx) * BPP / 8];
+    (CARDBPP *)&client->window.frameBuffer[(srcy * client->width + srcx) * BPP / 8];
   int y;
 
 #if BPP == 32
@@ -384,7 +384,7 @@ InitFilterGradientBPP (rfbClient* client, int rw, int rh)
 static void
 FilterGradient24 (rfbClient* client, int srcx, int srcy, int numRows)
 { CARDBPP *dst =
-    (CARDBPP *)&client->frameBuffer[(srcy * client->width + srcx) * BPP / 8];
+    (CARDBPP *)&client->window.frameBuffer[(srcy * client->width + srcx) * BPP / 8];
   int x, y, c;
   uint8_t thisRow[2048*3];
   uint8_t pix[3];
@@ -425,7 +425,7 @@ FilterGradient24 (rfbClient* client, int srcx, int srcy, int numRows)
 
 static void FilterGradientBPP (rfbClient* client, int srcx, int srcy, int numRows)
 { CARDBPP *dst =
-    (CARDBPP *)&client->frameBuffer[(srcy * client->width + srcx) * BPP / 8];
+    (CARDBPP *)&client->window.frameBuffer[(srcy * client->width + srcx) * BPP / 8];
 
   int x, y, c;
   CARDBPP *src = (CARDBPP *)client->buffer;
@@ -519,7 +519,7 @@ InitFilterPaletteBPP (rfbClient* client, int rw, int rh)
 
 static void FilterPaletteBPP (rfbClient* client, int srcx, int srcy, int numRows)
 { int x, y, b, w;
-  CARDBPP *dst = (CARDBPP *)&client->frameBuffer[(srcy * client->width + srcx) * BPP / 8];
+  CARDBPP *dst = (CARDBPP *)&client->window.frameBuffer[(srcy * client->width + srcx) * BPP / 8];
 
   uint8_t *src = (uint8_t *)client->buffer;
   CARDBPP *palette = (CARDBPP *)client->tightPalette;
@@ -597,7 +597,7 @@ DecompressJpegRectBPP(rfbClient* client, int x, int y, int w, int h)
   if (client->format.bigEndian) { flags ^= TJ_BGR; }
   pixelSize = BPP / 8;
   pitch = client->width * pixelSize;
-  dst = &client->frameBuffer[y * pitch + x * pixelSize];
+  dst = &client->window.frameBuffer[y * pitch + x * pixelSize];
 #endif
 
   if (tjDecompress( client->tjhnd
@@ -615,7 +615,7 @@ DecompressJpegRectBPP(rfbClient* client, int x, int y, int w, int h)
 #if BPP == 16
   pixelSize = BPP / 8;
   pitch = client->width * pixelSize;
-  dst = &client->frameBuffer[y * pitch + x * pixelSize];
+  dst = &client->window.frameBuffer[y * pitch + x * pixelSize];
   { CARDBPP *dst16=(CARDBPP *)dst, *dst2;
     char *src = client->buffer;
     int i, j;

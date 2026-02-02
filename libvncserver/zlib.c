@@ -88,13 +88,14 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClient * cl
   int previousOut;
   int i;
 
-  char *fbptr = (cl->scaledScreen->frameBuffer + (cl->scaledScreen->paddedWidthInBytes * y)
-                 + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+  char *fbptr= (cl->scaledScreen->window.frameBuffer
+             + (cl->scaledScreen->window.paddedWidthInBytes * y)
+             + (x * (cl->scaledScreen->window.bitsPerPixel / 8)));
 
   int maxRawSize;
   int maxCompSize;
 
-  maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
+  maxRawSize = (cl->scaledScreen->window.width * cl->scaledScreen->window.height
                 * (cl->format.bitsPerPixel / 8));
 
   if (zlibBeforeBufSize < maxRawSize)
@@ -110,11 +111,9 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClient * cl
   /* zlib compression is not useful for very small data sets.
      So, we just send these raw without any compression.
   */
-  if (( w * h * (cl->scaledScreen->bitsPerPixel / 8)) <
-      VNC_ENCODE_ZLIB_MIN_COMP_SIZE )
-  {
-
-    int result;
+  if (( w * h * (cl->scaledScreen->window.bitsPerPixel / 8))
+     < VNC_ENCODE_ZLIB_MIN_COMP_SIZE )
+  { int result;
 
     /* The translation function (used also by the in raw encoding)
        requires 4/2/1 byte alignment in the output buffer (which is
@@ -125,8 +124,8 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClient * cl
     if (( cl->format.bitsPerPixel > 8 ) &&
         ( cl->ublen % ( cl->format.bitsPerPixel / 8 )) != 0 )
     { if (!rfbSendUpdateBuf(cl))
-      { return FALSE; }
-    }
+      { return FALSE;
+    } }
 
     result = rfbSendRectEncodingRaw(cl, x, y, w, h);
 
@@ -145,20 +144,22 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClient * cl
     if (zlibAfterBuf == NULL)
     { zlibAfterBuf = (char *)malloc(zlibAfterBufSize); }
     else
-    { zlibAfterBuf = (char *)realloc(zlibAfterBuf, zlibAfterBufSize); }
-  }
+    { zlibAfterBuf = (char *)realloc(zlibAfterBuf, zlibAfterBufSize);
+  } }
 
 
   /*
      Convert pixel data to client format.
   */
-  (*cl->translateFn)(cl->translateLookupTable, &cl->screen->serverFormat,
-                     &cl->format, fbptr, zlibBeforeBuf,
-                     cl->scaledScreen->paddedWidthInBytes, w, h);
+  (*cl->translateFn)(cl->translateLookupTable
+                    , &cl->screen->window.serverFormat
+                    , &cl->format
+                    , fbptr, zlibBeforeBuf
+                    , cl->scaledScreen->window.paddedWidthInBytes, w, h);
 
-  cl->compStream.next_in = ( Bytef * )zlibBeforeBuf;
-  cl->compStream.avail_in = w * h * (cl->format.bitsPerPixel / 8);
-  cl->compStream.next_out = ( Bytef * )zlibAfterBuf;
+  cl->compStream.next_in   = ( Bytef * )zlibBeforeBuf;
+  cl->compStream.avail_in  = w * h * (cl->format.bitsPerPixel / 8);
+  cl->compStream.next_out  = ( Bytef * )zlibAfterBuf;
   cl->compStream.avail_out = maxCompSize;
   cl->compStream.data_type = Z_BINARY;
 
@@ -210,8 +211,8 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClient * cl
   if (cl->ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbZlibHeader
       > UPDATE_BUF_SIZE)
   { if (!rfbSendUpdateBuf(cl))
-    { return FALSE; }
-  }
+    { return FALSE;
+  } }
 
   rect.r.x = Swap16IfLE( x );
   rect.r.y = Swap16IfLE( y );
@@ -244,26 +245,21 @@ static rfbBool rfbSendOneRectEncodingZlib( rfbClient * cl
 
     if (cl->ublen == UPDATE_BUF_SIZE)
     { if (!rfbSendUpdateBuf(cl))
-      { return FALSE; }
-    }
-  }
+      { return FALSE;
+  } } }
 
   return TRUE;
-
 }
 
 
-/*
-   rfbSendRectEncodingZlib - send a given rectangle using one or more
-                             Zlib encoding rectangles.
-*/
+/**
+ * rfbSendRectEncodingZlib -
+ *  send a given rectangle using one or more Zlib encoding rectangles.
+ */
 
-rfbBool
-rfbSendRectEncodingZlib(rfbClient * cl,
-                        int x,
-                        int y,
-                        int w,
-                        int h)
+rfbBool rfbSendRectEncodingZlib( rfbClient * cl
+                               , int x, int y
+                               , int w, int h )
 { int  maxLines;
   int  linesRemaining;
   rfbRectangle partialRect;
@@ -281,26 +277,25 @@ rfbSendRectEncodingZlib(rfbClient * cl,
 
   /* Loop until all work is done. */
   while ( linesRemaining > 0 )
-  {
-
-    int linesToComp;
+  { int linesToComp;
 
     if ( maxLines < linesRemaining )
-    { linesToComp = maxLines; }
+    { linesToComp = maxLines;
+    }
+
     else
-    { linesToComp = linesRemaining; }
+    { linesToComp = linesRemaining;
+    }
 
     partialRect.h = linesToComp;
 
     /* Encode (compress) and send the next rectangle. */
-    if ( ! rfbSendOneRectEncodingZlib( cl,
-                                       partialRect.x,
-                                       partialRect.y,
-                                       partialRect.w,
-                                       partialRect.h ))
-    {
-
-      return FALSE;
+    if ( ! rfbSendOneRectEncodingZlib( cl
+                                     , partialRect.x
+                                     , partialRect.y
+                                     , partialRect.w
+                                     , partialRect.h ))
+    { return FALSE;
     }
 
     /* Technically, flushing the buffer here is not extremely
@@ -317,19 +312,14 @@ rfbSendRectEncodingZlib(rfbClient * cl,
     if (( cl->ublen > 0 ) &&
         ( linesToComp == maxLines ))
     { if (!rfbSendUpdateBuf(cl))
-      {
-
-        return FALSE;
-      }
-    }
+      { return FALSE;
+    } }
 
     /* Update remaining and incremental rectangle location. */
     linesRemaining -= linesToComp;
     partialRect.y += linesToComp;
-
   }
 
   return TRUE;
-
 }
 

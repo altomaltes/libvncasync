@@ -780,8 +780,7 @@ rfbBool sraRgnIteratorNext(sraRectangleIterator* i,sraRect* r)
     else
     { i->sPtrs[i->ptrPos]   =   i->sPtrs[i->ptrPos-2]->subspan->front._next;
       i->sPtrs[i->ptrPos+1] = &(i->sPtrs[i->ptrPos-2]->subspan->back);
-    }
-  }
+  } }
 
   if((i->ptrPos%4)!=2)
   { rfbErr("sraRgnIteratorNext: offset is wrong (%d%%4!=2)\n",i->ptrPos);
@@ -800,17 +799,17 @@ void sraRgnReleaseIterator(sraRectangleIterator* i)
 { if ( i )
   { FREE( i->sPtrs );
     FREE( i        );
-  }
-}
+} }
 
 void
 sraRgnPrint(const sraRegion *rgn)
 { sraSpanListPrint((sraSpanList*)rgn);
 }
 
-rfbBool
-sraClipRect(int *x, int *y, int *w, int *h,
-            int cx, int cy, int cw, int ch)
+rfbBool sraClipRect( int *x, int *y
+                   , int *w, int *h
+                   , int cx, int cy
+                   , int cw, int ch )
 { if (*x < cx)
   { *w -= (cx-*x);
     *x = cx;
@@ -828,25 +827,19 @@ sraClipRect(int *x, int *y, int *w, int *h,
   return (*w>0) && (*h>0);
 }
 
-rfbBool
-sraClipRect2(int *x, int *y, int *x2, int *y2,
-             int cx, int cy, int cx2, int cy2)
-{ if (*x < cx)
-    *x = cx;
-  if (*y < cy)
-    *y = cy;
-  if (*x >= cx2)
-    *x = cx2-1;
-  if (*y >= cy2)
-    *y = cy2-1;
-  if (*x2 <= cx)
-    *x2 = cx+1;
-  if (*y2 <= cy)
-    *y2 = cy+1;
-  if (*x2 > cx2)
-    *x2 = cx2;
-  if (*y2 > cy2)
-    *y2 = cy2;
+rfbBool sraClipRect2( int *x, int *y
+                    , int *x2, int *y2
+                    , int cx, int cy
+                    , int cx2, int cy2 )
+{ if ( *x <   cx) *x = cx;
+  if ( *y <   cy) *y = cy;
+  if ( *x >= cx2) *x = cx2-1;
+  if ( *y >= cy2) *y = cy2-1;
+  if (*x2 <=  cx) *x2 = cx+1;
+  if (*y2 <=  cy) *y2 = cy+1;
+  if (*x2 >  cx2) *x2 = cx2;
+  if (*y2 >  cy2) *y2 = cy2;
+
   return (*x2>*x) && (*y2>*y);
 }
 

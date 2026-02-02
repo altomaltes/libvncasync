@@ -138,7 +138,7 @@ rfbBool rfbUpdateClients( struct _rfbScreenInfo * ); // JACS
 
  And you allocate the frame buffer like this:
  @code
-     screen->frameBuffer = (char*)malloc(screenwidth*screenheight*bpp);
+     screen->window.frameBuffer = (char*)malloc(screenwidth*screenheight*bpp);
  @endcode
  After that, you initialize the server, like
  @code

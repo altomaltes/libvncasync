@@ -411,9 +411,7 @@ static InlineX void FilterWaveletSquare(int* pBuf, int width, int height, int le
 				pH += s;
 			}
 			pH += (s-1)*width;
-		}
-	}
-}
+}	} }
 #  else
 /*
  Type B:Non liner quantization filter.

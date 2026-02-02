@@ -133,22 +133,24 @@ typedef struct
 */
 
 typedef struct
-{
+{ uint8_t bitsPerPixel; /* 8,16,32 only */
+  uint8_t depth;        /* 8 to 32 */
 
-  uint8_t bitsPerPixel;   /* 8,16,32 only */
 
-  uint8_t depth;    /* 8 to 32 */
 
-  uint8_t bigEndian;    /* True if multi-byte pixels are interpreted
-           as big endian, or if single-bit-per-pixel
-           has most significant bit of the byte
-           corresponding to first (leftmost) pixel. Of
-           course this is meaningless for 8 bits/pix */
+/**
+ *   True if multi-byte pixels are interpreted as big endian,
+ * or if single-bit-per-pixel has most significant bit of the byte
+ * corresponding to first (leftmost) pixel. Of course this is meaningless
+ * for 8 bits/pix
+ */
+  uint8_t bigEndian;
 
-  uint8_t trueColour;   /* If false then we need a "colour map" to
-           convert pixels to RGB.  If true, xxxMax and
-           xxxShift specify bits used for red, green
-           and blue */
+/**
+ *   If false then we need a "colour map" to convert pixels to RGB.
+ * If true, xxxMax and xxxShift specify bits used for red, green and blue
+ */
+  uint8_t trueColour;
 
   /* the following fields are only meaningful if trueColour is true */
 
@@ -929,14 +931,14 @@ typedef struct
 #define rfbHextileZlibMono    (1 << 7)
 
 
-/*-----------------------------------------------------------------------------
-   SetColourMapEntries - these messages are only sent if the pixel
-   format uses a "colour map" (i.e. trueColour false) and the client has not
-   fixed the entire colour map using FixColourMapEntries.  In addition they
-   will only start being sent after the client has sent its first
-   FramebufferUpdateRequest.  So if the client always tells the server to use
-   trueColour then it never needs to process this type of message.
-*/
+/**
+ *  SetColourMapEntries - these messages are only sent if the pixel
+ *  format uses a "colour map" (i.e. trueColour false) and the client has not
+ *  fixed the entire colour map using FixColourMapEntries.  In addition they
+ *  will only start being sent after the client has sent its first
+ *  FramebufferUpdateRequest.  So if the client always tells the server to use
+ *  trueColour then it never needs to process this type of message.
+ */
 
 typedef struct
 { uint8_t type;     /* always rfbSetColourMapEntries */
@@ -1609,23 +1611,42 @@ typedef struct _rfbExtensionData
  * rfbProcessEvents for each of these.
  */
 
-typedef struct _rfbScreenInfo
-{ struct _rfbScreenInfo *scaledScreenNext;  /** this structure has children that are scaled versions of this screen */
-  int scaledScreenRefCount;
+typedef struct
+{ struct _rfbScreenInfo * owner;
 
   int width;
   int paddedWidthInBytes;
   int height;
-  int depth;
+
+/**
+ * the frameBuffer has to be supplied by the serving process.
+ * The buffer will not be freed by
+ */
+  char* frameBuffer;
+
+
   int bitsPerPixel;
+
+/* additions by libvncserver */
+
+  rfbPixelFormat serverFormat;
+
+} ScreenAtom;
+
+typedef struct _rfbScreenInfo
+{ struct _rfbScreenInfo *scaledScreenNext;  /** this structure has children that are scaled versions of this screen */
+  int scaledScreenRefCount;
+
+  ScreenAtom window;
+
+  int depth;
 
   rfbPixel blackPixel;
   rfbPixel whitePixel;
 
-    /**  JACS, async stuff
-      */
+/**  JACS, async stuff
+  */
   VncPushFun streamPusher;
-
 
 /**
   *  some screen specific data can be put into a struct where screenData points to.
@@ -1634,9 +1655,8 @@ typedef struct _rfbScreenInfo
   */
   void * screenData;
 
-    /* additions by libvncserver */
+/* additions by libvncserver */
 
-  rfbPixelFormat serverFormat;
   rfbColourMap   colourMap; /**< set this if rfbServerFormat.trueColour==FALSE */
   const char*    desktopName;
   char           thisHost[255];
@@ -1649,7 +1669,6 @@ typedef struct _rfbScreenInfo
   void* authPasswdData;
 
   int authPasswdFirstViewOnly; /** If rfbAuthPasswdData is given a list, this is the first view only password. */
-
   int maxRectsPerUpdate;       /** send only this many rectangles in one update */
                                /** this is the amount of milliseconds to wait at least before sending an update. */
   int deferUpdateTime;
@@ -1667,12 +1686,6 @@ typedef struct _rfbScreenInfo
   char* underCursorBuffer;
   rfbBool dontConvertRichCursorToXCursor;
   struct rfbCursor* cursor;
-
-/**
- * the frameBuffer has to be supplied by the serving process.
- * The buffer will not be freed by
- */
-  char* frameBuffer;
 
   rfbKbdAddEventProcPtr          kbdAddEvent;
   rfbKbdReleaseAllKeysProcPtr    kbdReleaseAllKeys;
@@ -1736,8 +1749,7 @@ typedef struct _rfbScreenInfo
  */
   float fdQuota;
 
-}   rfbScreenInfo
-, * rfbScreenInfoPtr;
+} rfbScreenInfo;
 
 
 /**

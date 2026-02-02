@@ -66,34 +66,37 @@ static InlineX int pad4(int value)
   return value + 4 - remainder;
 }
 
-int ScaleX(rfbScreenInfo * from, rfbScreenInfo * to, int x)
-{ if ((from== to)
-  ||  (from== NULL)
-  ||  (to  == NULL))
+int ScaleX(ScreenAtom * from, ScreenAtom * to, int x)
+{ if (( from == to  )
+  ||  ( from == NULL)
+  ||  ( to   == NULL))
   { return x;
   }
 
   return ((int)(((double) x / (double)from->width) * (double)to->width ));
 }
 
-int ScaleY(rfbScreenInfo * from, rfbScreenInfo * to, int y)
+int ScaleY(ScreenAtom * from, ScreenAtom * to, int y)
 { if ((from==to) || (from==NULL) || (to==NULL)) return y;
   return ((int)(((double) y / (double)from->height) * (double)to->height ));
 }
 
-/** So, all of the encodings point to the ->screen->frameBuffer,
+/** So, all of the encodings point to the ->screen->window.frameBuffer,
  * We need to change this!
  */
-void rfbScaledCorrection(rfbScreenInfo * from, rfbScreenInfo * to, int *x, int *y, int *w, int *h, const char *function)
+void rfbScaledCorrection( ScreenAtom * from
+                        , ScreenAtom * to
+                        , int *x, int *y
+                        , int *w, int *h
+                        , const char *function)
 { double x1,y1,w1,h1, x2, y2, w2, h2;
   double scaleW = ((double) to->width) / ((double) from->width);
   double scaleH = ((double) to->height) / ((double) from->height);
 
-
-    /*
-     * rfbLog("rfbScaledCorrection(%p -> %p, %dx%d->%dx%d (%dXx%dY-%dWx%dH)\n",
-     * from, to, from->width, from->height, to->width, to->height, *x, *y, *w, *h);
-     */
+/**
+ * rfbLog("rfbScaledCorrection(%p -> %p, %dx%d->%dx%d (%dXx%dY-%dWx%dH)\n",
+ * from, to, from->width, from->height, to->width, to->height, *x, *y, *w, *h);
+ */
 
     /* If it's the original framebuffer... */
   if (from==to) return;
@@ -132,7 +135,10 @@ void rfbScaledCorrection(rfbScreenInfo * from, rfbScreenInfo * to, int *x, int *
   if (*y+*h > to->height) *h=to->height - *y;
 }
 
-void rfbScaledScreenUpdateRect(rfbScreenInfo * screen, rfbScreenInfo * ptr, int x0, int y0, int w0, int h0)
+void rfbScaledScreenUpdateRect( ScreenAtom * screen
+                              , ScreenAtom * ptr
+                              , int x0, int y0
+                              , int w0, int h0 )
 { int x,y,w,v,z;
   int x1, y1, w1, h1;
   int bitsPerPixel, bytesPerPixel, bytesPerLine, areaX, areaY, area2;
@@ -146,7 +152,9 @@ void rfbScaledScreenUpdateRect(rfbScreenInfo * screen, rfbScreenInfo * ptr, int 
   w1 = w0;
   h1 = h0;
 
-  rfbScaledCorrection(screen, ptr, &x1, &y1, &w1, &h1, "rfbScaledScreenUpdateRect");
+  rfbScaledCorrection( screen
+                     , ptr
+                     , &x1, &y1, &w1, &h1, "rfbScaledScreenUpdateRect");
   x0 = ScaleX(ptr, screen, x1);
   y0 = ScaleY(ptr, screen, y1);
   w0 = ScaleX(ptr, screen, w1);
@@ -155,13 +163,11 @@ void rfbScaledScreenUpdateRect(rfbScreenInfo * screen, rfbScreenInfo * ptr, int 
   bitsPerPixel = screen->bitsPerPixel;
   bytesPerPixel = bitsPerPixel / 8;
   bytesPerLine = w1 * bytesPerPixel;
-  srcptr = (unsigned char *)(screen->frameBuffer +
-     (y0 * screen->paddedWidthInBytes + x0 * bytesPerPixel));
-  dstptr = (unsigned char *)(ptr->frameBuffer +
-     ( y1 * ptr->paddedWidthInBytes + x1 * bytesPerPixel));
+  srcptr = (unsigned char *)(screen->frameBuffer + (y0 * screen->paddedWidthInBytes + x0 * bytesPerPixel));
+  dstptr = (unsigned char *)(   ptr->frameBuffer + ( y1 * ptr->paddedWidthInBytes + x1 * bytesPerPixel));
     /* The area of the source framebuffer for each destination pixel */
-  areaX = ScaleX(ptr,screen,1);
-  areaY = ScaleY(ptr,screen,1);
+  areaX = ScaleX(ptr, screen,1);
+  areaY = ScaleY(ptr, screen,1);
   area2 = areaX*areaY;
 
 
@@ -175,16 +181,17 @@ void rfbScaledScreenUpdateRect(rfbScreenInfo * screen, rfbScreenInfo * ptr, int 
     /*
      * rfbLog("rfbScaledScreenUpdateRect(%dXx%dY-%dWx%dH  ->  %dXx%dY-%dWx%dH <%dx%d>) {%dWx%dH -> %dWx%dH} 0x%p\n",
      *    x0, y0, w0, h0, x1, y1, w1, h1, areaX, areaY,
-     *    screen->width, screen->height, ptr->width, ptr->height, ptr->frameBuffer);
+     *    screen->width, screen->height, ptr->width, ptr->height, ptr->window.frameBuffer);
      */
 
-  if (screen->serverFormat.trueColour)   /* Blend neighbouring pixels together */
+  if ( screen->serverFormat.trueColour )   /* Blend neighbouring pixels together */
   { unsigned char *srcptr2;
     rfbLong pixel_value, red, green, blue;
 
     unsigned int redShift  = screen->serverFormat.redShift;
     unsigned int greenShift= screen->serverFormat.greenShift;
     unsigned int blueShift = screen->serverFormat.blueShift;
+
     dword redMax   = screen->serverFormat.redMax;
     dword greenMax = screen->serverFormat.greenMax;
     dword blueMax  = screen->serverFormat.blueMax;
@@ -202,9 +209,9 @@ void rfbScaledScreenUpdateRect(rfbScreenInfo * screen, rfbScreenInfo * ptr, int 
 
 
              switch (bytesPerPixel)
-             { case 4: pixel_value = *((unsigned int *)srcptr2);   break;
+             { case 4: pixel_value = *((unsigned int   *)srcptr2);   break;
                case 2: pixel_value = *((unsigned short *)srcptr2); break;
-               case 1: pixel_value = *((unsigned char *)srcptr2);  break;
+               case 1: pixel_value = *((unsigned char  *)srcptr2);  break;
                default:
                /* fixme: endianness problem? */
                for (z = 0; z < bytesPerPixel; z++)
@@ -219,8 +226,7 @@ void rfbScaledScreenUpdateRect(rfbScreenInfo * screen, rfbScreenInfo * ptr, int 
             green += ((pixel_value >> greenShift) & greenMax);
             blue += ((pixel_value >> blueShift) & blueMax);
 
-           }
-         }
+         } }
          /* We now have a total for all of the colors, find the average! */
          red /= area2;
          green /= area2;
@@ -241,23 +247,23 @@ void rfbScaledScreenUpdateRect(rfbScreenInfo * screen, rfbScreenInfo * ptr, int 
           dstptr += bytesPerPixel;
        }
        srcptr += (screen->paddedWidthInBytes * areaY);
-       dstptr += (ptr->paddedWidthInBytes - bytesPerLine);
-     }
-   } else
-   { /* Not truecolour, so we can't blend. Just use the top-left pixel instead */
-     for (y = y1; y < (y1+h1); y++) {
-       for (x = x1; x < (x1+w1); x++)
+       dstptr += (ptr   ->paddedWidthInBytes - bytesPerLine);
+   }  }
+
+   else  /* Not truecolour, so we can't blend. Just use the top-left pixel instead */
+   { for (y = y1; y < (y1+h1); y++)
+     { for (x = x1; x < (x1+w1); x++)
          memcpy (&ptr->frameBuffer[(y *ptr->paddedWidthInBytes) + (x * bytesPerPixel)],
                  &screen->frameBuffer[(y * areaY * screen->paddedWidthInBytes) + (x *areaX * bytesPerPixel)], bytesPerPixel);
-     }
-  }
-}
+} } }
 
 /**
  *   ok, now the task is to update each and every scaled version of the framebuffer
  * and we only have to do this for this specific changed rectangle!
  */
-void rfbScaledScreenUpdate(rfbScreenInfo * screen, int x1, int y1, int x2, int y2)
+void rfbScaledScreenUpdate( rfbScreenInfo * screen
+                          , int x1, int y1
+                          , int x2, int y2 )
 { rfbScreenInfo * ptr;
   int count=0;
 
@@ -266,15 +272,17 @@ void rfbScaledScreenUpdate(rfbScreenInfo * screen, int x1, int y1, int x2, int y
       ; ptr
       ; ptr= ptr->scaledScreenNext )
   {  if (ptr->scaledScreenRefCount>0) /* Only update if it has active clients... */
-     {  rfbScaledScreenUpdateRect(screen, ptr, x1, y1, x2-x1, y2-y1);
+     {  rfbScaledScreenUpdateRect( &screen->window
+                                 , &ptr->window
+                                 , x1, y1, x2-x1, y2-y1);
         count++;
 }  }  }
 
-/* Create a new scaled version of the framebuffer
+/**
+ * Create a new scaled version of the framebuffer
  */
-
 rfbScreenInfo * rfbScaledScreenAllocate( rfbClient * cl
-                                        , int width, int height )
+                                       , int width, int height )
 { rfbScreenInfo * ptr;
   ptr = malloc(sizeof(rfbScreenInfo));
 
@@ -287,7 +295,7 @@ rfbScreenInfo * rfbScaledScreenAllocate( rfbClient * cl
  * Note: this is defensive coding, as the check should have already been
  * performed during initial, non-scaled screen setup.
  */
-    allocSize = pad4(width * (ptr->bitsPerPixel/8)); /* per protocol, width<2**16 and bpp<256 */
+    allocSize = pad4(width * (ptr->window.bitsPerPixel/8)); /* per protocol, width<2**16 and bpp<256 */
 
     if (height == 0 || allocSize >= SIZE_MAX / height)
     { FREE( ptr );
@@ -295,20 +303,21 @@ rfbScreenInfo * rfbScaledScreenAllocate( rfbClient * cl
     }
 
     /* Resume copy everything */
-    ptr->width = width;
-    ptr->height = height;
-    ptr->paddedWidthInBytes = (ptr->bitsPerPixel/8)*ptr->width;
-    ptr->paddedWidthInBytes = pad4(ptr->paddedWidthInBytes); /* Need to by multiples of 4 for Sparc systems */
+    ptr->window.width = width;
+    ptr->window.height = height;
+    ptr->window.paddedWidthInBytes = (ptr->window.bitsPerPixel/8)*ptr->window.width;
+    ptr->window.paddedWidthInBytes = pad4(ptr->window.paddedWidthInBytes); /* Need to by multiples of 4 for Sparc systems */
     ptr->scaledScreenRefCount = 0;         /* Reset the reference count to 0! */
 
-    //    ptr->sizeInBytes = ptr->paddedWidthInBytes * ptr->height;
-    ptr->serverFormat= cl->screen->serverFormat;
-    ptr->frameBuffer = calloc(ptr->paddedWidthInBytes , ptr->height);
+    //    ptr->sizeInBytes = ptr->window.paddedWidthInBytes * ptr->height;
+    ptr->window.serverFormat= cl->screen->window.serverFormat;
+    ptr->window.frameBuffer = calloc(ptr->window.paddedWidthInBytes , ptr->window.height);
 
-    if ( ptr->frameBuffer )
-    { rfbScaledScreenUpdateRect(cl->screen, ptr                          /* Reset to a known condition: scale the entire framebuffer */
+    if ( ptr->window.frameBuffer )
+    { rfbScaledScreenUpdateRect( &cl->screen->window, &ptr->window                          /* Reset to a known condition: scale the entire framebuffer */
                                , 0, 0
-                               , cl->screen->width, cl->screen->height);
+                               , cl->screen->window.width
+                               , cl->screen->window.height);
             /* Now, insert into the chain */
       ptr->scaledScreenNext = cl->screen->scaledScreenNext;
       cl->screen->scaledScreenNext = ptr;
@@ -328,14 +337,19 @@ rfbScreenInfo * rfbScalingFind(rfbClient * cl, int width, int height)
 { rfbScreenInfo * ptr;
     /* include the original in the search (ie: fine 1:1 scaled version of the frameBuffer) */
   for (ptr=cl->screen; ptr!=NULL; ptr=ptr->scaledScreenNext)
-  { if ((ptr->width==width) && (ptr->height==height))
+  { if ((ptr->window.width==width)
+     && (ptr->window.height==height))
             return ptr;
   }
   return NULL;
 }
 
-/* Future needs "scale to 320x240, as that's the client's screen size */
-void rfbScalingSetup(rfbClient * cl, int width, int height)
+/**
+ * Future needs "scale to 320x240, as that's the client's screen size
+ */
+void rfbScalingSetup( rfbClient * cl
+                    , int width
+                    , int height)
 { rfbScreenInfo * ptr;
 
   ptr = rfbScalingFind(cl,width,height);
@@ -346,10 +360,13 @@ void rfbScalingSetup(rfbClient * cl, int width, int height)
     {
         /* Update it! */
         if (ptr->scaledScreenRefCount<1)
-            rfbScaledScreenUpdateRect(cl->screen, ptr, 0, 0, cl->screen->width, cl->screen->height);
+            rfbScaledScreenUpdateRect( &cl->screen->window, &ptr->window
+                                     , 0, 0
+                                     , cl->screen->window.width
+                                     , cl->screen->window.height);
         /*
          * rfbLog("Taking one from %dx%d-%d and adding it to %dx%d-%d\n",
-         *    cl->scaledScreen->width, cl->scaledScreen->height,
+         *    cl->scaledScreen->window.width, cl->scaledScreen->window.height,
          *    cl->scaledScreen->scaledScreenRefCount,
          *    ptr->width, ptr->height, ptr->scaledScreenRefCount);
          */
@@ -378,13 +395,13 @@ int rfbSendNewScaleSize(rfbClient * cl)
         rfbPalmVNCReSizeFrameBufferMsg pmsg;
         pmsg.type = rfbPalmVNCReSizeFrameBuffer;
         pmsg.pad1 = 0;
-        pmsg.desktop_w = Swap16IfLE(cl->screen->width);
-        pmsg.desktop_h = Swap16IfLE(cl->screen->height);
-        pmsg.buffer_w  = Swap16IfLE(cl->scaledScreen->width);
-        pmsg.buffer_h  = Swap16IfLE(cl->scaledScreen->height);
+        pmsg.desktop_w = Swap16IfLE( cl->screen->window.width);
+        pmsg.desktop_h = Swap16IfLE( cl->screen->window.height);
+        pmsg.buffer_w  = Swap16IfLE( cl->scaledScreen->window.width);
+        pmsg.buffer_h  = Swap16IfLE( cl->scaledScreen->window.height);
         pmsg.pad2 = 0;
 
-        rfbLog("Sending a response to a PalmVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->width, cl->scaledScreen->height);
+        rfbLog("Sending a response to a PalmVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->window.width, cl->scaledScreen->window.height);
         if (rfbPushClientStream( cl,  (char *)&pmsg, sz_rfbPalmVNCReSizeFrameBufferMsg) < 0) {
             rfbLogPerror("rfbNewClient: write");
             rfbCloseClient(cl);
@@ -394,10 +411,10 @@ int rfbSendNewScaleSize(rfbClient * cl)
     { rfbResizeFrameBufferMsg rmsg;
         rmsg.type= rfbResizeFrameBuffer;
         rmsg.pad1=0;
-        rmsg.framebufferWidth  = Swap16IfLE(cl->scaledScreen->width);
-        rmsg.framebufferHeigth = Swap16IfLE(cl->scaledScreen->height);
+        rmsg.framebufferWidth  = Swap16IfLE(cl->scaledScreen->window.width);
+        rmsg.framebufferHeigth = Swap16IfLE(cl->scaledScreen->window.height);
 
-      rfbLog("Sending a response to a UltraVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->width, cl->scaledScreen->height);
+      rfbLog("Sending a response to a UltraVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->window.width, cl->scaledScreen->window.height);
       if (rfbPushClientStream( cl,  (char *)&rmsg, sz_rfbResizeFrameBufferMsg) < 0) {
             rfbLogPerror("rfbNewClient: write");
             rfbCloseClient(cl);

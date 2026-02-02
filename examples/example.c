@@ -85,7 +85,7 @@ static void newframebuffer( rfbScreenInfo * screen
 
   maxx = width;
   maxy = height;
-  oldfb = (unsigned char*)screen->frameBuffer;
+  oldfb = (unsigned char*)screen->window.frameBuffer;
   newfb = (unsigned char*)malloc(maxx * maxy * bpp);
   initBuffer(newfb);
   rfbNewFramebuffer(screen, (char*)newfb, maxx, maxy, 8, 3, bpp);
@@ -146,7 +146,7 @@ static void doptr(int buttonMask,int x,int y,rfbClient * cl)
     { int i,j,x1,x2,y1,y2;
 
       if(cd->oldButton==buttonMask)   /* draw a line */
-      { drawline((unsigned char*)cl->screen->frameBuffer,cl->screen->paddedWidthInBytes,bpp,
+      { drawline((unsigned char*)cl->screen->window.frameBuffer,cl->screen->window.paddedWidthInBytes,bpp,
                  x,y,cd->oldx,cd->oldy);
         x1=x;
         y1=y;
@@ -156,8 +156,9 @@ static void doptr(int buttonMask,int x,int y,rfbClient * cl)
         else cd->oldy++;
         rfbMarkRectAsModified(cl->screen,x,y,cd->oldx,cd->oldy);
       }
+
       else     /* draw a point (diameter depends on button) */
-      { int w=cl->screen->paddedWidthInBytes;
+      { int w=cl->screen->window.paddedWidthInBytes;
         x1=x-buttonMask;
         if(x1<0) x1=0;
         x2=x+buttonMask;
@@ -169,7 +170,7 @@ static void doptr(int buttonMask,int x,int y,rfbClient * cl)
 
         for(i=x1*bpp; i<x2*bpp; i++)
           for(j=y1; j<y2; j++)
-            cl->screen->frameBuffer[j*w+i]=(char)0xff;
+            cl->screen->window.frameBuffer[j*w+i]=(char)0xff;
         rfbMarkRectAsModified(cl->screen,x1,y1,x2,y2);
       }
 
@@ -233,7 +234,7 @@ static void dokey(rfbBool down,rfbKeySym key,rfbClient * cl)
       /* close down server, but wait for all clients to disconnect */
       rfbShutdownServer(cl->screen,FALSE);
     else if(key==XK_Page_Up)
-    { initBuffer((unsigned char*)cl->screen->frameBuffer);
+    { initBuffer((unsigned char*)cl->screen->window.frameBuffer);
       rfbMarkRectAsModified(cl->screen,0,0,maxx,maxy);
     }
 
@@ -342,7 +343,7 @@ int main( int argc,char** argv )
   if(!rfbScreen)
     return 0;
   rfbScreen->desktopName = "LibVNCServer Example";
-  rfbScreen->frameBuffer = (char*)malloc(maxx*maxy*bpp);
+  rfbScreen->window.frameBuffer = (char*)malloc(maxx*maxy*bpp);
   rfbScreen->alwaysShared = TRUE;
   rfbScreen->ptrAddEvent = doptr;
   rfbScreen->kbdAddEvent = dokey;
@@ -350,7 +351,7 @@ int main( int argc,char** argv )
 //  rfbScreen->httpDir = "../webclients";
   rfbScreen->httpEnableProxyConnect = TRUE;
 
-  initBuffer((unsigned char*)rfbScreen->frameBuffer);
+  initBuffer((unsigned char*)rfbScreen->window.frameBuffer);
   rfbDrawString(rfbScreen,&radonFont,20,100,"Hello, World!",0xffffff);
 
   /* This call creates a mask and then a cursor: */
@@ -389,7 +390,7 @@ int main( int argc,char** argv )
   while(1) sleep(5); /* render(); */
 #endif /* BACKGROUND_LOOP */
 
-  FREE( rfbScreen->frameBuffer );
+  FREE( rfbScreen->window.frameBuffer );
   rfbScreenCleanup(rfbScreen);
 
   return(0);

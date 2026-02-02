@@ -98,7 +98,7 @@ static rfbBool HandleTRLE( rfbClient *client
         for (j = y * client->width; j < (y + h) * client->width;
              j += client->width)
           for (i = x; i < x + w; i++, buffer += REALBPP / 8)
-            ((CARDBPP *)client->frameBuffer)[j + i] = UncompressCPixel(buffer);
+            ((CARDBPP *)client->window.frameBuffer)[j + i] = UncompressCPixel(buffer);
 #else
         client->GotBitmap(client, buffer, x, y, w, h);
 #endif
@@ -146,7 +146,7 @@ static rfbBool HandleTRLE( rfbClient *client
             for (j = y * client->width; j < (y + h) * client->width;
                  j += client->width) {
               for (i = x, shift = 8 - bpp; i < x + w; i++) {
-                ((CARDBPP *)client->frameBuffer)[j + i] =
+                ((CARDBPP *)client->window.frameBuffer)[j + i] =
                     palette[((*buffer) >> shift) & mask];
                 shift -= bpp;
                 if (shift < 0) {
@@ -183,7 +183,7 @@ static rfbBool HandleTRLE( rfbClient *client
           length += *buffer;
           buffer++;
           while (j < h && length > 0) {
-            ((CARDBPP *)client->frameBuffer)[(y + j) * client->width + x + i] =
+            ((CARDBPP *)client->window.frameBuffer)[(y + j) * client->width + x + i] =
                 color;
             length--;
             i++;
@@ -227,7 +227,7 @@ static rfbBool HandleTRLE( rfbClient *client
           }
           buffer++;
           while (j < h && length > 0) {
-            ((CARDBPP *)client->frameBuffer)[(y + j) * client->width + x + i] =
+            ((CARDBPP *)client->window.frameBuffer)[(y + j) * client->width + x + i] =
                 color;
             length--;
             i++;

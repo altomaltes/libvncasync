@@ -71,24 +71,23 @@ rfbBool rfbSendRectEncodingCoRRE( rfbClient * cl
 
 
 
-/*
-   rfbSendSmallRectEncodingCoRRE - send a small (guaranteed < 256x256)
-   rectangle using CoRRE encoding.
-*/
-
+/**
+ *  rfbSendSmallRectEncodingCoRRE - send a small (guaranteed < 256x256)
+ *  rectangle using CoRRE encoding.
+ */
 static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
-    , int x, int y
-    , int w, int h )
+                                            , int x, int y
+                                            , int w, int h )
 { rfbFramebufferUpdateRectHeader rect;
   rfbRREHeader hdr;
   int nSubrects;
   int i;
 
-  char *fbptr= (cl->scaledScreen->frameBuffer
-             + (cl->scaledScreen->paddedWidthInBytes * y)
-             + (x * (cl->scaledScreen->bitsPerPixel / 8)));
+  char *fbptr= (cl->scaledScreen->window.frameBuffer
+             + (cl->scaledScreen->window.paddedWidthInBytes * y)
+             + (x * (cl->scaledScreen->window.bitsPerPixel / 8)));
 
-  int maxRawSize = (cl->scaledScreen->width * cl->scaledScreen->height
+  int maxRawSize = (cl->scaledScreen->window.width * cl->scaledScreen->window.height
                  * (cl->format.bitsPerPixel / 8));
 
   if (cl->beforeEncBufSize < maxRawSize)
@@ -107,9 +106,10 @@ static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
     { cl->afterEncBuf = (char *)realloc(cl->afterEncBuf, cl->afterEncBufSize); }
   }
 
-  (*cl->translateFn)(cl->translateLookupTable,&(cl->screen->serverFormat),
-                     &cl->format, fbptr, cl->beforeEncBuf,
-                     cl->scaledScreen->paddedWidthInBytes, w, h);
+  (*cl->translateFn)( cl->translateLookupTable
+                    , &(cl->screen->window.serverFormat)
+                    , &cl->format, fbptr, cl->beforeEncBuf
+                    , cl->scaledScreen->window.paddedWidthInBytes, w, h );
 
   switch (cl->format.bitsPerPixel)
   { case  8: nSubrects = subrectEncode8(cl, (uint8_t *)cl->beforeEncBuf, w, h);      break;

@@ -92,7 +92,7 @@ static char* ReadPassword(rfbClient* client)
 static rfbBool MallocFrameBuffer(rfbClient* client)
 { uint64_t allocSize;
 
-  FREE(client->frameBuffer);
+  FREE(client->window.frameBuffer);
 
   /* SECURITY: promote 'width' into uint64_t so that the multiplication does not overflow
      'width' and 'height' are 16-bit integers per RFB protocol design
@@ -105,12 +105,12 @@ static rfbBool MallocFrameBuffer(rfbClient* client)
     return FALSE;
   }
 
-  client->frameBuffer=calloc( (size_t)allocSize, 1 );
+  client->window.frameBuffer=calloc( (size_t)allocSize, 1 );
 
-  if (client->frameBuffer == NULL)
+  if (client->window.frameBuffer == NULL)
     rfbClientErr("CRITICAL: frameBuffer allocation failed, requested size too large or not enough memory?\n");
 
-  return client->frameBuffer?TRUE:FALSE;
+  return client->window.frameBuffer?TRUE:FALSE;
 }
 
 /* messages */
@@ -122,7 +122,7 @@ static rfbBool CheckRect(rfbClient* client, int x, int y, int w, int h)
 static void FillRectangle(rfbClient* client, int x, int y, int w, int h, uint32_t colour)
 { int i,j;
 
-  if (client->frameBuffer == NULL)
+  if (client->window.frameBuffer == NULL)
   { return;
   }
 
@@ -134,7 +134,7 @@ static void FillRectangle(rfbClient* client, int x, int y, int w, int h, uint32_
 #define FILL_RECT(BPP) \
     for(j=y*client->width;j<(y+h)*client->width;j+=client->width) \
       for(i=x;i<x+w;i++) \
-  ((uint##BPP##_t*)client->frameBuffer)[j+i]=colour;
+  ((uint##BPP##_t*)client->window.frameBuffer)[j+i]=colour;
 
   switch(client->format.bitsPerPixel)
   { case  8:
@@ -154,7 +154,7 @@ static void FillRectangle(rfbClient* client, int x, int y, int w, int h, uint32_
 static void CopyRectangle(rfbClient* client, const uint8_t* buffer, int x, int y, int w, int h)
 { int j;
 
-  if (client->frameBuffer == NULL)
+  if (client->window.frameBuffer == NULL)
   { return;
   }
 
@@ -167,7 +167,7 @@ static void CopyRectangle(rfbClient* client, const uint8_t* buffer, int x, int y
   { \
     int rs = w * BPP / 8, rs2 = client->width * BPP / 8; \
     for (j = ((x * (BPP / 8)) + (y * rs2)); j < (y + h) * rs2; j += rs2) { \
-      memcpy(client->frameBuffer + j, buffer, rs); \
+      memcpy(client->window.frameBuffer + j, buffer, rs); \
       buffer += rs; \
     } \
   }
@@ -191,7 +191,7 @@ static void CopyRectangle(rfbClient* client, const uint8_t* buffer, int x, int y
 static void CopyRectangleFromRectangle(rfbClient* client, int src_x, int src_y, int w, int h, int dest_x, int dest_y)
 { int i,j;
 
-  if (client->frameBuffer == NULL)
+  if (client->window.frameBuffer == NULL)
   { return;
   }
 
@@ -207,16 +207,16 @@ static void CopyRectangleFromRectangle(rfbClient* client, int src_x, int src_y, 
 
 #define COPY_RECT_FROM_RECT(BPP) \
   { \
-    uint##BPP##_t* _buffer=((uint##BPP##_t*)client->frameBuffer)+(src_y-dest_y)*client->width+src_x-dest_x; \
+    uint##BPP##_t* _buffer=((uint##BPP##_t*)client->window.frameBuffer)+(src_y-dest_y)*client->width+src_x-dest_x; \
     if (dest_y < src_y) { \
       for(j = dest_y*client->width; j < (dest_y+h)*client->width; j += client->width) { \
         if (dest_x < src_x) { \
           for(i = dest_x; i < dest_x+w; i++) { \
-            ((uint##BPP##_t*)client->frameBuffer)[j+i]=_buffer[j+i]; \
+            ((uint##BPP##_t*)client->window.frameBuffer)[j+i]=_buffer[j+i]; \
           } \
         } else { \
           for(i = dest_x+w-1; i >= dest_x; i--) { \
-            ((uint##BPP##_t*)client->frameBuffer)[j+i]=_buffer[j+i]; \
+            ((uint##BPP##_t*)client->window.frameBuffer)[j+i]=_buffer[j+i]; \
           } \
         } \
       } \
@@ -224,11 +224,11 @@ static void CopyRectangleFromRectangle(rfbClient* client, int src_x, int src_y, 
       for(j = (dest_y+h-1)*client->width; j >= dest_y*client->width; j-=client->width) { \
         if (dest_x < src_x) { \
           for(i = dest_x; i < dest_x+w; i++) { \
-            ((uint##BPP##_t*)client->frameBuffer)[j+i]=_buffer[j+i]; \
+            ((uint##BPP##_t*)client->window.frameBuffer)[j+i]=_buffer[j+i]; \
           } \
         } else { \
           for(i = dest_x+w-1; i >= dest_x; i--) { \
-            ((uint##BPP##_t*)client->frameBuffer)[j+i]=_buffer[j+i]; \
+            ((uint##BPP##_t*)client->window.frameBuffer)[j+i]=_buffer[j+i]; \
           } \
         } \
       } \
@@ -294,7 +294,7 @@ rfbClient* rfbGetClient( int bitsPerSample
   /* default: use complete frame buffer */
   client->updateRect.x = -1;
 
-  client->frameBuffer = NULL;
+  client->window.frameBuffer = NULL;
   client->outputWindow = 0;
 
   client->format.bitsPerPixel = bytesPerPixel*8;
