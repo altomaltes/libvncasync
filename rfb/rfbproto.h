@@ -1,31 +1,31 @@
 #ifndef RFBPROTO_H
 #define RFBPROTO_H
 
-/*
-    Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
-    Copyright (C) 2005 Rohit Kumar, Johannes E. Schindelin
-    Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
-    Copyright (C) 2000-2002 Constantin Kaplinsky.  All Rights Reserved.
-    Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
-    Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+/**
+ *   Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
+ *   Copyright (C) 2005 Rohit Kumar, Johannes E. Schindelin
+ *   Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
+ *   Copyright (C) 2000-2002 Constantin Kaplinsky.  All Rights Reserved.
+ *   Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
+ *   Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.*
+ *
+ *   This is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This software is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this software; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+ *   USA.
+ */
 
-    This is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this software; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
-    USA.
-*/
-
-/*
+/**
    rfbproto.h - header file for the RFB protocol version 3.3
 
    Uses types CARD<n> for an n-bit unsigned integer, INT<n> for an n-bit signed
@@ -67,40 +67,41 @@
 #endif
 
 #if HAVE_ENDIAN_H
-# include <endian.h>
-# if __BYTE_ORDER == __BIG_ENDIAN
-#  define WORDS_BIGENDIAN 1
-# endif
+  # include <endian.h>
+  # if __BYTE_ORDER == __BIG_ENDIAN
+  #  define WORDS_BIGENDIAN 1
+  # endif
 #endif
 
-/* MS compilers don't have strncasecmp
-*/
+/**
+ * MS compilers don't have strncasecmp
+ */
 #ifdef _MSC_VER
-#define strncasecmp _strnicmp
+  #define strncasecmp _strnicmp
 #endif
 
 #endif
 
 #ifdef HAVE_LIBZ
-#include <zlib.h>
-#ifdef __CHECKER__
-#undef Z_NULL
-#define Z_NULL NULL
-#endif
+  #include <zlib.h>
+  #ifdef __CHECKER__
+  #undef Z_NULL
+  #define Z_NULL NULL
+  #endif
 #endif
 
 #define rfbMax(a,b) (((a)>(b))?(a):(b))
 
 #if !defined(WIN32) || defined(__MINGW32__)
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+  #ifdef HAVE_SYS_TIME_H
+    #include <sys/time.h>
+  #endif
 
 
-#undef FALSE
-#define FALSE 0
-#undef TRUE
-#define TRUE -1
+  #undef FALSE
+  #define FALSE 0
+  #undef TRUE
+  #define TRUE -1
 #endif
 
 #define MAX_ENCODINGS 64
@@ -162,34 +163,35 @@ typedef struct
 
   uint16_t blueMax;   /* and blue */
 
-  uint8_t redShift;   /* number of shifts needed to get the red
-           value in a pixel to the least significant
-           bit. To find the red value from a given
-           pixel, do the following:
-           1) Swap pixel value according to bigEndian
-              (e.g. if bigEndian is false and host byte
-              order is big endian, then swap).
-           2) Shift right by redShift.
-           3) AND with redMax (in host byte order).
-           4) You now have the red value between 0 and
-              redMax. */
-
+/**
+ *    number of shifts needed to get the red value in a pixel
+ * to the least significant bit.
+ * To find the red value from a given pixel, do the following:
+ *
+ * 1) Swap pixel value according to bigEndian
+ *     ( e.g. if bigEndian is false and host byte order is big endian, then swap).
+ * 2) Shift right by redShift.
+ * 3) AND with redMax (in host byte order).
+ * 4) You now have the red value between 0 and redMax.
+ */
+  uint8_t redShift;
   uint8_t greenShift;   /* similar for green */
-
   uint8_t blueShift;    /* and blue */
 
-  uint8_t pad1;
+  uint8_t  pad1;
   uint16_t pad2;
 
 } rfbPixelFormat;
 
 #define sz_rfbPixelFormat 16
 
-/* UltraVNC: Color settings values */
+/**
+ * UltraVNC: Color settings values
+ */
 #define rfbPFFullColors   0
-#define rfbPF256Colors     1
+#define rfbPF256Colors    1
 #define rfbPF64Colors     2
-#define rfbPF8Colors       3
+#define rfbPF8Colors      3
 #define rfbPF8GreyColors  4
 #define rfbPF4GreyColors  5
 #define rfbPF2GreyColors  6
@@ -290,7 +292,7 @@ typedef char rfbProtocolVersionMsg[ 13 ]; /* allow extra byte for null */
 #define rfbVeNCryptX509SASL  263
 #define rfbVeNCryptTLSSASL   264
 
-/*
+/**
    rfbConnFailed: For some reason the connection failed (e.g. the server
         cannot support the desired protocol version).  This is
         followed by a string describing the reason (where a
@@ -444,7 +446,7 @@ typedef struct
 /* Xvp pseudo-encoding */
 #define rfbEncodingXvp       0xFFFFFECB
 
-/*
+/**
    Special encoding numbers:
      0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level
      0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale)
@@ -1130,9 +1132,7 @@ typedef struct
 typedef struct rfbExtDesktopSizeMsg
 { uint8_t numberOfScreens;
   uint8_t pad[3];
-
-  /* Followed by rfbExtDesktopScreen[numberOfScreens] */
-} rfbExtDesktopSizeMsg;
+} rfbExtDesktopSizeMsg; /* Followed by rfbExtDesktopScreen[numberOfScreens] */
 
 typedef struct rfbExtDesktopScreen
 { uint32_t id;
@@ -1171,9 +1171,7 @@ typedef struct rfbSetDesktopSizeMsg
   uint16_t height;
   uint8_t numberOfScreens;
   uint8_t pad2;
-
-  /* Followed by rfbExtDesktopScreen[numberOfScreens] */
-} rfbSetDesktopSizeMsg;
+} rfbSetDesktopSizeMsg;   /* Followed by rfbExtDesktopScreen[numberOfScreens] */
 
 #define sz_rfbSetDesktopSizeMsg (8)
 
@@ -1520,8 +1518,7 @@ extern void  rfbEncryptBytes( unsigned char *bytes, char *passwd);
 enum rfbNewClientAction
 { RFB_CLIENT_ACCEPT
 , RFB_CLIENT_ON_HOLD
-, RFB_CLIENT_REFUSE
-};
+, RFB_CLIENT_REFUSE };
 
 typedef void   ( * rfbKbdAddEventProcPtr       ) ( rfbBool down, rfbKeySym keySym, struct _rfbClient* cl);
 typedef void   ( * rfbKbdReleaseAllKeysProcPtr ) ( struct _rfbClient* cl);
@@ -1563,8 +1560,9 @@ typedef void (*rfbSetTextChat) (struct _rfbClient* cl, int length, char *string)
 typedef struct
 { uint32_t count;
   rfbBool is16; /**< is the data format short? */
-  union {
-    uint8_t* bytes;
+
+  union
+  { uint8_t* bytes;
     uint16_t* shorts;
   } data; /**< there have to be count*3 entries */
 } rfbColourMap;
@@ -1613,6 +1611,8 @@ typedef struct _rfbExtensionData
 
 typedef struct
 { struct _rfbScreenInfo * owner;
+  struct _rfbScreenInfo * scaledScreenNext;  /** this structure has children that are scaled versions of this screen */
+  int scaledScreenRefCount;
 
   int width;
   int paddedWidthInBytes;
@@ -1634,10 +1634,7 @@ typedef struct
 } ScreenAtom;
 
 typedef struct _rfbScreenInfo
-{ struct _rfbScreenInfo *scaledScreenNext;  /** this structure has children that are scaled versions of this screen */
-  int scaledScreenRefCount;
-
-  ScreenAtom window;
+{ ScreenAtom window;
 
   int depth;
 

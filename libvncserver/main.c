@@ -370,7 +370,7 @@ void rfbMarkRegionAsModified( rfbScreenInfo * screen
   rfbReleaseClientIterator( iterator );
 }
 
-void rfbScaledScreenUpdate( rfbScreenInfo * screen
+void rfbScaledScreenUpdate( ScreenAtom * screen
                           , int x1, int y1
                           , int x2, int y2);
 
@@ -886,11 +886,12 @@ void rfbScreenCleanup(rfbScreenInfo * screen)
   rfbTightCleanup(screen);
 #endif
 
-  /* free all 'scaled' versions of this screen */
-  while (screen->scaledScreenNext!=NULL)
+  /** free all 'scaled' versions of this screen
+   */
+  while (screen->window.scaledScreenNext )
   { rfbScreenInfo * ptr;
-    ptr = screen->scaledScreenNext;
-    screen->scaledScreenNext = ptr->scaledScreenNext;
+    ptr = screen->window.scaledScreenNext;
+    screen->window.scaledScreenNext = ptr->window.scaledScreenNext;
     FREE( ptr->window.frameBuffer );
     FREE( ptr );
   }

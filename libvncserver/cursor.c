@@ -719,7 +719,7 @@ void rfbRedrawAfterHideCursor(rfbClient * cl,sraRegionPtr updateRegion)
 
 #ifdef DEBUG
 
-static void rfbPrintXCursor(rfbCursorPtr cursor)
+static void rfbPrintXCursor( rfbCursorPtr cursor )
 { int i,i1,j,w=(cursor->width+7)/8;
   unsigned char bit;
 
@@ -729,7 +729,7 @@ static void rfbPrintXCursor(rfbCursorPtr cursor)
   { for( i=0,i1=0,bit=0x80
        ; i1<cursor->width
        ; i1++,i+=(bit&1)?1:0,bit=(bit&1)?0x80:bit>>1 )
-      if(cursor->source[j*w+i]&bit)
+    { if(cursor->source[j*w+i]&bit)
       { putchar('#');
       }
       else
@@ -745,7 +745,7 @@ static void rfbPrintXCursor(rfbCursorPtr cursor)
       }
       else
       { putchar(' ');
-      }
+   }  }
     putchar('\n');
 } }
 

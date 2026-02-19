@@ -5,7 +5,7 @@
  * @file rfb.h
  */
 
-/*
+/**
  *  Copyright (C) 2005 Rohit Kumar <rokumar@novell.com>,
  *                     Johannes E. Schindelin <johannes.schindelin@gmx.de>
  *  Copyright (C) 2002 RealVNC Ltd.

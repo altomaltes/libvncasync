@@ -233,7 +233,7 @@ rfbClient * rfbNewStreamClient( rfbScreenInfo * rfbScreen
 /* setup pseudo scaling
  */
     cl->scaledScreen = rfbScreen;
-    cl->scaledScreen->scaledScreenRefCount++;
+    cl->scaledScreen->window.scaledScreenRefCount++;
     rfbResetStats( cl );
 
     cl->clientData = NULL;
@@ -388,16 +388,20 @@ void rfbClientConnectionGone( rfbClient * cl )
 #endif
 
   if (cl->prev)
-    cl->prev->next = cl->next;
+  { cl->prev->next = cl->next;
+  }
 
   else
-    cl->screen->clientHead = cl->next;
+  { cl->screen->clientHead = cl->next;
+  }
 
   if (cl->next)
-    cl->next->prev = cl->prev;
+  { cl->next->prev = cl->prev;
+  }
 
   if (cl->scaledScreen!=NULL)
-    cl->scaledScreen->scaledScreenRefCount--;
+  { cl->scaledScreen->window.scaledScreenRefCount--;
+  }
 
 #ifdef HAVE_LIBZ
   rfbFreeZrleData(cl);
