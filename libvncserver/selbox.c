@@ -4,7 +4,7 @@
 #include <rfb/keysym.h>
 
 typedef struct
-{ rfbScreenInfo * screen;
+{ ScreenAtom * screen;
   rfbFontDataPtr font;
   char** list;
   int listSize;
@@ -17,18 +17,22 @@ typedef struct
   int lastButtons;
   rfbPixel colour,backColour;
   SelectionChangedHookPtr selChangedHook;
+
   enum
   { SELECTING, OK, CANCEL
   } state;
+
 } rfbSelectData;
 
 static const char* okStr="OK";
 static const char* cancelStr="Cancel";
 
-static void selPaintButtons(rfbSelectData* m,rfbBool invertOk,rfbBool invertCancel)
-{ rfbScreenInfo * s = m->screen;
+static void selPaintButtons( rfbSelectData* m
+                           , rfbBool invertOk
+                           , rfbBool invertCancel )
+{ ScreenAtom * s= m->screen;
   rfbPixel bcolour = m->backColour;
-  rfbPixel colour = m->colour;
+  rfbPixel colour  = m->colour;
 
   rfbFillRect(s,m->x1,m->okY-m->textH,m->x2,m->okY,bcolour);
 
@@ -55,12 +59,17 @@ static void selPaintButtons(rfbSelectData* m,rfbBool invertOk,rfbBool invertCanc
   m->cancelInverted = invertCancel;
 }
 
-/* line is relative to displayStart */
-static void selPaintLine(rfbSelectData* m,int line,rfbBool invert)
+/**
+ * line is relative to displayStart
+ */
+static void selPaintLine( rfbSelectData* m,int line,rfbBool invert)
 { int y1 = m->y1+line*m->textH, y2 = y1+m->textH;
   if(y2>m->y2)
     y2=m->y2;
-  rfbFillRect(m->screen,m->x1,y1,m->x2,y2,invert?m->colour:m->backColour);
+
+  rfbFillRect( m->screen
+             , m->x1,y1, m->x2
+             , y2, invert ? m->colour:m->backColour);
 
   if(m->displayStart+line<m->listSize)
   { rfbDrawStringWithClip( m->screen,m->font,m->x1+m->xhot,y2-1+m->yhot
@@ -268,7 +277,7 @@ int rfbSelectBox( rfbScreenInfo * rfbScreen
   frameBufferBackup = (char*)malloc(bpp*(x2-x1)*(y2-y1));
 
   selData.state = SELECTING;
-  selData.screen = rfbScreen;
+  selData.screen = &rfbScreen->window;
   selData.font = font;
   selData.list = list;
   selData.colour = colour;
@@ -296,7 +305,8 @@ int rfbSelectBox( rfbScreenInfo * rfbScreen
   }
 
   /* paint list and buttons */
-  rfbFillRect(rfbScreen,x1,y1,x2,y2,colour);
+  rfbFillRect( &rfbScreen->window
+             , x1,y1,x2,y2,colour);
   selPaintButtons(&selData,FALSE,FALSE);
   selSelect(&selData,0);
 
@@ -308,14 +318,14 @@ int rfbSelectBox( rfbScreenInfo * rfbScreen
   for( j=0
      ; j<y2-y1
      ; j++)
-  { memcpy( rfbScreen->window.frameBuffer+j*rfbScreen->window.paddedWidthInBytes + x1*bpp
+  { memcpy( rfbScreen->window.frameBuffer + j*rfbScreen->window.paddedWidthInBytes + x1*bpp
           , frameBufferBackup+j*(x2-x1)*bpp
           , (x2-x1)*bpp);
   }
 
   FREE( frameBufferBackup );
 
-  rfbMarkRectAsModified( rfbScreen,x1,y1,x2,y2);
+  rfbMarkRectAsModified( &rfbScreen->window ,x1,y1,x2,y2);
   rfbScreen->screenData = screenDataBackup;
   rfbScreen->kbdAddEvent = kbdAddEventBackup;
   rfbScreen->ptrAddEvent = ptrAddEventBackup;

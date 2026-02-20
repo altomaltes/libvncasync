@@ -460,7 +460,7 @@ rfbBool rfbSetClientColourMap( rfbClient * cl
 /**
  * Sets the colour map for each RFB client.
  */
-void rfbSetClientColourMaps( rfbScreenInfo * rfbScreen
+void rfbSetClientColourMaps( ScreenAtom * rfbScreen
                            , int firstColour
                            , int nColours )
 { rfbClientIteratorPtr i;

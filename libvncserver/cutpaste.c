@@ -31,8 +31,7 @@
  * the primary selection.  Ideally we'd like to set it to the same thing, but I
  * can't work out how to do that without some kind of helper X client.
  */
-
-void rfbGotXCutText( rfbScreenInfo * rfbScreen
+void rfbGotXCutText( ScreenAtom * rfbScreen
                    , char *str
                    , int len)
 { rfbSendServerCutText(rfbScreen, str, len);

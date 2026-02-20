@@ -43,11 +43,13 @@
 
  struct _rfbClient;
  struct _rfbScreenInfo;
+ struct _ScreenAtom;
 
 #else
 
  #define _rfbClient     rfbClient
  #define _rfbScreenInfo rfbScreenInfo
+ #define _ScreenAtom    ScreenAtom
 
 #endif
 
@@ -79,7 +81,7 @@ typedef
 /**
  * functions to make a vnc server
  */
-void rfbMarkRectAsModified( struct _rfbScreenInfo *
+void rfbMarkRectAsModified( struct _ScreenAtom *
                           , int x1, int y1
                           , int x2, int y2 );
 

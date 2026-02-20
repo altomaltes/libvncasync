@@ -435,13 +435,13 @@ rfbBool SendRectEncodingTight( rfbClient * cl
         { return FALSE;
         }
 
-        fbptr= ( cl->scaledScreen->window.frameBuffer
-             + ( cl->scaledScreen->window.paddedWidthInBytes * y_best)
-             + ( x_best * (cl->scaledScreen->window.bitsPerPixel / 8)));
+        fbptr= ( cl->scaledScreen->frameBuffer
+             + ( cl->scaledScreen->paddedWidthInBytes * y_best)
+             + ( x_best * (cl->scaledScreen->bitsPerPixel / 8)));
 
         (*cl->translateFn)(cl->translateLookupTable, &cl->screen->window.serverFormat,
                            &cl->format, fbptr, tightBeforeBuf,
-                           cl->scaledScreen->window.paddedWidthInBytes, 1, 1);
+                           cl->scaledScreen->paddedWidthInBytes, 1, 1);
 
         if (!SendSolidRect(cl))
         { return FALSE;
@@ -578,8 +578,8 @@ CheckSolidTile##bpp( rfbClient * cl, int x, int y, int w, int h,              \
     uint##bpp##_t colorValue;                                                 \
     int dx, dy;                                                               \
                                                                               \
-    fbptr = (uint##bpp##_t *)&cl->scaledScreen->window.frameBuffer                   \
-        [y * cl->scaledScreen->window.paddedWidthInBytes + x * (bpp/8)];             \
+    fbptr = (uint##bpp##_t *)&cl->scaledScreen->frameBuffer                   \
+        [y * cl->scaledScreen->paddedWidthInBytes + x * (bpp/8)];             \
                                                                               \
     colorValue = *fbptr;                                                      \
     if (needSameColor && (uint32_t)colorValue != *colorPtr)                   \
@@ -591,7 +591,7 @@ CheckSolidTile##bpp( rfbClient * cl, int x, int y, int w, int h,              \
         {   return FALSE;                                                 \
         } }                                                                     \
         fbptr = (uint##bpp##_t *)((uint8_t *)fbptr                            \
-                 + cl->scaledScreen->window.paddedWidthInBytes);                     \
+                 + cl->scaledScreen->paddedWidthInBytes);                     \
     }                                                                         \
                                                                               \
     *colorPtr = (uint32_t)colorValue;                                         \
@@ -607,12 +607,12 @@ static rfbBool CheckSolidTile32( rfbClient * cl
   uint32_t colorValue;
   int dx, dy;
 
-  if ( ! cl->scaledScreen->window.frameBuffer )
+  if ( ! cl->scaledScreen->frameBuffer )
   { return( FALSE );
   }
 
-  fbptr= (uint32_t *)&cl->scaledScreen->window.frameBuffer
-         [y * cl->scaledScreen->window.paddedWidthInBytes + x * (32/8)];
+  fbptr= (uint32_t *)&cl->scaledScreen->frameBuffer
+         [y * cl->scaledScreen->paddedWidthInBytes + x * (32/8)];
 
   colorValue = *fbptr;
   if (needSameColor && (uint32_t)colorValue != *colorPtr)
@@ -625,7 +625,7 @@ static rfbBool CheckSolidTile32( rfbClient * cl
     } }
 
     fbptr= (uint32_t *)((uint8_t *)fbptr
-                        + cl->scaledScreen->window.paddedWidthInBytes);
+                        + cl->scaledScreen->paddedWidthInBytes);
   }
 
   *colorPtr = (uint32_t)colorValue;
@@ -700,7 +700,7 @@ static rfbBool SendSubrect( rfbClient * cl
 { char * fbptr;
   rfbBool success = FALSE;
 
-  if ( !cl->scaledScreen->window.frameBuffer )
+  if ( !cl->scaledScreen->frameBuffer )
   { return( FALSE );
   }
 
@@ -713,9 +713,9 @@ static rfbBool SendSubrect( rfbClient * cl
   if (!rfbSendTightHeader(cl, x, y, w, h))
   { return FALSE; }
 
-  fbptr= ( cl->scaledScreen->window.frameBuffer
-       + ( cl->scaledScreen->window.paddedWidthInBytes * y)
-       + ( x * (cl->scaledScreen->window.bitsPerPixel / 8)));
+  fbptr= ( cl->scaledScreen->frameBuffer
+       + ( cl->scaledScreen->paddedWidthInBytes * y)
+       + ( x * (cl->scaledScreen->bitsPerPixel / 8)));
 
   if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1)
   { return SendJpegRect(cl, x, y, w, h, qualityLevel); }
@@ -741,12 +741,12 @@ static rfbBool SendSubrect( rfbClient * cl
   { switch ( cl->format.bitsPerPixel )
     { case 16:
         FastFillPalette16( cl, (uint16_t *)fbptr
-                           , w, cl->scaledScreen->window.paddedWidthInBytes / 2
+                           , w, cl->scaledScreen->paddedWidthInBytes / 2
                            , h );
         break;
       default:
         FastFillPalette32( cl, (uint32_t *)fbptr
-                           , w, cl->scaledScreen->window.paddedWidthInBytes / 4
+                           , w, cl->scaledScreen->paddedWidthInBytes / 4
                            , h );
     }
 
@@ -754,13 +754,13 @@ static rfbBool SendSubrect( rfbClient * cl
     { (*cl->translateFn)(cl->translateLookupTable,
                          &cl->screen->window.serverFormat, &cl->format, fbptr,
                          tightBeforeBuf,
-                         cl->scaledScreen->window.paddedWidthInBytes, w, h);
+                         cl->scaledScreen->paddedWidthInBytes, w, h);
     }
   }
   else
   { (*cl->translateFn)(cl->translateLookupTable, &cl->screen->window.serverFormat,
                        &cl->format, fbptr, tightBeforeBuf,
-                       cl->scaledScreen->window.paddedWidthInBytes, w, h);
+                       cl->scaledScreen->paddedWidthInBytes, w, h);
 
     switch (cl->format.bitsPerPixel)
     { case  8:        FillPalette8( w * h);        break;
@@ -1616,7 +1616,7 @@ SendJpegRect(rfbClient * cl, int x, int y, int w, int h, int quality)
     { rfbLog("Memory allocation failure!\n");
     }
 
-    srcptr= (uint16_t *)&cl->scaledScreen->window.frameBuffer[ y * cl->scaledScreen->window.paddedWidthInBytes + x * ps ];
+    srcptr= (uint16_t *)&cl->scaledScreen->frameBuffer[ y * cl->scaledScreen->paddedWidthInBytes + x * ps ];
     dst = tmpbuf;
 
     for(j = 0; j < h; j++)
@@ -1633,7 +1633,7 @@ SendJpegRect(rfbClient * cl, int x, int y, int w, int h, int quality)
         *dst2++ = (uint8_t)((inGreen * 255 + cl->screen->window.serverFormat.greenMax / 2) / cl->screen->window.serverFormat.greenMax );
         *dst2++ = (uint8_t)((inBlue  * 255 + cl->screen->window.serverFormat.blueMax  / 2) / cl->screen->window.serverFormat.blueMax );
       }
-      srcptr += cl->scaledScreen->window.paddedWidthInBytes / ps;
+      srcptr += cl->scaledScreen->paddedWidthInBytes / ps;
       dst += w * 3;
     }
     srcbuf = tmpbuf;
@@ -1648,8 +1648,8 @@ SendJpegRect(rfbClient * cl, int x, int y, int w, int h, int quality)
     { flags |= TJ_BGR; }
     if (cl->screen->window.serverFormat.bigEndian)
     { flags ^= TJ_BGR; }
-    pitch = cl->scaledScreen->window.paddedWidthInBytes;
-    srcbuf = (unsigned char *)&cl->scaledScreen->window.frameBuffer
+    pitch = cl->scaledScreen->paddedWidthInBytes;
+    srcbuf = (unsigned char *)&cl->scaledScreen->frameBuffer
              [y * pitch + x * ps];
   }
 
@@ -1706,7 +1706,7 @@ static void PrepareRowForImg24( rfbClient * cl
   uint32_t pix;
 
   fbptr = (uint32_t *)
-          &cl->scaledScreen->window.frameBuffer[y * cl->scaledScreen->window.paddedWidthInBytes + x * 4];
+          &cl->scaledScreen->frameBuffer[y * cl->scaledScreen->paddedWidthInBytes + x * 4];
 
   while (count--)
   { pix = *fbptr++;
@@ -1724,7 +1724,7 @@ PrepareRowForImg##bpp(rfbClient * cl, uint8_t *dst, int x, int y, int count) { \
     int inRed, inGreen, inBlue;                                             \
                                                                             \
     fbptr = (uint##bpp##_t *)                                               \
-        &cl->scaledScreen->window.frameBuffer[y * cl->scaledScreen->window.paddedWidthInBytes +       \
+        &cl->scaledScreen->frameBuffer[y * cl->scaledScreen->paddedWidthInBytes +       \
                              x * (bpp / 8)];                                \
                                                                             \
     while (count--) {                                                       \

@@ -1,8 +1,12 @@
 #include <string.h>
 #include <rfb/rfbproto.h>
 
-void rfbFillRect(rfbScreenInfo * s,int x1,int y1,int x2,int y2,rfbPixel col)
-{ int rowstride = s->window.paddedWidthInBytes, bpp = s->window.bitsPerPixel>>3;
+void rfbFillRect( ScreenAtom * s
+                , int x1,int y1
+                , int x2,int y2
+                , rfbPixel col)
+{ int rowstride    = s->paddedWidthInBytes
+              , bpp= s->bitsPerPixel>>3;
   int i,j;
   char* colour=(char*)&col;
 
@@ -10,14 +14,15 @@ void rfbFillRect(rfbScreenInfo * s,int x1,int y1,int x2,int y2,rfbPixel col)
     colour += 4-bpp;
   for(j=y1; j<y2; j++)
     for(i=x1; i<x2; i++)
-      memcpy(s->window.frameBuffer+j*rowstride+i*bpp,colour,bpp);
+      memcpy(s->frameBuffer+j*rowstride+i*bpp,colour,bpp);
   rfbMarkRectAsModified(s,x1,y1,x2,y2);
 }
 
-#define SETPIXEL(x,y) memcpy(s->window.frameBuffer+(y)*rowstride+(x)*bpp,colour,bpp)
+#define SETPIXEL(x,y) memcpy(s->frameBuffer+(y)*rowstride+(x)*bpp,colour,bpp)
 
-void rfbDrawPixel(rfbScreenInfo * s,int x,int y,rfbPixel col)
-{ int rowstride = s->window.paddedWidthInBytes, bpp = s->window.bitsPerPixel>>3;
+void rfbDrawPixel( ScreenAtom * s,int x,int y,rfbPixel col)
+{ int rowstride    = s->paddedWidthInBytes
+              , bpp= s->bitsPerPixel>>3;
   char* colour=(char*)&col;
 
   if ( !rfbEndianTest )
@@ -26,8 +31,11 @@ void rfbDrawPixel(rfbScreenInfo * s,int x,int y,rfbPixel col)
   rfbMarkRectAsModified(s,x,y,x+1,y+1);
 }
 
-void rfbDrawLine(rfbScreenInfo * s,int x1,int y1,int x2,int y2,rfbPixel col)
-{ int rowstride = s->window.paddedWidthInBytes, bpp = s->window.bitsPerPixel>>3;
+/**
+ */
+void rfbDrawLine( ScreenAtom * s,int x1,int y1,int x2,int y2,rfbPixel col)
+{ int rowstride    = s->paddedWidthInBytes
+              , bpp= s->bitsPerPixel>>3;
   int i;
   char* colour=(char*)&col;
 

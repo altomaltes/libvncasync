@@ -4,13 +4,14 @@
 
 #include <rfb/rfbproto.h>
 
-int rfbDrawChar(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
+int rfbDrawChar( ScreenAtom * rfbScreen
+               , rfbFontDataPtr font,
                 int x,int y,unsigned char c,rfbPixel col)
 { int i,j,width,height;
   unsigned char* data=font->data+font->metaData[c*5];
   unsigned char d=*data;
-  int rowstride=rfbScreen->window.paddedWidthInBytes;
-  int bpp=rfbScreen->window.serverFormat.bitsPerPixel/8;
+  int rowstride=rfbScreen->paddedWidthInBytes;
+  int bpp=rfbScreen->serverFormat.bitsPerPixel/8;
   char *colour=(char*)&col;
 
   if(!rfbEndianTest)
@@ -27,10 +28,10 @@ int rfbDrawChar(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
       { d=*data;
         data++;
       }
-      if(d&0x80 && y+j >= 0 && y+j < rfbScreen->window.height
+      if(d&0x80 && y+j >= 0 && y+j < rfbScreen->height
        && x+i >= 0
-       && x+i < rfbScreen->window.width)
-        memcpy(rfbScreen->window.frameBuffer+(y+j)*rowstride+(x+i)*bpp,colour,bpp);
+       && x+i < rfbScreen->width)
+        memcpy(rfbScreen->frameBuffer+(y+j)*rowstride+(x+i)*bpp,colour,bpp);
       d<<=1;
     }
     /* if((i&7)!=0) data++; */
@@ -38,7 +39,8 @@ int rfbDrawChar(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
   return(width);
 }
 
-void rfbDrawString(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
+void rfbDrawString( ScreenAtom * rfbScreen
+                  , rfbFontDataPtr font,
                    int x,int y,const char* string,rfbPixel colour)
 { while(*string)
   { x+=rfbDrawChar(rfbScreen,font,x,y,*string,colour);
@@ -47,15 +49,16 @@ void rfbDrawString(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
 
 /* TODO: these two functions need to be more efficient */
 /* if col==bcol, assume transparent background */
-int rfbDrawCharWithClip(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
-                        int x,int y,unsigned char c,
+int rfbDrawCharWithClip( ScreenAtom * rfbScreen
+                       , rfbFontDataPtr font
+                       , int x,int y,unsigned char c,
                         int x1,int y1,int x2,int y2,
                         rfbPixel col,rfbPixel bcol)
 { int i,j,width,height;
   unsigned char* data=font->data+font->metaData[c*5];
   unsigned char d;
-  int rowstride=rfbScreen->window.paddedWidthInBytes;
-  int bpp=rfbScreen->window.serverFormat.bitsPerPixel/8,extra_bytes=0;
+  int rowstride=rfbScreen->paddedWidthInBytes;
+  int bpp=rfbScreen->serverFormat.bitsPerPixel/8,extra_bytes=0;
   char* colour=(char*)&col;
   char* bcolour=(char*)&bcol;
 
@@ -103,11 +106,11 @@ int rfbDrawCharWithClip(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
       }
       /* if(x+i>=x1 && x+i<x2 && y+j>=y1 && y+j<y2) */
       { if ( d&0x80 )
-        { memcpy( rfbScreen->window.frameBuffer+(y+j)*rowstride+(x+i)*bpp
+        { memcpy( rfbScreen->frameBuffer+(y+j)*rowstride+(x+i)*bpp
                 , colour,bpp);
         }
         else if(bcol!=col)
-        { memcpy(rfbScreen->window.frameBuffer+(y+j)*rowstride+(x+i)*bpp,
+        { memcpy(rfbScreen->frameBuffer+(y+j)*rowstride+(x+i)*bpp,
                  bcolour,bpp);
         }
       }
@@ -119,8 +122,9 @@ int rfbDrawCharWithClip(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
   return(width);
 }
 
-void rfbDrawStringWithClip(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,
-                           int x,int y,const char* string,
+void rfbDrawStringWithClip( ScreenAtom * rfbScreen
+                          , rfbFontDataPtr font
+                          , int x,int y,const char* string,
                            int x1,int y1,int x2,int y2,
                            rfbPixel colour,rfbPixel backColour)
 { while(*string)

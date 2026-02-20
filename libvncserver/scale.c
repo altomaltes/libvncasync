@@ -281,9 +281,9 @@ void rfbScaledScreenUpdate( ScreenAtom * screen
 /**
  * Create a new scaled version of the framebuffer
  */
-rfbScreenInfo * rfbScaledScreenAllocate( rfbClient * cl
+ScreenAtom * rfbScaledScreenAllocate( rfbClient * cl
                                        , int width, int height )
-{ rfbScreenInfo * ptr;
+{ ScreenAtom * ptr;
   ptr = malloc(sizeof(rfbScreenInfo));
 
   if ( ptr )
@@ -295,7 +295,7 @@ rfbScreenInfo * rfbScaledScreenAllocate( rfbClient * cl
  * Note: this is defensive coding, as the check should have already been
  * performed during initial, non-scaled screen setup.
  */
-    allocSize = pad4(width * (ptr->window.bitsPerPixel/8)); /* per protocol, width<2**16 and bpp<256 */
+    allocSize = pad4(width * (ptr->bitsPerPixel/8)); /* per protocol, width<2**16 and bpp<256 */
 
     if (height == 0 || allocSize >= SIZE_MAX / height)
     { FREE( ptr );
@@ -303,23 +303,23 @@ rfbScreenInfo * rfbScaledScreenAllocate( rfbClient * cl
     }
 
     /* Resume copy everything */
-    ptr->window.width = width;
-    ptr->window.height = height;
-    ptr->window.paddedWidthInBytes = (ptr->window.bitsPerPixel/8)*ptr->window.width;
-    ptr->window.paddedWidthInBytes = pad4(ptr->window.paddedWidthInBytes); /* Need to by multiples of 4 for Sparc systems */
-    ptr->window.scaledScreenRefCount = 0;         /* Reset the reference count to 0! */
+    ptr->width = width;
+    ptr->height = height;
+    ptr->paddedWidthInBytes = (ptr->bitsPerPixel/8)*ptr->width;
+    ptr->paddedWidthInBytes = pad4(ptr->paddedWidthInBytes); /* Need to by multiples of 4 for Sparc systems */
+    ptr->scaledScreenRefCount = 0;         /* Reset the reference count to 0! */
 
     //    ptr->sizeInBytes = ptr->window.paddedWidthInBytes * ptr->height;
-    ptr->window.serverFormat= cl->screen->window.serverFormat;
-    ptr->window.frameBuffer = calloc(ptr->window.paddedWidthInBytes , ptr->window.height);
+    ptr->serverFormat= cl->screen->window.serverFormat;
+    ptr->frameBuffer = calloc(ptr->paddedWidthInBytes , ptr->height);
 
-    if ( ptr->window.frameBuffer )
-    { rfbScaledScreenUpdateRect( &cl->screen->window, &ptr->window                          /* Reset to a known condition: scale the entire framebuffer */
+    if ( ptr->frameBuffer )
+    { rfbScaledScreenUpdateRect( &cl->screen->window, ptr                          /* Reset to a known condition: scale the entire framebuffer */
                                , 0, 0
                                , cl->screen->window.width
                                , cl->screen->window.height);
             /* Now, insert into the chain */
-      ptr->window.scaledScreenNext = cl->screen->window.scaledScreenNext;
+      ptr->scaledScreenNext = cl->screen->window.scaledScreenNext;
       cl->screen->window.scaledScreenNext = ptr;
     }
     else /* Failed to malloc the new frameBuffer, cleanup */
@@ -333,13 +333,13 @@ rfbScreenInfo * rfbScaledScreenAllocate( rfbClient * cl
  * TODO: implement a refcount per scaled screen to prevent
  * unreferenced scaled screens from hanging around
  */
-rfbScreenInfo * rfbScalingFind(rfbClient * cl, int width, int height)
+ScreenAtom * rfbScalingFind(rfbClient * cl, int width, int height)
 { ScreenAtom * ptr;
     /* include the original in the search (ie: fine 1:1 scaled version of the frameBuffer) */
 
   for ( ptr= &cl->screen->window
       ; ptr
-      ; ptr= ptr->scaledScreenNext)
+      ; ptr= ptr->scaledScreenNext )
   { if ((ptr->width==width)
      && (ptr->height==height))
     { return ptr;
@@ -353,34 +353,34 @@ rfbScreenInfo * rfbScalingFind(rfbClient * cl, int width, int height)
 void rfbScalingSetup( rfbClient * cl
                     , int width
                     , int height)
-{ rfbScreenInfo * ptr;
+{ ScreenAtom * ptr;
 
   ptr = rfbScalingFind(cl,width,height);
-  if (ptr==NULL)
+
+  if ( !ptr )
         ptr = rfbScaledScreenAllocate(cl,width,height);
     /* Now, there is a new screen available (if ptr is not NULL) */
-    if ( ptr )
+    if ( ptr )  /* Update it! */
     {
-        /* Update it! */
-        if (ptr->window.scaledScreenRefCount<1)
-            rfbScaledScreenUpdateRect( &cl->screen->window, &ptr->window
+        if (ptr->scaledScreenRefCount<1)
+            rfbScaledScreenUpdateRect( &cl->screen->window, ptr
                                      , 0, 0
                                      , cl->screen->window.width
                                      , cl->screen->window.height);
-        /*
-         * rfbLog("Taking one from %dx%d-%d and adding it to %dx%d-%d\n",
-         *    cl->scaledScreen->window.width, cl->scaledScreen->window.height,
-         *    cl->scaledScreen->scaledScreenRefCount,
-         *    ptr->width, ptr->height, ptr->scaledScreenRefCount);
-         */
+/*
+ * rfbLog("Taking one from %dx%d-%d and adding it to %dx%d-%d\n",
+ *    cl->scaledScreen->width, cl->scaledScreen->height,
+ *    cl->scaledScreen->scaledScreenRefCount,
+ *    ptr->width, ptr->height, ptr->scaledScreenRefCount);
+ */
 
-        cl ->scaledScreen->window.scaledScreenRefCount--;
-        ptr->window.scaledScreenRefCount++;
-        cl->scaledScreen=ptr;
+        cl ->scaledScreen->scaledScreenRefCount--;
+        ptr->scaledScreenRefCount++;
+        cl->scaledScreen= ptr;
         cl->newFBSizePending = TRUE;
 
         rfbLog( "Scaling to %dx%d (refcount=%d)\n"
-              , width,height,ptr->window.scaledScreenRefCount);
+              , width,height,ptr->scaledScreenRefCount);
     }
     else
         rfbLog("Scaling to %dx%d failed, leaving things alone\n",width,height);
@@ -401,11 +401,11 @@ int rfbSendNewScaleSize(rfbClient * cl)
         pmsg.pad1 = 0;
         pmsg.desktop_w = Swap16IfLE( cl->screen->window.width);
         pmsg.desktop_h = Swap16IfLE( cl->screen->window.height);
-        pmsg.buffer_w  = Swap16IfLE( cl->scaledScreen->window.width);
-        pmsg.buffer_h  = Swap16IfLE( cl->scaledScreen->window.height);
+        pmsg.buffer_w  = Swap16IfLE( cl->scaledScreen->width);
+        pmsg.buffer_h  = Swap16IfLE( cl->scaledScreen->height);
         pmsg.pad2 = 0;
 
-        rfbLog("Sending a response to a PalmVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->window.width, cl->scaledScreen->window.height);
+        rfbLog("Sending a response to a PalmVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->width, cl->scaledScreen->height);
         if (rfbPushClientStream( cl,  (char *)&pmsg, sz_rfbPalmVNCReSizeFrameBufferMsg) < 0) {
             rfbLogPerror("rfbNewClient: write");
             rfbCloseClient(cl);
@@ -415,10 +415,10 @@ int rfbSendNewScaleSize(rfbClient * cl)
     { rfbResizeFrameBufferMsg rmsg;
         rmsg.type= rfbResizeFrameBuffer;
         rmsg.pad1=0;
-        rmsg.framebufferWidth  = Swap16IfLE(cl->scaledScreen->window.width);
-        rmsg.framebufferHeigth = Swap16IfLE(cl->scaledScreen->window.height);
+        rmsg.framebufferWidth  = Swap16IfLE(cl->scaledScreen->width);
+        rmsg.framebufferHeigth = Swap16IfLE(cl->scaledScreen->height);
 
-      rfbLog("Sending a response to a UltraVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->window.width, cl->scaledScreen->window.height);
+      rfbLog("Sending a response to a UltraVNC style frameuffer resize event (%dx%d)\n", cl->scaledScreen->width, cl->scaledScreen->height);
       if (rfbPushClientStream( cl,  (char *)&rmsg, sz_rfbResizeFrameBufferMsg) < 0) {
             rfbLogPerror("rfbNewClient: write");
             rfbCloseClient(cl);

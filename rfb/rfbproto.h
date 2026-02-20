@@ -1609,14 +1609,23 @@ typedef struct _rfbExtensionData
  * rfbProcessEvents for each of these.
  */
 
-typedef struct
+typedef struct _ScreenAtom
 { struct _rfbScreenInfo * owner;
-  struct _rfbScreenInfo * scaledScreenNext;  /** this structure has children that are scaled versions of this screen */
+  struct _ScreenAtom    * scaledScreenNext;  /** this structure has children that are scaled versions of this screen */
   int scaledScreenRefCount;
+
+  struct _rfbClient * clientHead;
+
 
   int width;
   int paddedWidthInBytes;
   int height;
+
+/**
+ * cursor
+ */
+  int cursorX, cursorY,underCursorBufferLen;
+  char* underCursorBuffer;
 
 /**
  * the frameBuffer has to be supplied by the serving process.
@@ -1675,12 +1684,8 @@ typedef struct _rfbScreenInfo
   rfbBool alwaysShared;
   rfbBool neverShared;
   rfbBool dontDisconnect;
-  struct _rfbClient * clientHead;
   struct _rfbClient * pointerClient;  /**< "Mutex" for pointer events */
 
-    /* cursor */
-  int cursorX, cursorY,underCursorBufferLen;
-  char* underCursorBuffer;
   rfbBool dontConvertRichCursorToXCursor;
   struct rfbCursor* cursor;
 
@@ -1806,7 +1811,7 @@ typedef struct _rfbClient
   int fd;
   char * recvPtr; int bytesLeft;   /* JACS, jun 2017, async reads */
 
-  rfbScreenInfo * scaledScreen; /** points to a scaled version of the screen buffer in cl->scaledScreenList */
+  ScreenAtom * scaledScreen; /** points to a scaled version of the screen buffer in cl->scaledScreenList */
   rfbBool PalmVNC; /** how did the client tell us it wanted the screen changed?  Ultra style or palm style? */
 
 
@@ -2054,8 +2059,8 @@ typedef struct _rfbClient
 #define FB_UPDATE_PENDING(cl)                                              \
      (((cl)->enableCursorShapeUpdates && (cl)->cursorWasChanged) ||        \
      (((cl)->enableCursorShapeUpdates == FALSE &&                          \
-       ((cl)->cursorX != (cl)->screen->cursorX ||                          \
-	(cl)->cursorY != (cl)->screen->cursorY))) ||                       \
+       ((cl)->cursorX != (cl)->screen->window.cursorX ||                          \
+	(cl)->cursorY != (cl)->screen->window.cursorY))) ||                       \
      ((cl)->useNewFBSize && (cl)->newFBSizePending) ||                     \
      ((cl)->enableCursorPosUpdates && (cl)->cursorWasMoved) ||             \
      !sraRgnEmpty((cl)->copyRegion) || !sraRgnEmpty((cl)->modifiedRegion))
@@ -2095,12 +2100,12 @@ int rfbPushClientStream( rfbClient * cl, const void * data, size_t sz );  // JAC
    Only a single iterator can be in use at a time process-wide. */
 typedef struct rfbClientIterator *rfbClientIteratorPtr;
 
-extern void rfbClientListInit(rfbScreenInfo * rfbScreen);
-extern rfbClientIteratorPtr rfbGetClientIterator(rfbScreenInfo * rfbScreen);
-extern rfbClient * rfbClientIteratorNext(rfbClientIteratorPtr iterator);
-extern void rfbReleaseClientIterator(rfbClientIteratorPtr iterator);
-extern void rfbIncrClientRef(rfbClient * cl);
-extern void rfbDecrClientRef(rfbClient * cl);
+extern void                 rfbClientListInit       ( ScreenAtom * rfbScreen );
+extern rfbClientIteratorPtr rfbGetClientIterator    ( ScreenAtom * rfbScreen );
+extern rfbClient          * rfbClientIteratorNext   ( rfbClientIteratorPtr iterator);
+extern void                 rfbReleaseClientIterator( rfbClientIteratorPtr iterator);
+extern void                 rfbIncrClientRef( rfbClient * cl);
+extern void                 rfbDecrClientRef( rfbClient * cl);
 
 extern void rfbNewClientConnection(rfbScreenInfo * rfbScreen,int sock);
 
@@ -2125,8 +2130,8 @@ extern rfbBool rfbProcessFileTransfer(     rfbClient * cl, uint8_t contentType, 
 
 extern void rfbSendBell(          rfbScreenInfo * );
 extern void rfbProcessUDPInput(   rfbScreenInfo * );
-extern void rfbSendServerCutText( rfbScreenInfo * ,char *str, int len);
-       void rfbGotXCutText(       rfbScreenInfo * , char *str, int len);
+extern void rfbSendServerCutText( ScreenAtom * ,char *str, int len);
+       void rfbGotXCutText(       ScreenAtom * , char *str, int len);
 
 
 
@@ -2141,7 +2146,7 @@ extern void rfbTranslateNone(char *table, rfbPixelFormat *in,
                              int width, int height);
 extern rfbBool rfbSetTranslateFunction(rfbClient * cl);
 extern rfbBool rfbSetClientColourMap(rfbClient * cl, int firstColour, int nColours);
-extern void rfbSetClientColourMaps(rfbScreenInfo * rfbScreen, int firstColour, int nColours);
+extern void rfbSetClientColourMaps( ScreenAtom * , int firstColour, int nColours);
 
 
 
@@ -2239,7 +2244,7 @@ extern         rfbCursorPtr rfbMakeXCursor(int width,int height,char* cursorStri
 extern char*   rfbMakeMaskForXCursor(int width,int height,char* cursorString);
 extern char*   rfbMakeMaskFromAlphaSource(int width,int height,unsigned char* alphaSource);
 extern void    rfbMakeXCursorFromRichCursor( rfbScreenInfo *, rfbCursorPtr cursor);
-extern void    rfbMakeRichCursorFromXCursor( rfbScreenInfo *, rfbCursorPtr cursor);
+extern void    rfbMakeRichCursorFromXCursor( ScreenAtom *, rfbCursorPtr cursor);
 extern void    rfbSetCursor(                 rfbScreenInfo *, rfbCursorPtr c);
 
 extern void    rfbFreeCursor(rfbCursorPtr cursor);
@@ -2269,11 +2274,13 @@ typedef struct rfbFontData
   int* metaData;
 } rfbFontData,* rfbFontDataPtr;
 
-int rfbDrawChar(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,int x,int y,unsigned char c,rfbPixel colour);
-void rfbDrawString(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,int x,int y,const char* string,rfbPixel colour);
+int rfbDrawChar(    ScreenAtom * , rfbFontDataPtr font,int x,int y,unsigned char c,rfbPixel colour);
+void rfbDrawString( ScreenAtom * , rfbFontDataPtr font,int x,int y,const char* string,rfbPixel colour);
 /** if colour==backColour, background is transparent */
-int rfbDrawCharWithClip(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,int x,int y,unsigned char c,int x1,int y1,int x2,int y2,rfbPixel colour,rfbPixel backColour);
-void rfbDrawStringWithClip(rfbScreenInfo * rfbScreen,rfbFontDataPtr font,int x,int y,const char* string,int x1,int y1,int x2,int y2,rfbPixel colour,rfbPixel backColour);
+
+int  rfbDrawCharWithClip(   ScreenAtom * ,rfbFontDataPtr font,int x,int y,unsigned char c,int x1,int y1,int x2,int y2,rfbPixel colour,rfbPixel backColour);
+void rfbDrawStringWithClip( ScreenAtom * ,rfbFontDataPtr font,int x,int y,const char* string,int x1,int y1,int x2,int y2,rfbPixel colour,rfbPixel backColour);
+
 int rfbWidthOfString(rfbFontDataPtr font,const char* string);
 int rfbWidthOfChar(rfbFontDataPtr font,unsigned char c);
 void rfbFontBBox(rfbFontDataPtr font,unsigned char c,int* x1,int* y1,int* x2,int* y2);
@@ -2287,9 +2294,9 @@ void rfbFreeFont(rfbFontDataPtr font);
 
 /* draw.c */
 
-void rfbFillRect(  rfbScreenInfo * s,int x1,int y1,int x2,int y2,rfbPixel col);
-void rfbDrawPixel( rfbScreenInfo * s,int x,int y,rfbPixel col);
-void rfbDrawLine(  rfbScreenInfo * s,int x1,int y1,int x2,int y2,rfbPixel col);
+void rfbFillRect ( ScreenAtom * s,int x1,int y1,int x2,int y2,rfbPixel col);
+void rfbDrawPixel( ScreenAtom * s,int x,int y,rfbPixel col);
+void rfbDrawLine ( ScreenAtom * s,int x1,int y1,int x2,int y2,rfbPixel col);
 
 /* selbox.c */
 
@@ -2322,11 +2329,11 @@ extern void rfbLogPerror(const char *str);
 typedef void (*rfbLogProc)(const char *format, ...);
 extern rfbLogProc rfbLog, rfbErr;
 
-void rfbScheduleCopyRect(     rfbScreenInfo *, int x1,int y1,int x2,int y2,int dx,int dy);
-void rfbScheduleCopyRegion(   rfbScreenInfo *, sraRegionPtr copyRegion,int dx,int dy);
-void rfbDoCopyRect(           rfbScreenInfo *, int x1,int y1,int x2,int y2,int dx,int dy);
-void rfbDoCopyRegion(         rfbScreenInfo *, sraRegionPtr copyRegion,int dx,int dy);
-void rfbMarkRegionAsModified( rfbScreenInfo *, sraRegionPtr modRegion);
+void rfbScheduleCopyRect(     ScreenAtom *, int x1,int y1,int x2,int y2,int dx,int dy);
+void rfbScheduleCopyRegion(   ScreenAtom *, sraRegionPtr copyRegion,int dx,int dy);
+void rfbDoCopyRect(           ScreenAtom *, int x1,int y1,int x2,int y2,int dx,int dy);
+void rfbDoCopyRegion(         ScreenAtom *, sraRegionPtr copyRegion,int dx,int dy);
+void rfbMarkRegionAsModified( ScreenAtom *, sraRegionPtr modRegion);
 
 void rfbDoNothingWithClient(  rfbClient * cl);
 enum rfbNewClientAction defaultNewClientHook(rfbClient * cl);

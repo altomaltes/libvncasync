@@ -222,12 +222,14 @@ static void rfbDefaultLog(const char *format, ...)
 rfbLogProc rfbLog=rfbDefaultLog;
 rfbLogProc rfbErr=rfbDefaultLog;
 
-void rfbScheduleCopyRegion( rfbScreenInfo * rfbScreen,sraRegionPtr copyRegion
-                            , int dx,int dy )
+void rfbScheduleCopyRegion( ScreenAtom * rfbScreen
+                          , sraRegionPtr copyRegion
+                          , int dx,int dy )
 { rfbClientIteratorPtr iterator;
   rfbClient * cl;
 
-  iterator=rfbGetClientIterator(rfbScreen);
+  iterator=rfbGetClientIterator( rfbScreen );
+
   while((cl=rfbClientIteratorNext(iterator)))
   { if(cl->useCopyRect)
     { sraRegionPtr modifiedRegionBackup;
@@ -239,16 +241,16 @@ void rfbScheduleCopyRegion( rfbScreenInfo * rfbScreen,sraRegionPtr copyRegion
           sraRgnOr(cl->modifiedRegion,cl->copyRegion);
           sraRgnMakeEmpty(cl->copyRegion);
         }
-        else
-        { /* we have to set the intersection of the source of the copy
+ /* we have to set the intersection of the source of the copy
              and the old copy to modified. */
-          modifiedRegionBackup=sraRgnCreateRgn(copyRegion);
+
+        else
+        { modifiedRegionBackup=sraRgnCreateRgn(copyRegion);
           sraRgnOffset(modifiedRegionBackup,-dx,-dy);
           sraRgnAnd(modifiedRegionBackup,cl->copyRegion);
           sraRgnOr(cl->modifiedRegion,modifiedRegionBackup);
           sraRgnDestroy(modifiedRegionBackup);
-        }
-      }
+      }  }
 
       sraRgnOr(cl->copyRegion,copyRegion);
       cl->copyDX = dx;
@@ -311,13 +313,14 @@ void rfbScheduleCopyRegion( rfbScreenInfo * rfbScreen,sraRegionPtr copyRegion
   rfbReleaseClientIterator(iterator);
 }
 
-void rfbDoCopyRegion( rfbScreenInfo * screen
-                      , sraRegionPtr copyRegion
-                      , int dx,int dy )
+void rfbDoCopyRegion( ScreenAtom * screen
+                    , sraRegionPtr copyRegion
+                    , int dx,int dy )
 { sraRectangleIterator* i;
   sraRect rect;
-  int j,widthInBytes,bpp=screen->window.serverFormat.bitsPerPixel/8,
-                     rowstride=screen->window.paddedWidthInBytes;
+  int j,widthInBytes
+    , bpp=screen->serverFormat.bitsPerPixel/8
+    , rowstride=screen->paddedWidthInBytes;
   char *in,*out;
 
   /* copy it, really */
@@ -325,8 +328,8 @@ void rfbDoCopyRegion( rfbScreenInfo * screen
 
   while(sraRgnIteratorNext(i,&rect))
   { widthInBytes = (rect.x2-rect.x1)*bpp;
-    out = screen->window.frameBuffer+rect.x1*bpp+rect.y1*rowstride;
-    in  = screen->window.frameBuffer+(rect.x1-dx)*bpp+(rect.y1-dy)*rowstride;
+    out = screen->frameBuffer+rect.x1*bpp+rect.y1*rowstride;
+    in  = screen->frameBuffer+(rect.x1-dx)*bpp+(rect.y1-dy)*rowstride;
 
     if ( dy<0 )
       for(j=rect.y1; j<rect.y2; j++,out+=rowstride,in+=rowstride)
@@ -343,20 +346,22 @@ void rfbDoCopyRegion( rfbScreenInfo * screen
   rfbScheduleCopyRegion(screen,copyRegion,dx,dy);
 }
 
-void rfbDoCopyRect(rfbScreenInfo * screen,int x1,int y1,int x2,int y2,int dx,int dy)
+/**
+ */
+void rfbDoCopyRect( ScreenAtom * screen,int x1,int y1,int x2,int y2,int dx,int dy)
 { sraRegionPtr region = sraRgnCreateRect(x1,y1,x2,y2);
   rfbDoCopyRegion(screen,region,dx,dy);
   sraRgnDestroy(region);
 }
 
-void rfbScheduleCopyRect(rfbScreenInfo * screen,int x1,int y1,int x2,int y2,int dx,int dy)
+void rfbScheduleCopyRect( ScreenAtom * screen,int x1,int y1,int x2,int y2,int dx,int dy)
 { sraRegionPtr region = sraRgnCreateRect(x1,y1,x2,y2);
   rfbScheduleCopyRegion(screen,region,dx,dy);
   sraRgnDestroy(region);
 }
 
-void rfbMarkRegionAsModified( rfbScreenInfo * screen
-                              , sraRegionPtr modRegion )
+void rfbMarkRegionAsModified( ScreenAtom * screen
+                            , sraRegionPtr modRegion )
 { rfbClientIteratorPtr iterator;
   rfbClient * cl;
 
@@ -374,7 +379,7 @@ void rfbScaledScreenUpdate( ScreenAtom * screen
                           , int x1, int y1
                           , int x2, int y2);
 
-void rfbMarkRectAsModified( rfbScreenInfo * screen
+void rfbMarkRectAsModified( ScreenAtom * screen
                           , int x1, int y1
                           , int x2, int y2 )
 { sraRegionPtr region;
@@ -390,19 +395,24 @@ void rfbMarkRectAsModified( rfbScreenInfo * screen
   { x1=0;
   }
 
-  if ( x2>screen->window.width) x2=screen->window.width;
-  if ( x1==x2) return;
+  if ( x2>screen->width)
+  { x2= screen->width;
+  }
+
+  if ( x1==x2)
+  { return;
+  }
 
   if ( y1>y2)
-  { i=y1;
-    y1=y2;
-    y2=i;
+  { i = y1;
+    y1= y2;
+    y2= i;
   }
 
   if ( y1<0) y1=0;
 
-  if ( y2>screen->window.height)
-  { y2=screen->window.height;
+  if ( y2>screen->height)
+  { y2=screen->height;
   }
   if ( y1==y2) return;
 
@@ -410,7 +420,7 @@ void rfbMarkRectAsModified( rfbScreenInfo * screen
   rfbScaledScreenUpdate(screen,x1,y1,x2,y2);
 
   region = sraRgnCreateRect(x1,y1,x2,y2);
-  rfbMarkRegionAsModified(screen,region);
+  rfbMarkRegionAsModified( screen,region);
   sraRgnDestroy(region);
 }
 
@@ -433,7 +443,7 @@ void rfbDefaultPtrAddEvent( int buttonMask
                           , rfbClient * cl )
 { rfbClientIteratorPtr iterator;
   rfbClient * other_client;
-  rfbScreenInfo * s = cl->screen;
+  ScreenAtom * s = &cl->screen->window;
 
   if (x != s->cursorX || y != s->cursorY)
   { s->cursorX = x;
@@ -445,15 +455,14 @@ void rfbDefaultPtrAddEvent( int buttonMask
 
     /* But inform all remaining clients about this cursor movement.
     */
-    iterator = rfbGetClientIterator(s);
+    iterator = rfbGetClientIterator( s );
     while ((other_client = rfbClientIteratorNext(iterator)) != NULL)
     { if (other_client != cl && other_client->enableCursorPosUpdates)
       { other_client->cursorWasMoved = TRUE;
-      }
-    }
+    } }
+
     rfbReleaseClientIterator(iterator);
-  }
-}
+} }
 
 static void rfbDefaultSetXCutText(char* text, int len, rfbClient * cl)
 {
@@ -587,8 +596,8 @@ static rfbBool rfbDefaultGetExtDesktopScreen(int seqnumber, rfbExtDesktopScreen*
 
   /* Populate the provided rfbExtDesktopScreen structure */
   s->id = 1;
-  s->width = cl->scaledScreen->window.width;
-  s->height = cl->scaledScreen->window.height;
+  s->width = cl->scaledScreen->width;
+  s->height = cl->scaledScreen->height;
   s->x = 0;
   s->y = 0;
   s->flags = 0;
@@ -691,10 +700,10 @@ int  getVncHandler ( rfbClient * cl )
 
 
 rfbScreenInfo * rfbGetScreen( void * frameBuffer
-                             , int width, int height
-                             , int bitsPerSample
-                             , int  stride               // samplesPerPixel1 JACS, nos standard stride
-                             , int bytesPerPixel )
+                            , int width, int height
+                            , int bitsPerSample
+                            , int  stride               // samplesPerPixel1 JACS, nos standard stride
+                            , int bytesPerPixel )
 { rfbScreenInfo * screen= calloc(sizeof(rfbScreenInfo),1);
 
   if ( width & 3 )
@@ -703,7 +712,7 @@ rfbScreenInfo * rfbGetScreen( void * frameBuffer
 
   screen->window.frameBuffer=   frameBuffer;
  // screen->autoPort=      FALSE;
-  screen->clientHead=    NULL;
+  screen->window.clientHead=    NULL;
   screen->pointerClient= NULL;
 
 //  screen->inetdInitDone = FALSE;
@@ -760,8 +769,11 @@ rfbScreenInfo * rfbGetScreen( void * frameBuffer
 
   /* cursor */
 
-  screen->cursorX=screen->cursorY=screen->underCursorBufferLen=0;
-  screen->underCursorBuffer=NULL;
+  screen->window.cursorX=
+  screen->window.cursorY=
+  screen->window.underCursorBufferLen=0;
+
+  screen->window.underCursorBuffer=NULL;
   screen->dontConvertRichCursorToXCursor = FALSE;
   screen->cursor = &myCursor;
 
@@ -784,7 +796,7 @@ rfbScreenInfo * rfbGetScreen( void * frameBuffer
   screen->numberOfExtDesktopScreensHook= rfbDefaultNumberOfExtDesktopScreens;
 
   /* initialize client list and iterator mutex */
-  rfbClientListInit( screen );
+  rfbClientListInit( &screen->window );
 
   return(screen);
 }
@@ -828,16 +840,16 @@ void rfbNewFramebuffer( rfbScreenInfo * screen, char *framebuffer
 
   /* Adjust pointer position if necessary */
 
-  if (screen->cursorX >= width)
-  { screen->cursorX = width - 1;
+  if (screen->window.cursorX >= width)
+  { screen->window.cursorX = width - 1;
   }
 
-  if (screen->cursorY >= height)
-  { screen->cursorY = height - 1;
+  if (screen->window.cursorY >= height)
+  { screen->window.cursorY = height - 1;
   }
 
   /* For each client: */
-  iterator = rfbGetClientIterator(screen);
+  iterator = rfbGetClientIterator( &screen->window );
 
   while ((cl = rfbClientIteratorNext(iterator)))
   { if (format_changed) /* Re-install color translation tables if necessary */
@@ -863,7 +875,7 @@ void rfbNewFramebuffer( rfbScreenInfo * screen, char *framebuffer
 /* hang up on all clients and free all reserved memory */
 
 void rfbScreenCleanup(rfbScreenInfo * screen)
-{ rfbClientIteratorPtr i=rfbGetClientIterator(screen);
+{ rfbClientIteratorPtr i=rfbGetClientIterator( &screen->window );
   rfbClient * cl
   , * cl1= rfbClientIteratorNext(i);
 
@@ -875,8 +887,8 @@ void rfbScreenCleanup(rfbScreenInfo * screen)
   rfbReleaseClientIterator(i);
 
 #define FREE_IF(x) if(screen->x) free(screen->x)
-  FREE_IF(colourMap.data.bytes);
-  FREE_IF(underCursorBuffer);
+  FREE_IF( colourMap.data.bytes);
+  FREE_IF( window.underCursorBuffer);
   if(screen->cursor && screen->cursor->cleanup)
     rfbFreeCursor(screen->cursor);
 
@@ -889,10 +901,9 @@ void rfbScreenCleanup(rfbScreenInfo * screen)
   /** free all 'scaled' versions of this screen
    */
   while (screen->window.scaledScreenNext )
-  { rfbScreenInfo * ptr;
-    ptr = screen->window.scaledScreenNext;
-    screen->window.scaledScreenNext = ptr->window.scaledScreenNext;
-    FREE( ptr->window.frameBuffer );
+  { ScreenAtom * ptr= screen->window.scaledScreenNext;
+    screen->window.scaledScreenNext = ptr->scaledScreenNext;
+    FREE( ptr->frameBuffer );
     FREE( ptr );
   }
 
@@ -910,7 +921,7 @@ void rfbInitServer(rfbScreenInfo * screen)
 
 void rfbShutdownServer(rfbScreenInfo * screen,rfbBool disconnectClients)
 { if(disconnectClients)
-  { rfbClientIteratorPtr iter = rfbGetClientIterator(screen);
+  { rfbClientIteratorPtr iter= rfbGetClientIterator( &screen->window );
     rfbClient * nextCl
     , * currentCl = rfbClientIteratorNext(iter);
 
@@ -951,26 +962,26 @@ int  gettimeofday123( struct timeval*  tv,char *  dummy )
 extern rfbClientIteratorPtr rfbGetClientIteratorWithClosed(rfbScreenInfo * rfbScreen);
 // JACS
 rfbBool rfbUpdateClients( rfbScreenInfo * screen )
-{ rfbClient * clPrev;
+{ //rfbClient * clPrev;
   rfbClientIteratorPtr i= rfbGetClientIteratorWithClosed(screen);
   rfbClient * cl= rfbClientIteratorHead(i);
   rfbBool result=FALSE;
 
   while(cl)
   { result = rfbUpdateClient(cl);
-    clPrev=cl;
+    //clPrev=cl;
     cl=rfbClientIteratorNext(i);
   }
   rfbReleaseClientIterator(i);
   return( result );
 }
 
-
+/**
+ */
 rfbBool rfbProcessEvents( rfbScreenInfo * screen
                         , rfbLong usec)
 { rfbClientIteratorPtr i;
-  rfbClient * cl
-          , * clPrev;
+  rfbClient * cl;
   rfbBool result=FALSE;
 
   if( usec < 0 )
@@ -982,7 +993,7 @@ rfbBool rfbProcessEvents( rfbScreenInfo * screen
 
   while(cl)
   { result = rfbUpdateClient(cl);
-    clPrev=cl;
+   // clPrev=cl;
     cl=rfbClientIteratorNext(i);
   }
   rfbReleaseClientIterator(i);
@@ -990,6 +1001,8 @@ rfbBool rfbProcessEvents( rfbScreenInfo * screen
   return result;
 }
 
+/**
+ */
 rfbBool rfbUpdateClient( rfbClient * cl )
 { struct timeval tv;
   rfbBool result=FALSE;
@@ -1045,7 +1058,7 @@ rfbBool rfbUpdateClient( rfbClient * cl )
 }
 
 rfbBool rfbIsActive(rfbScreenInfo * screenInfo)
-{ return screenInfo->clientHead!=NULL;
+{ return( screenInfo->window.clientHead != NULL );
 }
 
 /*
