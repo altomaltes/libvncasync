@@ -65,15 +65,15 @@ rfbBool rfbSendCursorShape(rfbClient * cl)
     rect.encoding = Swap32IfLE(rfbEncodingXCursor);
   }
 
-  /* If there is no cursor, send update with empty cursor data. */
-
-  if ( pCursor && pCursor->width == 1 &&
-       pCursor->height == 1 &&
-       pCursor->mask[0] == 0 )
+/** If there is no cursor, send update with empty cursor data.
+ */
+  if ( pCursor && pCursor->width == 1
+    && pCursor->height == 1
+    && pCursor->mask[0] == 0 )
   { pCursor = NULL;
   }
 
-  if (pCursor == NULL)
+  if ( !pCursor )
   { if (cl->ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE )
     { if (!rfbSendUpdateBuf(cl))
       { return FALSE; }
@@ -666,12 +666,13 @@ void rfbShowCursor(rfbClient * cl)
         gsrc = (sval & gmask) >> gshift;
         bsrc = (sval & bmask) >> bshift;
 
-        /* blend in fb data. */
-        if (! c->alphaPreMultiplied)
+
+        if (! c->alphaPreMultiplied)         /* blend in fb data. */
         { rsrc = (asrc * rsrc)/amax;
           gsrc = (asrc * gsrc)/amax;
           bsrc = (asrc * bsrc)/amax;
         }
+
         rdst = rsrc + ((amax - asrc) * rdst)/amax;
         gdst = gsrc + ((amax - asrc) * gdst)/amax;
         bdst = bsrc + ((amax - asrc) * bdst)/amax;
@@ -681,31 +682,29 @@ void rfbShowCursor(rfbClient * cl)
         val |= (gdst << gshift);
         val |= (bdst << bshift);
 
-        /* insert the cooked pixel into the fb */
-        memcpy(dest, &val, bpp);
+        memcpy(dest, &val, bpp);         /* insert the cooked pixel into the fb */
   } } }
 
   else /* now the cursor has to be drawn */
   { for(j=0; j<y2; j++)
       for(i=0; i<x2; i++)
-        if((c->mask[(j+j1)*w+(i+i1)/8]<<((i+i1)&7))&0x80)
-          memcpy( s->frameBuffer+(j+y1)*rowstride+(i+x1)*bpp
-                , c->richSource+(j+j1)*c->width*bpp+(i+i1)*bpp
+        if(( c->mask[(j+j1)*w+(i+i1)/8] << ((i+i1)&7)) & 0x80)
+          memcpy( s->frameBuffer+(j+y1)*rowstride+(i+x1)   * bpp
+                , c->richSource +(j+j1)*c->width*bpp+(i+i1)* bpp
                 , bpp );
   }
 
   /* Copy to all scaled versions */
   rfbScaledScreenUpdate( cl->screen, x1, y1, x1+x2, y1+y2);
-
 }
 
-/*
-   If enableCursorShapeUpdates is FALSE, and the cursor is hidden, make sure
-   that if the frameBuffer was transmitted with a cursor drawn, then that
-   region gets redrawn.
-*/
-
-void rfbRedrawAfterHideCursor(rfbClient * cl,sraRegionPtr updateRegion)
+/**
+ *  If enableCursorShapeUpdates is FALSE, and the cursor is hidden, make sure
+ * that if the frameBuffer was transmitted with a cursor drawn, then that
+ * region gets redrawn.
+ */
+void rfbRedrawAfterHideCursor( rfbClient * cl
+                             , sraRegionPtr updateRegion )
 { rfbScreenInfo * s = cl->screen;
   rfbCursorPtr c = s->cursor;
 

@@ -167,9 +167,8 @@ static rfbBool rfbSendSmallRectEncodingCoRRE( rfbClient * cl
 
     if (cl->ublen == UPDATE_BUF_SIZE)
     { if (!rfbSendUpdateBuf(cl))
-      { return FALSE; }
-    }
-  }
+      { return FALSE;
+  } } }
 
   return TRUE;
 }
