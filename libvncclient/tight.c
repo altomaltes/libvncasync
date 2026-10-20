@@ -423,7 +423,9 @@ FilterGradient24 (rfbClient* client, int srcx, int srcy, int numRows)
 
 #endif
 
-static void FilterGradientBPP (rfbClient* client, int srcx, int srcy, int numRows)
+static void FilterGradientBPP( rfbClient* client
+                             , int srcx, int srcy
+                             , int numRows )
 { CARDBPP *dst =
     (CARDBPP *)&client->window.frameBuffer[(srcy * client->width + srcx) * BPP / 8];
 
@@ -477,8 +479,7 @@ static void FilterGradientBPP (rfbClient* client, int srcx, int srcy, int numRow
       dst[y*client->width+x] = RGB_TO_PIXEL(BPP, pix[0], pix[1], pix[2]);
     }
     memcpy(thatRow, thisRow, client->rectWidth * 3 * sizeof(uint16_t));
-  }
-}
+} }
 
 static int
 InitFilterPaletteBPP (rfbClient* client, int rw, int rh)
@@ -533,15 +534,13 @@ static void FilterPaletteBPP (rfbClient* client, int srcx, int srcy, int numRows
       }
       for (b = 7; b >= 8 - client->rectWidth % 8; b--)
       { dst[y*client->width+x*8+7-b] = palette[src[y*w+x] >> b & 1];
-      }
-    }
-  }
+  } } }
+
   else
   { for (y = 0; y < numRows; y++)
       for (x = 0; x < client->rectWidth; x++)
       { dst[y*client->width+x] = palette[(int)src[y*client->rectWidth+x]]; }
-  }
-}
+} }
 
 #if BPP != 8
 
@@ -582,8 +581,7 @@ DecompressJpegRectBPP(rfbClient* client, int x, int y, int w, int h)
     { rfbClientLog("TurboJPEG error: %s\n", tjGetErrorStr());
       FREE( compressedData );
       return FALSE;
-    }
-  }
+  } }
 
 #if BPP == 16
   flags = 0;
@@ -650,8 +648,8 @@ ReadCompactLen (rfbClient* client)
     { if (!ReadFromRFBServer(client, (char *)&b, 1))
       { return -1; }
       len |= ((int)b & 0xFF) << 14;
-    }
-  }
+  } }
+
   return len;
 }
 

@@ -2088,8 +2088,7 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
                         handled = TRUE;
                         e = NULL;
                         break;
-                      }
-                    }
+                    } }
                     encs++;
                   }
 
@@ -2113,8 +2112,8 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
         else
         { cl->preferredEncoding = lastPreferredEncoding;
           rfbLog("Sticking with %s encoding for client %s\n", encodingName(cl->preferredEncoding,encBuf,sizeof(encBuf)),"cl->host");
-        }
-      }
+      } }
+
       else
       { if (lastPreferredEncoding==-1)
         { rfbLog("Using %s encoding for client %s\n", encodingName(cl->preferredEncoding,encBuf,sizeof(encBuf)),"cl->host");
@@ -2351,7 +2350,7 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
       if(!cl->viewOnly)
       { cl->screen->setXCutText(str, msg->cct.length, cl);
       }
-      return;
+    return;
 
     case rfbPalmVNCSetScaleFactor:
       cl->PalmVNC = TRUE;
@@ -2371,7 +2370,7 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
                          , cl->screen->window.height/msg->ssc.scale);
 
       rfbSendNewScaleSize(cl);
-      return;
+    return;
 
     case rfbSetScale:
       if ( !getStreamBytes( cl, sz_rfbSetScaleMsg-1 ) )
@@ -2389,7 +2388,7 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
       rfbScalingSetup(cl,cl->screen->window.width/msg->ssc.scale, cl->screen->window.height/msg->ssc.scale);
 
       rfbSendNewScaleSize(cl);
-      return;
+    return;
 
     case rfbXvp:
       if ( !getStreamBytes( cl, sz_rfbXvpMsg-1 ) )
@@ -2481,14 +2480,14 @@ static void rfbProcessClientNormalMessage( rfbClient * cl )
 
 
 
-/*
+/**
    rfbSendFramebufferUpdate - send the currently pending framebuffer update to
    the RFB client.
    givenUpdateRegion is not changed.
 */
 
 rfbBool rfbSendFramebufferUpdate( rfbClient * cl
-                                  , sraRegionPtr givenUpdateRegion )
+                                , sraRegionPtr givenUpdateRegion )
 { sraRectangleIterator* i=NULL;
   sraRect rect;
   int nUpdateRegionRects;
@@ -2525,8 +2524,8 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
       { if(cl->screen->displayFinishedHook)
           cl->screen->displayFinishedHook(cl, FALSE);
         return FALSE;
-      }
-    }
+    } }
+
     else if (!rfbSendNewFBSize(cl, cl->scaledScreen->width, cl->scaledScreen->height))
     { if(cl->screen->displayFinishedHook)
         cl->screen->displayFinishedHook(cl, FALSE);
@@ -2566,8 +2565,7 @@ rfbBool rfbSendFramebufferUpdate( rfbClient * cl
     if (x!=cl->lastKeyboardLedState)
     { sendKeyboardLedState = TRUE;
       cl->lastKeyboardLedState=x;
-    }
-  }
+  } }
 
   /*
      Do we plan to send a rfbEncodingSupportedMessages?
@@ -3350,7 +3348,9 @@ void rfbSendBell(rfbScreenInfo * rfbScreen)
 /**
  *  rfbSendServerCutText sends a ServerCutText message to all the clients.
  */
-void rfbSendServerCutText( ScreenAtom * rfbScreen,char *str, int len)
+void rfbSendServerCutText( ScreenAtom * rfbScreen
+                         , char *str
+                         , int len )
 { rfbClient * cl;
   rfbServerCutTextMsg sct;
   rfbClientIteratorPtr iterator;
@@ -3368,10 +3368,12 @@ void rfbSendServerCutText( ScreenAtom * rfbScreen,char *str, int len)
       rfbCloseClient(cl);
       continue;
     }
+
     if (rfbPushClientStream( cl,  str, len) < 0)
     { rfbLogPerror("rfbSendServerCutText: write");
       rfbCloseClient(cl);
     }
+
     rfbStatRecordMessageSent(cl, rfbServerCutText, sz_rfbServerCutTextMsg+len, sz_rfbServerCutTextMsg+len);
   }
   rfbReleaseClientIterator(iterator);

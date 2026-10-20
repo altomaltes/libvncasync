@@ -227,12 +227,13 @@ static void dokey(rfbBool down,rfbKeySym key,rfbClient * cl)
 { if(down)
   { if(key==XK_Escape)
       rfbCloseClient(cl);
+
     else if(key==XK_F12)
-      /* close down server, disconnecting clients */
-      rfbShutdownServer(cl->screen,TRUE);
+      rfbShutdownServer(cl->screen,TRUE); /* close down server, disconnecting clients */
+
     else if(key==XK_F11)
-      /* close down server, but wait for all clients to disconnect */
-      rfbShutdownServer(cl->screen,FALSE);
+      rfbShutdownServer(cl->screen,FALSE);       /* close down server, but wait for all clients to disconnect */
+
     else if(key==XK_Page_Up)
     { initBuffer((unsigned char*)cl->screen->window.frameBuffer);
       rfbMarkRectAsModified(cl->screen,0,0,maxx,maxy);

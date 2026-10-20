@@ -89,18 +89,23 @@ struct rfbssl_ctx *rfbssl_init_global(char *key, char *cert)
   if (NULL == (ctx = malloc(sizeof(struct rfbssl_ctx))))
   { ret = GNUTLS_E_MEMORY_ERROR;
   }
+
   else if (!GNUTLS_E_SUCCESS == (ret = gnutls_global_init()))
   { /* */
   }
+
   else if (!GNUTLS_E_SUCCESS == (ret = gnutls_certificate_allocate_credentials(&ctx->x509_cred)))
   { /* */
   }
+
   else if ((ret = gnutls_certificate_set_x509_trust_file(ctx->x509_cred, cert, GNUTLS_X509_FMT_PEM)) < 0)
   { /* */
   }
+
   else if (!GNUTLS_E_SUCCESS == (ret = gnutls_certificate_set_x509_key_file(ctx->x509_cred, cert, key, GNUTLS_X509_FMT_PEM)))
   { /* */
   }
+
   else if (!GNUTLS_E_SUCCESS == (ret = generate_dh_params(ctx)))
   { /* */
 #ifdef I_LIKE_RSA_PARAMS_THAT_MUCH
@@ -132,16 +137,17 @@ int rfbssl_init(rfbClient * cl)
   if (NULL == (ctx = rfbssl_init_global(keyfile,  cl->screen->sslcertfile)))
   { /* */
   }
+
   else if (GNUTLS_E_SUCCESS != (ret = rfbssl_init_session(ctx, cl->sock)))
   { /* */
   }
+
   else
   { while (GNUTLS_E_SUCCESS != (ret = gnutls_handshake(ctx->session)))
     { if (ret == GNUTLS_E_AGAIN)
         continue;
       break;
-    }
-  }
+  } }
 
   if (ret != GNUTLS_E_SUCCESS)
   { rfbssl_error(__func__, ret);
@@ -161,13 +167,14 @@ static int rfbssl_do_read(rfbClient * cl, char *buf, int bufsize)
   { if (ret == GNUTLS_E_AGAIN)
     { /* continue */
     }
+
     else if (ret == GNUTLS_E_INTERRUPTED)
     { /* continue */
     }
+
     else
     { break;
-    }
-  }
+  } }
 
   if (ret < 0)
   { rfbssl_error(__func__, ret);
@@ -186,13 +193,14 @@ int rfbssl_write(rfbClient * cl, const char *buf, int bufsize)
   { if (ret == GNUTLS_E_AGAIN)
     { /* continue */
     }
+
     else if (ret == GNUTLS_E_INTERRUPTED)
     { /* continue */
     }
+
     else
     { break;
-    }
-  }
+  } }
 
   if (ret < 0)
     rfbssl_error(__func__, ret);
@@ -200,15 +208,14 @@ int rfbssl_write(rfbClient * cl, const char *buf, int bufsize)
   return ret;
 }
 
-static void rfbssl_gc_peekbuf(struct rfbssl_ctx *ctx, int bufsize)
+static void rfbssl_gc_peekbuf( struct rfbssl_ctx *ctx
+                             , int bufsize)
 { if (ctx->peekstart)
   { int spaceleft = sizeof(ctx->peekbuf) - ctx->peeklen - ctx->peekstart;
     if (spaceleft < bufsize)
     { memmove(ctx->peekbuf, ctx->peekbuf + ctx->peekstart, ctx->peeklen);
       ctx->peekstart = 0;
-    }
-  }
-}
+} } }
 
 static int __rfbssl_read(rfbClient * cl, char *buf, int bufsize, int peek)
 { int ret = 0;
@@ -226,8 +233,7 @@ static int __rfbssl_read(rfbClient * cl, char *buf, int bufsize, int peek)
         ctx->peekstart += ret;
       else
         ctx->peekstart = 0;
-    }
-  }
+  } }
 
   if (ret < bufsize)
   { int n;

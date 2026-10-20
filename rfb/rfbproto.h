@@ -1859,15 +1859,15 @@ typedef struct _rfbClient
 
                                 /** Possible client states: */
   enum
-  { RFB_PROTOCOL_VERSION,   /**< establishing protocol version */
-   	RFB_SECURITY_TYPE,      /**< negotiating security (RFB v.3.7) */
-    RFB_AUTHENTICATION,     /**< authenticating */
-    RFB_INITIALISATION,     /**< sending initialisation messages */
-    RFB_NORMAL,             /**< normal protocol messages */
+  { RFB_PROTOCOL_VERSION   /**< establishing protocol version */
+  ,	RFB_SECURITY_TYPE      /**< negotiating security (RFB v.3.7) */
+  , RFB_AUTHENTICATION     /**< authenticating */
+  , RFB_INITIALISATION     /**< sending initialisation messages */
+  , RFB_NORMAL             /**< normal protocol messages */
 
         /* Ephemeral internal-use states that will never be seen by software
          * using LibVNCServer to provide services: */
-    RFB_INITIALISATION_SHARED /**< sending initialisation messages with implicit shared-flag already true */
+  , RFB_INITIALISATION_SHARED /**< sending initialisation messages with implicit shared-flag already true */
   } state;
 
   rfbBool reverseConnection;
@@ -1882,38 +1882,38 @@ typedef struct _rfbClient
     /* The following member is only used during VNC authentication */
   uint8_t authChallenge[CHALLENGESIZE];
 
-    /* The following members represent the update needed to get the client's
-       framebuffer from its present state to the current state of our
-       framebuffer.
-
-       If the client does not accept CopyRect encoding then the update is
-       simply represented as the region of the screen which has been modified
-       (modifiedRegion).
-
-       If the client does accept CopyRect encoding, then the update consists of
-       two parts.  First we have a single copy from one region of the screen to
-       another (the destination of the copy is copyRegion), and second we have
-       the region of the screen which has been modified in some other way
-       (modifiedRegion).
-
-       Although the copy is of a single region, this region may have many
-       rectangles.  When sending an update, the copyRegion is always sent
-       before the modifiedRegion.  This is because the modifiedRegion may
-       overlap parts of the screen which are in the source of the copy.
-
-       In fact during normal processing, the modifiedRegion may even overlap
-       the destination copyRegion.  Just before an update is sent we remove
-       from the copyRegion anything in the modifiedRegion. */
+/**   The following members represent the update needed to get the client's
+ * framebuffer from its present state to the current state of our framebuffer.
+ *
+ *   If the client does not accept CopyRect encoding then the update is simply
+ * represented as the region of the screen which has been modified (modifiedRegion)
+ *
+ *   If the client does accept CopyRect encoding, then the update consists of
+ * two parts.  First we have a single copy from one region of the screen to
+ * another (the destination of the copy is copyRegion), and second we have
+ * the region of the screen which has been modified in some other way
+ * (modifiedRegion).
+ *
+ *   Although the copy is of a single region, this region may have many
+ * rectangles.  When sending an update, the copyRegion is always sent
+ * before the modifiedRegion.  This is because the modifiedRegion may
+ * overlap parts of the screen which are in the source of the copy.
+ *
+ *   In fact during normal processing, the modifiedRegion may even overlap
+ * the destination copyRegion.  Just before an update is sent we remove
+ * from the copyRegion anything in the modifiedRegion.
+ */
 
     sraRegionPtr copyRegion;	/**< the destination region of the copy */
     int copyDX, copyDY;		/**< the translation by which the copy happens */
 
     sraRegionPtr modifiedRegion;
 
-    /** As part of the FramebufferUpdateRequest, a client can express interest
+/** As part of the FramebufferUpdateRequest, a client can express interest
        in a subrectangle of the whole framebuffer.  This is stored in the
        requestedRegion member.  In the normal case this is the whole
-       framebuffer if the client is ready, empty if it's not. */
+       framebuffer if the client is ready, empty if it's not.
+*/
 
     sraRegionPtr requestedRegion;
 
@@ -2329,16 +2329,16 @@ extern void rfbLogPerror(const char *str);
 typedef void (*rfbLogProc)(const char *format, ...);
 extern rfbLogProc rfbLog, rfbErr;
 
-void rfbScheduleCopyRect(     ScreenAtom *, int x1,int y1,int x2,int y2,int dx,int dy);
-void rfbScheduleCopyRegion(   ScreenAtom *, sraRegionPtr copyRegion,int dx,int dy);
-void rfbDoCopyRect(           ScreenAtom *, int x1,int y1,int x2,int y2,int dx,int dy);
-void rfbDoCopyRegion(         ScreenAtom *, sraRegionPtr copyRegion,int dx,int dy);
+void rfbScheduleCopyRect    ( ScreenAtom *, int x1,int y1,int x2,int y2,int dx,int dy);
+void rfbScheduleCopyRegion  ( ScreenAtom *, sraRegionPtr copyRegion,int dx,int dy);
+void rfbDoCopyRect          ( ScreenAtom *, int x1,int y1,int x2,int y2,int dx,int dy);
+void rfbDoCopyRegion        ( ScreenAtom *, sraRegionPtr copyRegion,int dx,int dy);
 void rfbMarkRegionAsModified( ScreenAtom *, sraRegionPtr modRegion);
 
 void rfbDoNothingWithClient(  rfbClient * cl);
-enum rfbNewClientAction defaultNewClientHook(rfbClient * cl);
-void rfbRegisterProtocolExtension(   rfbProtocolExtension* extension);
-void rfbUnregisterProtocolExtension( rfbProtocolExtension* extension);
+enum rfbNewClientAction defaultNewClientHook(rfbClient * );
+void rfbRegisterProtocolExtension(   rfbProtocolExtension* );
+void rfbUnregisterProtocolExtension( rfbProtocolExtension* );
 
 struct _rfbProtocolExtension* rfbGetExtensionIterator();
 void rfbReleaseExtensionIterator();
@@ -2384,12 +2384,12 @@ extern rfbStatList *rfbStatLookupEncoding(rfbClient * cl, uint32_t type);
 extern rfbStatList *rfbStatLookupMessage( rfbClient * cl, uint32_t type);
 
 /* Each call to rfbStatRecord* adds one to the rect count for that type */
-extern void rfbStatRecordEncodingSent(    rfbClient * , uint32_t type, int byteCount, int byteIfRaw );
+extern void rfbStatRecordEncodingSent   ( rfbClient * , uint32_t type, int byteCount, int byteIfRaw );
 extern void rfbStatRecordEncodingSentAdd( rfbClient * , uint32_t type, int byteCount); /* Specifically for tight encoding */
-extern void rfbStatRecordEncodingRcvd(    rfbClient * , uint32_t type, int byteCount, int byteIfRaw );
-extern void rfbStatRecordMessageSent(     rfbClient * , uint32_t type, int byteCount, int byteIfRaw );
-extern void rfbStatRecordMessageRcvd(     rfbClient * , uint32_t type, int byteCount, int byteIfRaw );
-extern void rfbResetStats(                rfbClient * );
+extern void rfbStatRecordEncodingRcvd   ( rfbClient * , uint32_t type, int byteCount, int byteIfRaw );
+extern void rfbStatRecordMessageSent    ( rfbClient * , uint32_t type, int byteCount, int byteIfRaw );
+extern void rfbStatRecordMessageRcvd    ( rfbClient * , uint32_t type, int byteCount, int byteIfRaw );
+extern void rfbResetStats               ( rfbClient * );
 extern void rfbPrintStats(                rfbClient * );
 extern  int rfbStatGetSentBytes(          rfbClient * );
 extern  int rfbStatGetSentBytesIfRaw(     rfbClient * );

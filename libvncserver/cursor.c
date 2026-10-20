@@ -537,7 +537,10 @@ void rfbShowCursor(rfbClient * cl)
 { ScreenAtom * s= &cl->screen->window;
   rfbCursorPtr c= cl->screen->cursor;
 
-  int i,j,x1,x2,y1,y2,i1,j1
+  int i ,  j
+    , x1, x2
+    , y1, y2
+    , i1, j1
     , bpp=s->serverFormat.bitsPerPixel/8
     , rowstride=s->paddedWidthInBytes
     , bufSize,w;
@@ -560,7 +563,10 @@ void rfbShowCursor(rfbClient * cl)
   i1=j1=0; /* offset in cursor */
   x1=cl->cursorX-c->xhot;
   x2=x1+c->width;
-  if(x1<0) { i1=-x1; x1=0; }
+
+  if( x1<0 )
+  { i1=-x1; x1=0;
+  }
 
   if(x2>=s->width)
   { x2=s->width-1; }
@@ -571,7 +577,10 @@ void rfbShowCursor(rfbClient * cl)
 
   y1=cl->cursorY-c->yhot;
   y2=y1+c->height;
-  if(y1<0) { j1=-y1; y1=0; }
+  if(y1<0)
+  { j1=-y1; y1=0;
+  }
+
   if(y2>=s->height)
   { y2=s->height-1;
   }
@@ -581,7 +590,9 @@ void rfbShowCursor(rfbClient * cl)
   }
 
   /* save data */
-  for(j=0; j<y2; j++)
+  for( j=0
+     ; j<y2
+     ; j++)
   { char* dest=s->underCursorBuffer+j*x2*bpp;
     const char* src=s->frameBuffer+(y1+j)*rowstride+x1*bpp;
     unsigned int count=x2*bpp;
@@ -634,10 +645,12 @@ void rfbShowCursor(rfbClient * cl)
         { dval = *((unsigned char*) dest);
           sval = *((unsigned char*) src);
         }
+
         else if (bpp == 2)
         { dval = *((unsigned short*) dest);
           sval = *((unsigned short*) src);
         }
+
         else if (bpp == 3)
         { unsigned char *dst = (unsigned char *) dest;
           dval = 0;
@@ -649,10 +662,12 @@ void rfbShowCursor(rfbClient * cl)
           sval |= ((*(src+1)) << 8);
           sval |= ((*(src+2)) << 16);
         }
+
         else if (bpp == 4)
         { dval = *((unsigned int*) dest);
           sval = *((unsigned int*) src);
         }
+
         else
         { continue;
         }

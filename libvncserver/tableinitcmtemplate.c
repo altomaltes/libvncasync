@@ -43,8 +43,10 @@
                                 CONCAT2E(rfbInitColourMapSingleTable,OUT)
 
 static void
-rfbInitColourMapSingleTableOUT(char **table, rfbPixelFormat *in,
-                               rfbPixelFormat *out,rfbColourMap* colourMap)
+rfbInitColourMapSingleTableOUT( char **table
+                              , rfbPixelFormat * in
+                              , rfbPixelFormat * out
+                              , rfbColourMap   * colourMap)
 { uint32_t i, r, g, b;
   OUT_T *t;
   uint32_t nEntries = 1 << in->bitsPerPixel;
@@ -67,8 +69,8 @@ rfbInitColourMapSingleTableOUT(char **table, rfbPixelFormat *in,
       { r = colourMap->data.bytes[3*i+0];
         g = colourMap->data.bytes[3*i+1];
         b = colourMap->data.bytes[3*i+2];
-      }
-    }
+    } }
+
     t[i] = ((((r * (1 + out->redMax)) >> shift) << out->redShift) |
             (((g * (1 + out->greenMax)) >> shift) << out->greenShift) |
             (((b * (1 + out->blueMax)) >> shift) << out->blueShift));
@@ -77,8 +79,7 @@ rfbInitColourMapSingleTableOUT(char **table, rfbPixelFormat *in,
     { t[i] = SwapOUT(t[i]);
     }
 #endif
-  }
-}
+} }
 
 #undef OUT_T
 #undef SwapOUT
